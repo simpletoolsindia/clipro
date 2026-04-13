@@ -34,6 +34,39 @@ git clone https://github.com/Gitlawb/openclaude.git ~/openclaude
 4. Repeat
 ```
 
+### PIXEL-PERFECT VERIFICATION (MANDATORY - BEFORE EVERY COMMIT)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  VERIFICATION CHECKLIST                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  1. BEFORE WRITING CODE:                                       │
+│     □ Read OpenClaude source (~/openclaude/)                   │
+│     □ Understand exact behavior, not just structure               │
+│     □ Note edge cases, error handling, states                    │
+│                                                                  │
+│  2. AFTER WRITING CODE:                                         │
+│     □ Compare output with OpenClaude behavior                   │
+│     □ Test edge cases (empty, max, error)                       │
+│     □ Visual comparison if UI component                        │
+│                                                                  │
+│  3. IF NOT PIXEL-PERFECT:                                       │
+│     □ MIGRATION FAILED - Do NOT commit                          │
+│     □ Research OpenClaude again                                │
+│     □ Re-read the specific file/function                       │
+│     □ Fix the code                                             │
+│     □ Verify again                                             │
+│     □ Repeat until PASS                                        │
+│                                                                  │
+│  4. COMMIT ONLY WHEN:                                          │
+│     □ All tests pass                                           │
+│     □ Behavior matches OpenClaude exactly                       │
+│     □ No visual differences (UI)                               │
+│     □ Token output matches expected format                     │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 ### Commit Author
 ```
 Name: Sridhar Karuppusamy
