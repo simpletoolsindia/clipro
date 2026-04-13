@@ -1,47 +1,74 @@
 ---
 name: clipro-project-rules-2026-04-13
-description: CLIPRO project rules for PC Agent and MB Agent collaboration
+description: CLIPRO project rules - LOCAL-FIRST Ollama + TDD + Native Tools
 type: project
 ---
 
-# CLIPRO Project Rules
+# CLIPRO - Agent Rules
 
 ## Repository
 - **Repo:** https://github.com/simpletoolsindia/clipro
-- **Source:** OpenClaude (https://github.com/Gitlawb/openclaude) - 2,087 files, 544K lines
+- **Source:** OpenClaude (https://github.com/Gitlawb/openclaude)
 
 ## Agent Configuration
 | Agent | Machine | Tasks |
 |-------|---------|-------|
-| **PC Agent** | This machine | UI components, TAMBUI setup, core infrastructure |
-| **MB Agent** | Different machine | Services, LLM integration, MCP, tools, commands |
+| **PC Agent** | This machine | UI, TAMBUI, core |
+| **MB Agent** | Different machine | Ollama, tools, agent |
 
 ## Workflow (MANDATORY)
 
 ### Before Any Task
-1. Read `TASKS.md`
-2. Pull: `git pull origin main`
-3. Check task status
+1. `git pull origin main`
+2. Read TASKS.md
+3. Check ticket status
 
 ### After Completing Task
 1. Run tests
-2. Update TASKS.md status
-3. Commit: `git add . && git commit -m "[TICKET-X] Task description #done"`
-4. Push: `git push origin main`
+2. Update TASKS.md
+3. `git add . && git commit -m "[TICKET-X] description #done"`
+4. `git push origin main`
 
-## Commit Author
+### Commit Author
 ```
 Name: Sridhar Karuppusamy
 Email: support@simpletools.in
 ```
 
-## Key Files
-- `SPEC.md` - Full specification
-- `TASKS.md` - Task tracker (116 tickets, 9 phases)
-- `README.md` - Coming soon
+## Core Priorities
 
-## Technology Stack
-- TAMBUI (React-like TUI for Java)
-- Quarkus (GraalVM native support)
-- OpenAI-compatible API (all LLM providers)
-- MCP server (port 7710 - your existing one)
+### LOCAL-FIRST
+```
+1. Ollama (qwen3-coder:32b) - FIRST
+2. OpenRouter - SECOND
+3. Cloud API - LAST
+```
+
+### NATIVE TOOLS (14 built-in)
+```
+- Web Search  → SearXNG (search.sridharhomelab.in)
+- File Ops    → Java NIO.2
+- Bash        → ProcessBuilder
+- Git         → JGit
+- Grep        → Java regex
+```
+
+## TDD Rules
+- Write test BEFORE implementation
+- All public methods tested
+- Small tasks (<100 lines)
+- Reference OpenClaude source
+
+## Key Files
+| File | Purpose |
+|------|---------|
+| TASKS.md | Master task tracker (read this!) |
+| SPEC.md | Full specification |
+
+## Quick Commands
+```bash
+git pull origin main
+./gradlew test
+./gradlew build
+./gradlew nativeCompile
+```
