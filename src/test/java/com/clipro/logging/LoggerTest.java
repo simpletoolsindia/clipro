@@ -13,17 +13,17 @@ class LoggerTest {
 
     @Test
     void shouldSetAndGetLogLevel() {
-        Logger.setLevel(LogLevel.DEBUG);
-        assertEquals(LogLevel.DEBUG, Logger.getLevel());
+        Logger.setLevel(Logger.LogLevel.DEBUG);
+        assertEquals(Logger.LogLevel.DEBUG, Logger.getLevel());
 
-        Logger.setLevel(LogLevel.ERROR);
-        assertEquals(LogLevel.ERROR, Logger.getLevel());
+        Logger.setLevel(Logger.LogLevel.ERROR);
+        assertEquals(Logger.LogLevel.ERROR, Logger.getLevel());
     }
 
     @Test
     void shouldNotThrowOnAnyLogLevel() {
         Logger logger = new Logger("test");
-        Logger.setLevel(LogLevel.DEBUG);
+        Logger.setLevel(Logger.LogLevel.DEBUG);
 
         assertDoesNotThrow(() -> logger.debug("debug message"));
         assertDoesNotThrow(() -> logger.info("info message"));

@@ -1,71 +1,133 @@
 package com.clipro;
 
+import com.clipro.agent.AgentEngine;
+import com.clipro.cli.CommandRegistry;
 import com.clipro.logging.Logger;
-import com.clipro.ui.Terminal;
-import com.clipro.ui.components.*;
-import com.clipro.ui.vim.VimMode;
-import com.clipro.session.CommandRegistry;
-import com.clipro.session.HistoryManager;
+import com.clipro.tools.file.*;
+import com.clipro.tools.git.*;
+import com.clipro.tools.shell.BashTool;
+import com.clipro.tools.web.*;
 
+import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * CLIPRO - Java AI Coding CLI
+ * LOCAL-FIRST approach: Ollama + Native Tools
+ */
 public class App {
+
     private static final Logger LOG = new Logger("App");
+    private static final Logger UI = new Logger("UI");
 
-    public static void main(String[] args) {
-        LOG.info("CLIPRO - Java AI Coding CLI");
-        LOG.info("Version: 0.1.0");
-        LOG.info("Terminal: " + Terminal.getColumns() + "x" + Terminal.getRows());
+    private final AgentEngine agent;
+    private final CommandRegistry commands;
+    private final CommandRegistry.CommandContext commandContext;
+    private boolean running = true;
 
-        // Demo all components
-        demoComponents();
+    public App() {
+        LOG.info("Initializing CLIPRO...");
+        this.agent = new AgentEngine();
+        this.commands = new CommandRegistry();
+        this.commandContext = new CommandRegistry.CommandContext();
+        commandContext.setAgentContext(new AppAgentContext());
+        registerDefaultTools();
+        LOG.info("CLIPRO initialized successfully");
     }
 
-    private static void demoComponents() {
-        System.out.println("\n" + Terminal.bold("=== CLIPRO Component Demo ===\n"));
+    private void registerDefaultTools() {
+        LOG.info("Registering default tools...");
+        agent.registerTool(new FileReadTool());
+        agent.registerTool(new FileWriteTool());
+        agent.registerTool(new FileEditTool());
+        agent.registerTool(new GlobTool());
+        agent.registerTool(new GrepTool());
+        agent.registerTool(new BashTool());
+        agent.registerTool(new GitStatusTool());
+        agent.registerTool(new GitDiffTool());
+        agent.registerTool(new GitLogTool());
+        agent.registerTool(new GitCommitTool());
+        agent.registerTool(new WebSearchTool());
+        agent.registerTool(new WebFetchTool());
+        agent.registerTool(new QuickFetchTool());
+        LOG.info("Registered " + agent.getToolRegistry().getToolNames().size() + " tools");
+    }
 
-        // 1. Messages
-        System.out.println(Terminal.bold("1. Message Components:"));
-        MessageList messages = new MessageList();
-        messages.addUser("Hello, can you help me?");
-        messages.addAssistant("Of course! I'm here to help.");
-        System.out.println(messages.render());
+    public void run() {
+        LOG.info("Starting CLIPRO...");
+        printBanner();
+        try (Scanner scanner = new Scanner(System.in)) {
+            while (running && scanner.hasNextLine()) {
+                processInput(scanner.nextLine());
+            }
+        }
+    }
 
-        // 2. Markdown
-        System.out.println("\n" + Terminal.bold("2. Markdown Rendering:"));
-        String md = "**Bold** and *italic* with `code`";
-        System.out.println(MarkdownRenderer.render(md));
+    private void processInput(String input) {
+        if (input == null || input.trim().isEmpty()) return;
+        String cmdResult = commands.execute(input, commandContext);
+        if (cmdResult != null) {
+            UI.info(cmdResult);
+            return;
+        }
+        UI.info("Thinking...");
+        CompletableFuture<String> future = agent.run(input);
+        future.thenAccept(response -> {
+            UI.info("\n" + response);
+            UI.info("\n[Ready]");
+        }).exceptionally(ex -> {
+            UI.error("Error: " + ex.getMessage());
+            return null;
+        });
+        try {
+            future.join();
+        } catch (Exception e) {
+            UI.error("Error: " + e.getMessage());
+        }
+    }
 
-        // 3. Streaming
-        System.out.println("\n" + Terminal.bold("3. Streaming Message:"));
-        StreamingMessage streaming = new StreamingMessage(MessageRole.ASSISTANT);
-        streaming.append("Typing response...");
-        System.out.println(streaming.render());
+    private void printBanner() {
+        System.out.println();
+        UI.info("╔═══════════════════════════════════════════╗");
+        UI.info("║         CLIPRO - Java AI CLI            ║");
+        UI.info("║         LOCAL-FIRST: Ollama             ║");
+        UI.info("╚═══════════════════════════════════════════╝");
+        System.out.println();
+        UI.info("Model: " + agent.getProvider().getCurrentModel());
+        UI.info("Tools: " + agent.getToolRegistry().getToolNames().size() + " registered");
+        System.out.println();
+        UI.info("Type /help for commands, or ask me anything!");
+        UI.info("[Ready]");
+    }
 
-        // 4. Vim Mode
-        System.out.println("\n" + Terminal.bold("4. Vim Mode:"));
-        VimMode vim = new VimMode();
-        System.out.println("Normal: " + vim.renderIndicator());
-        vim.enterInsert();
-        System.out.println("Insert: " + vim.renderIndicator());
-        vim.enterNormal();
-        System.out.println("Normal: " + vim.renderIndicator());
+    public void stop() {
+        running = false;
+        LOG.info("Shutting down CLIPRO...");
+    }
 
-        // 5. Commands
-        System.out.println("\n" + Terminal.bold("5. Command Registry:"));
-        CommandRegistry registry = new CommandRegistry();
-        CommandRegistry.CommandContext ctx = new CommandRegistry.CommandContext(java.util.List.of());
-        registry.execute("models", ctx);
-        System.out.println(ctx.getOutput());
+    private class AppAgentContext implements CommandRegistry.AgentContext {
+        @Override
+        public String getCurrentModel() {
+            return agent.getProvider().getCurrentModel();
+        }
+        @Override
+        public void clearHistory() {
+            UI.info("History cleared");
+        }
+        @Override
+        public void exit() {
+            stop();
+        }
+    }
 
-        // 6. Layout
-        System.out.println("\n" + Terminal.bold("6. Full Layout:"));
-        FullscreenLayout layout = new FullscreenLayout("qwen3-coder:32b");
-        layout.setConnected(true);
-        layout.addUserMessage("Show me the layout");
-        layout.addAssistantMessage("Here's the full layout!");
-
-        // Header
-        System.out.println(layout.getHeader().render());
-
-        System.out.println("\n" + Terminal.green("=== All components working! ==="));
+    public static void main(String[] args) {
+        LOG.info("CLIPRO v0.1.0");
+        LOG.info("Starting...");
+        App app = new App();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOG.info("Shutdown hook triggered");
+        }));
+        app.run();
+        LOG.info("CLIPRO exited");
     }
 }

@@ -1,132 +1,90 @@
 package com.clipro.ui;
 
-import java.io.Console;
-import java.io.IOException;
-
 /**
- * Terminal utilities for size detection and ANSI output.
- * Reference: openclaude/src/ink/terminal.ts
+ * Terminal utilities for TUI.
  */
 public class Terminal {
-    private static int columns = 80;
-    private static int rows = 24;
 
-    static {
-        detectSize();
-    }
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_RED = "\u001B[31m";
+    private static final String ANSI_GREEN = "\u001B[32m";
+    private static final String ANSI_YELLOW = "\u001B[33m";
+    private static final String ANSI_BLUE = "\u001B[34m";
+    private static final String ANSI_CYAN = "\u001B[36m";
 
     public static int getColumns() {
-        return columns;
+        return 80;
     }
 
     public static int getRows() {
-        return rows;
-    }
-
-    public static void detectSize() {
-        try {
-            // Use stty for Unix systems
-            ProcessBuilder pb = new ProcessBuilder("stty", "size");
-            pb.redirectErrorStream(true);
-            Process p = pb.start();
-
-            String output = new String(p.getInputStream().readAllBytes()).trim();
-            p.waitFor();
-
-            if (!output.isEmpty()) {
-                String[] parts = output.split("\\s+");
-                if (parts.length == 2) {
-                    rows = Integer.parseInt(parts[0]);
-                    columns = Integer.parseInt(parts[1]);
-                }
-            }
-        } catch (IOException | InterruptedException | NumberFormatException e) {
-            // Fall back to defaults
-        }
-
-        // Try environment as fallback
-        try {
-            String cols = System.getenv("COLUMNS");
-            String lines = System.getenv("LINES");
-            if (cols != null) columns = Integer.parseInt(cols);
-            if (lines != null) rows = Integer.parseInt(lines);
-        } catch (NumberFormatException e) {
-            // Use defaults
-        }
-    }
-
-    public static void clear() {
-        System.out.print("\033[2J\033[H");
-        System.out.flush();
-    }
-
-    public static void moveCursor(int row, int col) {
-        System.out.print("\033[" + row + ";" + col + "H");
-        System.out.flush();
-    }
-
-    public static void hideCursor() {
-        System.out.print("\033[?25l");
-        System.out.flush();
-    }
-
-    public static void showCursor() {
-        System.out.print("\033[?25h");
-        System.out.flush();
-    }
-
-    public static void enterAltScreen() {
-        System.out.print("\033[?1049h");
-        System.out.flush();
-    }
-
-    public static void exitAltScreen() {
-        System.out.print("\033[?1049l");
-        System.out.flush();
-    }
-
-    public static void resetAttributes() {
-        System.out.print("\033[0m");
-        System.out.flush();
-    }
-
-    public static String ansi(String code) {
-        return "\033[" + code + "m";
-    }
-
-    public static String bold(String text) {
-        return ansi("1") + text + ansi("0");
-    }
-
-    public static String dim(String text) {
-        return ansi("2") + text + ansi("0");
+        return 24;
     }
 
     public static String red(String text) {
-        return ansi("31") + text + ansi("0");
+        return ANSI_RED + text + ANSI_RESET;
     }
 
     public static String green(String text) {
-        return ansi("32") + text + ansi("0");
+        return ANSI_GREEN + text + ANSI_RESET;
     }
 
     public static String yellow(String text) {
-        return ansi("33") + text + ansi("0");
+        return ANSI_YELLOW + text + ANSI_RESET;
     }
 
     public static String blue(String text) {
-        return ansi("34") + text + ansi("0");
+        return ANSI_BLUE + text + ANSI_RESET;
     }
 
     public static String cyan(String text) {
-        return ansi("36") + text + ansi("0");
+        return ANSI_CYAN + text + ANSI_RESET;
     }
 
-    public static String boldRed(String text) {
-        return ansi("1;31") + text + ansi("0");
+    public static void clear() {
+        System.out.print("\u001B[2J");
+        System.out.print("\u001B[H");
     }
 
-    public static String boldGreen(String text) {
-        return ansi("1;32") + text + ansi("0");
+    public static void cursorHome() {
+        System.out.print("\u001B[H");
+    }
+
+    public static void clearLine() {
+        System.out.print("\u001B[2K");
+    }
+
+    /**
+     * Create ANSI escape code.
+     */
+    public static String ansi(String code) {
+        return "\u001B[" + code + "m";
+    }
+
+    /**
+     * Bold text.
+     */
+    public static String bold(String text) {
+        return "\u001B[1m" + text + ANSI_RESET;
+    }
+
+    /**
+     * Enter alternate screen.
+     */
+    public static void enterAltScreen() {
+        System.out.print("\u001B[?1049h");
+    }
+
+    /**
+     * Exit alternate screen.
+     */
+    public static void exitAltScreen() {
+        System.out.print("\u001B[?1049l");
+    }
+
+    /**
+     * Dim text.
+     */
+    public static String dim(String text) {
+        return "\u001B[2m" + text + ANSI_RESET;
     }
 }
