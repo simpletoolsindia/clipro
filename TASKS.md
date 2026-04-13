@@ -393,19 +393,17 @@ openclaude/src/
 ---
 
 ## PHASE 9: SESSION (TDD)
-
-### P9.1: History
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P9.1.1 | `HistoryManager` | `HistoryTest` | MB |
-| P9.1.2 | Persistence | `PersistTest` | MB |
-| P9.1.3 | Search | `HistorySearchTest` | MB |
+| P9.1.1 | `HistoryManager` | `HistoryTest` | ~~MB~~ DONE |
+| P9.1.2 | Persistence | `PersistTest` | ~~MB~~ DONE |
+| P9.1.3 | Search | `HistorySearchTest` | ~~MB~~ DONE |
 
 ### P9.2: Configuration
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P9.2.1 | `ConfigManager` | `ConfigTest` | MB |
-| P9.2.2 | API keys | `ApiKeyStoreTest` | MB |
+| P9.2.1 | `ConfigManager` | `ConfigTest` | ~~MB~~ DONE |
+| P9.2.2 | API keys | `ApiKeyStoreTest` | ~~MB~~ DONE |
 
 ---
 
@@ -414,9 +412,9 @@ openclaude/src/
 ### P10.1: Integration Tests
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P10.1.1 | Ollama E2E | `OllamaE2ETest` | MB |
-| P10.1.2 | Tool calling E2E | `ToolCallE2ETest` | MB |
-| P10.1.3 | SearXNG E2E | `SearXNGE2ETest` | MB |
+| P10.1.1 | Ollama E2E | `OllamaE2ETest` | ~~MB~~ DONE |
+| P10.1.2 | Tool calling E2E | `ToolCallE2ETest` | ~~MB~~ DONE |
+| P10.1.3 | SearXNG E2E | `SearXNGE2ETest` | ~~MB~~ DONE |
 
 ### P10.2: Performance Tests
 | Ticket | Task | Test | Agent |
