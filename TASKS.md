@@ -260,13 +260,13 @@ openclaude/src/
 ### P4.1: Ollama Client (HIGHEST PRIORITY)
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
-| P4.1.1 | HTTP client setup | `HttpClientTest` | - | MB |
-| P4.1.2 | `ChatCompletionRequest` model | `RequestModelTest` | `openaiShim.ts` | MB |
-| P4.1.3 | `ChatCompletionResponse` model | `ResponseModelTest` | `openaiShim.ts` | MB |
-| P4.1.4 | `OllamaProvider` basic | `OllamaBasicTest` | `src/services/api/` | MB |
-| P4.1.5 | **Streaming** responses | `StreamingTest` | `openaiShim.ts` | MB |
-| P4.1.6 | **Tool calling** | `ToolCallTest` | `openaiShim.ts` | MB |
-| P4.1.7 | Model health check | `HealthCheckTest` | - | MB |
+| P4.1.1 | HTTP client setup | `HttpClientTest` | - | ~~MB~~ DONE |
+| P4.1.2 | `ChatCompletionRequest` model | `RequestModelTest` | `openaiShim.ts` | ~~MB~~ DONE |
+| P4.1.3 | `ChatCompletionResponse` model | `ResponseModelTest` | `openaiShim.ts` | ~~MB~~ DONE |
+| P4.1.4 | `OllamaProvider` basic | `OllamaBasicTest` | `src/services/api/` | ~~MB~~ DONE |
+| P4.1.5 | **Streaming** responses | `StreamingTest` | `openaiShim.ts` | ~~MB~~ DONE |
+| P4.1.6 | **Tool calling** | `ToolCallTest` | `openaiShim.ts` | ~~MB~~ DONE |
+| P4.1.7 | Model health check | `HealthCheckTest` | - | ~~MB~~ DONE |
 
 ### P4.2: OpenRouter Provider
 | Ticket | Task | Test | Agent |
