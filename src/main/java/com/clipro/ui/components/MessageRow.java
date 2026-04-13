@@ -1,0 +1,23 @@
+package com.clipro.ui.components;
+
+import java.time.format.DateTimeFormatter;
+
+/**
+ * Renders a message with timestamp.
+ * Reference: openclaude/src/components/Message.tsx
+ */
+public class MessageRow {
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+    public static String render(Message message) {
+        String time = message.getTimestamp().format(TIME_FORMAT);
+        String timePrefix = "\033[90m" + time + " " + "\033[0m";
+
+        return timePrefix + MessageBox.render(message);
+    }
+
+    public static String renderWithIndex(int index, Message message) {
+        String indexPrefix = "\033[90m[" + index + "] " + "\033[0m";
+        return indexPrefix + MessageBox.render(message);
+    }
+}
