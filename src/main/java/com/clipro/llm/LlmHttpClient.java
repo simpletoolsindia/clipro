@@ -99,4 +99,8 @@ public class LlmHttpClient {
                 .build();
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
+
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
 }
