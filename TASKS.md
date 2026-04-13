@@ -212,14 +212,14 @@ openclaude/src/
 | P2.2.2 | `MessageRow` (with timestamp) | ✅ `MessageRowTest` | `src/components/Message.tsx` | PC |
 | P2.2.3 | `MessageList` (scrollable) | ✅ `MessageListTest` | `src/components/VirtualMessageList.tsx` | PC |
 | P2.2.4 | `MarkdownRenderer` | ✅ `MarkdownRenderTest` | `src/components/Message.tsx` | PC |
-| P2.2.5 | `StreamingMessage` | ⏳ Pending | - | PC |
+| P2.2.5 | `StreamingMessage` | ✅ `StreamingTest` | - | PC |
 
 ### P2.3: Input Components
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
 | P2.3.1 | `InputField` basic | ✅ `InputFieldTest` | `src/components/Input.tsx` | PC |
 | P2.3.2 | `InputField` history | ✅ `HistoryTest` | `src/hooks/useArrowKeyHistory.ts` | PC |
-| P2.3.3 | `CommandCompleter` | ⏳ Pending | - | PC |
+| P2.3.3 | `CommandCompleter` | ✅ `CompleterTest` | - | PC |
 
 ### P2.4: Layout Components
 | Ticket | Task | Test | Reference | Agent |
