@@ -1,0 +1,32 @@
+plugins {
+    java
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JSON
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+
+    // Git
+    implementation("org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r")
+
+    // Logging
+    implementation("org.slf4j:slf4j-api:2.0.16")
+    runtimeOnly("ch.qos.logback:logback-classic:1.5.12")
+
+    // Testing
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
