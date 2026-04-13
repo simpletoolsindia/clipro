@@ -525,7 +525,7 @@ clipro/
 
 ### Phase 6: Polish (1 week)
 - [x] Testing
-- [ ] Documentation
+- [x] Documentation
 - [ ] Native build
 
 ---
