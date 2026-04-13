@@ -1,103 +1,86 @@
 package com.clipro.session;
 
-import com.clipro.ui.components.Message;
-import com.clipro.ui.components.MessageRole;
+import com.clipro.llm.models.Message;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import java.nio.file.Path;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Tests for HistoryManager.
+ */
 class HistoryManagerTest {
 
-    @Test
-    void shouldCreateHistoryManager() {
-        HistoryManager manager = new HistoryManager();
-        assertNotNull(manager);
-        assertNotNull(manager.getCurrentSession());
-    }
+    @TempDir
+    Path tempDir;
 
     @Test
     void shouldAddMessages() {
-        HistoryManager manager = new HistoryManager();
-        manager.addUserMessage("Hello");
-        manager.addAssistantMessage("Hi there");
-
-        assertEquals(2, manager.getCurrentMessages().size());
+        HistoryManager history = new HistoryManager(tempDir.toString());
+        history.addUser("Hello");
+        history.addAssistant("Hi there!");
+        
+        assertEquals(2, history.size());
     }
 
     @Test
-    void shouldAddMessagesToCurrentSession() {
-        HistoryManager manager = new HistoryManager();
-        manager.addUserMessage("Test");
-
-        Message msg = manager.getCurrentMessages().get(0);
-        assertEquals(MessageRole.USER, msg.getRole());
-        assertEquals("Test", msg.getContent());
+    void shouldClearHistory() {
+        HistoryManager history = new HistoryManager(tempDir.toString());
+        history.addUser("Hello");
+        history.addAssistant("Hi");
+        history.clear();
+        
+        assertEquals(0, history.size());
     }
 
     @Test
-    void shouldClearCurrentSession() {
-        HistoryManager manager = new HistoryManager();
-        manager.addUserMessage("Test");
-        manager.addAssistantMessage("Response");
-
-        manager.clearCurrentSession();
-
-        assertEquals(0, manager.getCurrentMessages().size());
+    void shouldGetMessages() {
+        HistoryManager history = new HistoryManager(tempDir.toString());
+        history.addUser("Hello");
+        history.addAssistant("Hi");
+        
+        List<Message> messages = history.getMessages();
+        assertEquals(2, messages.size());
+        assertEquals("user", messages.get(0).getRole());
+        assertEquals("assistant", messages.get(1).getRole());
     }
 
     @Test
-    void shouldStartNewSession() {
-        HistoryManager manager = new HistoryManager();
-        var oldSession = manager.getCurrentSession();
-        manager.addUserMessage("Old message");
-
-        manager.startNewSession();
-        var newSession = manager.getCurrentSession();
-
-        assertNotSame(oldSession, newSession);
-        assertEquals(0, newSession.size());
+    void shouldGetRecentMessages() {
+        HistoryManager history = new HistoryManager(tempDir.toString());
+        for (int i = 0; i < 10; i++) {
+            history.addUser("Message " + i);
+        }
+        
+        List<Message> recent = history.getRecentMessages(3);
+        assertEquals(3, recent.size());
+        assertTrue(recent.get(0).getContent().contains("7"));
     }
 
     @Test
-    void shouldTrimOldSessions() {
-        HistoryManager manager = new HistoryManager();
-        manager.setMaxSessions(2);
-
-        manager.startNewSession(); // session 2
-        manager.addUserMessage("msg2");
-        manager.startNewSession(); // session 3
-        manager.addUserMessage("msg3");
-        manager.startNewSession(); // session 4
-
-        // Only 2 sessions should remain
-        assertTrue(manager.getSessions().size() <= 2);
+    void shouldSearchMessages() {
+        HistoryManager history = new HistoryManager(tempDir.toString());
+        history.addUser("Hello world");
+        history.addUser("Goodbye world");
+        history.addUser("Hello again");
+        
+        List<Message> results = history.search("Hello");
+        assertEquals(2, results.size());
     }
 
     @Test
-    void shouldHaveUniqueSessionIds() {
-        HistoryManager manager = new HistoryManager();
-        var session1 = manager.getCurrentSession();
-        manager.startNewSession();
-        var session2 = manager.getCurrentSession();
-
-        assertNotEquals(session1.getId(), session2.getId());
+    void shouldListSessions() {
+        HistoryManager history = new HistoryManager(tempDir.toString());
+        history.save();
+        
+        List<String> sessions = history.listSessions();
+        assertTrue(sessions.size() >= 1);
     }
 
     @Test
-    void shouldCountTotalMessages() {
-        HistoryManager manager = new HistoryManager();
-        manager.addUserMessage("1");
-        manager.addAssistantMessage("2");
-        manager.startNewSession();
-        manager.addUserMessage("3");
-
-        assertEquals(3, manager.getTotalMessageCount());
-    }
-
-    @Test
-    void shouldGetSessionStartTime() {
-        HistoryManager manager = new HistoryManager();
-        var session = manager.getCurrentSession();
-
-        assertNotNull(session.getStartTime());
+    void shouldGetSessionId() {
+        HistoryManager history = new HistoryManager(tempDir.toString());
+        assertNotNull(history.getCurrentSessionId());
     }
 }

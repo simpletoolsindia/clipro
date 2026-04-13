@@ -1,126 +1,173 @@
 package com.clipro.session;
 
-import com.clipro.ui.components.Message;
-import com.clipro.ui.components.MessageRole;
+import com.clipro.llm.models.Message;
+
+import java.io.*;
+import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
- * Manages conversation history.
+ * History manager for conversation history.
+ * Supports search, persistence, and context management.
  */
 public class HistoryManager {
-    private final List<Session> sessions = new ArrayList<>();
-    private Session currentSession;
-    private int maxSessions = 10;
+
+    private static final String DEFAULT_DIR = System.getProperty("user.home") + "/.clipro/history";
+    private static final int MAX_MESSAGES = 1000;
+    private static final DateTimeFormatter FILE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
+
+    private final Path historyDir;
+    private final ConcurrentLinkedQueue<Message> messages;
+    private String currentSessionId;
 
     public HistoryManager() {
-        startNewSession();
+        this(DEFAULT_DIR);
     }
 
-    public void startNewSession() {
-        currentSession = new Session();
-        sessions.add(0, currentSession);
-        trimSessions();
+    public HistoryManager(String historyDir) {
+        this.historyDir = Paths.get(historyDir);
+        this.messages = new ConcurrentLinkedQueue<>();
+        this.currentSessionId = LocalDateTime.now().format(FILE_FORMAT);
+        ensureDirectory();
     }
 
-    public Session getCurrentSession() {
-        return currentSession;
-    }
-
-    public List<Session> getSessions() {
-        return new ArrayList<>(sessions);
-    }
-
-    public List<Message> getCurrentMessages() {
-        return currentSession != null ? currentSession.getMessages() : new ArrayList<>();
-    }
-
-    public void addUserMessage(String content) {
-        if (currentSession != null) {
-            currentSession.addMessage(MessageRole.USER, content);
+    private void ensureDirectory() {
+        try {
+            Files.createDirectories(historyDir);
+        } catch (IOException e) {
+            // Ignore - will use memory only
         }
     }
 
-    public void addAssistantMessage(String content) {
-        if (currentSession != null) {
-            currentSession.addMessage(MessageRole.ASSISTANT, content);
+    public void addMessage(Message message) {
+        messages.add(message);
+        while (messages.size() > MAX_MESSAGES) {
+            messages.poll();
         }
     }
 
-    public void addSystemMessage(String content) {
-        if (currentSession != null) {
-            currentSession.addMessage(MessageRole.SYSTEM, content);
+    public void addUser(String content) {
+        addMessage(Message.user(content));
+    }
+
+    public void addAssistant(String content) {
+        addMessage(Message.assistant(content));
+    }
+
+    public void addSystem(String content) {
+        addMessage(Message.system(content));
+    }
+
+    public void addToolResult(String content, String toolCallId) {
+        addMessage(Message.tool(content, toolCallId));
+    }
+
+    public List<Message> getMessages() {
+        return new ArrayList<>(messages);
+    }
+
+    public List<Message> getRecentMessages(int count) {
+        return messages.stream()
+            .skip(Math.max(0, messages.size() - count))
+            .collect(Collectors.toList());
+    }
+
+    public void clear() {
+        messages.clear();
+        currentSessionId = LocalDateTime.now().format(FILE_FORMAT);
+    }
+
+    public int size() {
+        return messages.size();
+    }
+
+    public List<Message> search(String query) {
+        return search(query, false);
+    }
+
+    public List<Message> search(String query, boolean regex) {
+        List<Message> results = new ArrayList<>();
+        Pattern pattern;
+        try {
+            pattern = regex ? Pattern.compile(query, Pattern.CASE_INSENSITIVE)
+                          : Pattern.compile(Pattern.quote(query), Pattern.CASE_INSENSITIVE);
+        } catch (Exception e) {
+            pattern = Pattern.compile(Pattern.quote(query), Pattern.CASE_INSENSITIVE);
+        }
+        for (Message msg : messages) {
+            if (msg.getContent() != null && pattern.matcher(msg.getContent()).find()) {
+                results.add(msg);
+            }
+        }
+        return results;
+    }
+
+    public void save() {
+        save(currentSessionId);
+    }
+
+    public void save(String sessionId) {
+        Path file = historyDir.resolve(sessionId + ".json");
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(file))) {
+            writer.println("{");
+            writer.println("  \"sessionId\": \"" + sessionId + "\",");
+            writer.println("  \"messages\": [");
+            Iterator<Message> it = messages.iterator();
+            while (it.hasNext()) {
+                Message msg = it.next();
+                writer.println("    {");
+                writer.println("      \"role\": \"" + msg.getRole() + "\",");
+                writer.println("      \"content\": " + jsonEscape(msg.getContent()));
+                writer.println("    }" + (it.hasNext() ? "," : ""));
+            }
+            writer.println("  ]");
+            writer.println("}");
+        } catch (IOException e) {
+            // Ignore
         }
     }
 
-    public void clearCurrentSession() {
-        if (currentSession != null) {
-            currentSession.clear();
+    public List<String> listSessions() {
+        List<String> sessions = new ArrayList<>();
+        try (var stream = Files.list(historyDir)) {
+            stream.filter(f -> f.toString().endsWith(".json"))
+                  .map(f -> f.getFileName().toString().replace(".json", ""))
+                  .sorted(Comparator.reverseOrder())
+                  .forEach(sessions::add);
+        } catch (IOException e) {
+            // Ignore
+        }
+        return sessions;
+    }
+
+    public void deleteSession(String sessionId) {
+        Path file = historyDir.resolve(sessionId + ".json");
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            // Ignore
         }
     }
 
-    private void trimSessions() {
-        while (sessions.size() > maxSessions) {
-            sessions.remove(sessions.size() - 1);
-        }
+    private String jsonEscape(String s) {
+        if (s == null) return "null";
+        return "\"" + s.replace("\\", "\\\\")
+                      .replace("\"", "\\\"")
+                      .replace("\n", "\\n")
+                      .replace("\r", "\\r")
+                      .replace("\t", "\\t") + "\"";
     }
 
-    public void setMaxSessions(int max) {
-        this.maxSessions = max;
-        trimSessions();
+    public String getCurrentSessionId() {
+        return currentSessionId;
     }
 
-    public int getTotalMessageCount() {
-        return sessions.stream().mapToInt(s -> s.getMessages().size()).sum();
-    }
-
-    public static class Session {
-        private final String id;
-        private final LocalDateTime startTime;
-        private LocalDateTime endTime;
-        private final List<Message> messages = new ArrayList<>();
-
-        public Session() {
-            this.id = generateId();
-            this.startTime = LocalDateTime.now();
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public LocalDateTime getStartTime() {
-            return startTime;
-        }
-
-        public LocalDateTime getEndTime() {
-            return endTime;
-        }
-
-        public List<Message> getMessages() {
-            return new ArrayList<>(messages);
-        }
-
-        public void addMessage(MessageRole role, String content) {
-            messages.add(new Message(role, content));
-        }
-
-        public void clear() {
-            messages.clear();
-        }
-
-        public int size() {
-            return messages.size();
-        }
-
-        public void end() {
-            this.endTime = LocalDateTime.now();
-        }
-
-        private static String generateId() {
-            return "session-" + UUID.randomUUID().toString();
-        }
+    public Path getHistoryDir() {
+        return historyDir;
     }
 }
