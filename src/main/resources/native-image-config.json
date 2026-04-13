@@ -1,0 +1,33 @@
+{
+  "reflectionConfig": [
+    {
+      "name": "com.clipro.agent.AgentEngine",
+      "methods": [
+        { "name": "<init>", "parameterTypes": [] },
+        { "name": "run", "parameterTypes": ["java.lang.String"] }
+      ]
+    },
+    {
+      "name": "com.clipro.llm.models.Message",
+      "fields": [
+        { "name": "role" },
+        { "name": "content" }
+      ]
+    }
+  ],
+  "resourceConfig": {
+    "includes": [
+      { "pattern": "META-INF/native-image/**" }
+    ],
+    "excludes": [
+      { "pattern": ".*\\.properties$" },
+      { "pattern": ".*\\.xml$" }
+    ]
+  },
+  "bundlesConfig": [
+    {
+      "bundles": ["sun.security.ssl"]
+    }
+  ],
+  "imageMainClass": "com.clipro.App"
+}

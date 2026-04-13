@@ -30,3 +30,19 @@ java {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+// Create a runnable JAR
+tasks.register<Jar>("uberJar") {
+    archiveBaseName.set("clipro")
+    archiveVersion.set("0.1.0")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.get().output)
+    manifest {
+        attributes["Main-Class"] = "com.clipro.App"
+        attributes["Implementation-Version"] = project.version
+    }
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
+}
