@@ -181,18 +181,18 @@ openclaude/src/
 ### P1.1: Gradle Setup
 | Ticket | Task | Test | Files | Agent |
 |--------|------|------|-------|-------|
-| P1.1.1 | Create Gradle wrapper | `BuildTest` | `settings.gradle.kts` | PC |
-| P1.1.2 | Add Quarkus dependencies | `QuarkusBuildTest` | `build.gradle.kts` | PC |
-| P1.1.3 | Add TamboUI dependencies | `TambouiBuildTest` | `build.gradle.kts` | PC |
-| P1.1.4 | Add Jackson, JGit | `DepsBuildTest` | `build.gradle.kts` | PC |
-| P1.1.5 | Configure GraalVM | `NativeBuildTest` | `native-image/` | PC |
+| P1.1.1 | Create Gradle wrapper | ✅ `BuildTest` | `settings.gradle.kts` | PC |
+| P1.1.2 | Add Quarkus dependencies | ✅ `QuarkusBuildTest` | `build.gradle.kts` | PC |
+| P1.1.3 | Add TamboUI dependencies | ⏳ Pending | `build.gradle.kts` | PC |
+| P1.1.4 | Add Jackson, JGit | ✅ `DepsBuildTest` | `build.gradle.kts` | PC |
+| P1.1.5 | Configure GraalVM | ⏳ Pending | `native-image/` | PC |
 
 ### P1.2: Base Structure
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
-| P1.2.1 | Create package `com.clipro` | `PackageTest` | - | PC |
-| P1.2.2 | Create `App.java` entry | `AppStartTest` | `src/main.tsx` | PC |
-| P1.2.3 | Create `logging/` package | `LoggingTest` | - | PC |
+| P1.2.1 | Create package `com.clipro` | ✅ `PackageTest` | - | PC |
+| P1.2.2 | Create `App.java` entry | ✅ `AppStartTest` | `src/main.tsx` | PC |
+| P1.2.3 | Create `logging/` package | ✅ `LoggingTest` | - | PC |
 
 ---
 
@@ -201,32 +201,32 @@ openclaude/src/
 ### P2.1: Terminal Setup
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
-| P2.1.1 | Detect terminal size | `TerminalSizeTest` | `src/ink/` | PC |
-| P2.1.2 | Handle resize events | `ResizeTest` | `src/ink/` | PC |
-| P2.1.3 | Basic output (Hello World) | `BasicOutputTest` | `src/ink/` | PC |
+| P2.1.1 | Detect terminal size | ✅ `TerminalSizeTest` | `src/ink/` | PC |
+| P2.1.2 | Handle resize events | ✅ `ResizeTest` | `src/ink/` | PC |
+| P2.1.3 | Basic output (Hello World) | ✅ `BasicOutputTest` | `src/ink/` | PC |
 
 ### P2.2: Message Components
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
-| P2.2.1 | `MessageBox` (assistant/user) | `MessageBoxTest` | `src/components/Message.tsx` | PC |
-| P2.2.2 | `MessageRow` (with timestamp) | `MessageRowTest` | `src/components/Message.tsx` | PC |
-| P2.2.3 | `MessageList` (scrollable) | `MessageListTest` | `src/components/VirtualMessageList.tsx` | PC |
-| P2.2.4 | `MarkdownRenderer` | `MarkdownRenderTest` | `src/components/Message.tsx` | PC |
-| P2.2.5 | `StreamingMessage` | `StreamingTest` | - | PC |
+| P2.2.1 | `MessageBox` (assistant/user) | ✅ `MessageBoxTest` | `src/components/Message.tsx` | PC |
+| P2.2.2 | `MessageRow` (with timestamp) | ✅ `MessageRowTest` | `src/components/Message.tsx` | PC |
+| P2.2.3 | `MessageList` (scrollable) | ✅ `MessageListTest` | `src/components/VirtualMessageList.tsx` | PC |
+| P2.2.4 | `MarkdownRenderer` | ✅ `MarkdownRenderTest` | `src/components/Message.tsx` | PC |
+| P2.2.5 | `StreamingMessage` | ⏳ Pending | - | PC |
 
 ### P2.3: Input Components
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
-| P2.3.1 | `InputField` basic | `InputFieldTest` | `src/components/Input.tsx` | PC |
-| P2.3.2 | `InputField` history | `HistoryTest` | `src/hooks/useArrowKeyHistory.ts` | PC |
-| P2.3.3 | `CommandCompleter` | `CompleterTest` | - | PC |
+| P2.3.1 | `InputField` basic | ✅ `InputFieldTest` | `src/components/Input.tsx` | PC |
+| P2.3.2 | `InputField` history | ✅ `HistoryTest` | `src/hooks/useArrowKeyHistory.ts` | PC |
+| P2.3.3 | `CommandCompleter` | ⏳ Pending | - | PC |
 
 ### P2.4: Layout Components
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
-| P2.4.1 | `HeaderBar` with model | `HeaderBarTest` | `src/components/Stats.tsx` | PC |
-| P2.4.2 | `StatusBar` with tokens | `StatusBarTest` | `src/components/Stats.tsx` | PC |
-| P2.4.3 | `FullscreenLayout` | `LayoutTest` | `src/components/FullscreenLayout.tsx` | PC |
+| P2.4.1 | `HeaderBar` with model | ✅ `HeaderBarTest` | `src/components/Stats.tsx` | PC |
+| P2.4.2 | `StatusBar` with tokens | ✅ `StatusBarTest` | `src/components/Stats.tsx` | PC |
+| P2.4.3 | `FullscreenLayout` | ⏳ Pending | `src/components/FullscreenLayout.tsx` | PC |
 
 ---
 
