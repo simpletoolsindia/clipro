@@ -524,7 +524,7 @@ clipro/
 - [x] Token budget
 
 ### Phase 6: Polish (1 week)
-- [ ] Testing
+- [x] Testing
 - [ ] Documentation
 - [ ] Native build
 
@@ -532,13 +532,13 @@ clipro/
 
 ## SUCCESS CRITERIA
 
-- [ ] Startup < 100ms
-- [ ] Memory < 50MB
-- [ ] Ollama tool calling works
-- [ ] All 14 native tools functional
-- [ ] SearXNG search works
-- [ ] Vim mode functional
-- [ ] Single native binary
+- [ ] Startup < 100ms (requires GraalVM)
+- [ ] Memory < 50MB (requires GraalVM)
+- [x] Ollama tool calling works
+- [x] All 14 native tools functional
+- [x] SearXNG search works
+- [ ] Vim mode functional (UI layer)
+- [ ] Single native binary (requires GraalVM)
 
 ---
 
