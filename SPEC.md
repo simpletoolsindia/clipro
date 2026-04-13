@@ -496,10 +496,10 @@ clipro/
 ## IMPLEMENTATION PHASES
 
 ### Phase 1: Foundation (1 week)
-- [ ] Gradle project setup
+- [x] Gradle project setup
 - [ ] TamboUI integration
 - [ ] GraalVM native build
-- [ ] Basic terminal output
+- [x] Basic terminal output
 
 ### Phase 2: UI (2 weeks)
 - [ ] Message components
@@ -508,20 +508,20 @@ clipro/
 - [ ] Dialogs
 
 ### Phase 3: LLM Bridge (1 week)
-- [ ] Ollama client (priority)
-- [ ] Streaming responses
-- [ ] Tool calling protocol
+- [x] Ollama client (priority)
+- [x] Streaming responses
+- [x] Tool calling protocol
 
 ### Phase 4: Native Tools (2 weeks)
-- [ ] File tools
-- [ ] Bash tool
-- [ ] Git tools
-- [ ] Web tools (SearXNG)
+- [x] File tools
+- [x] Bash tool
+- [x] Git tools
+- [x] Web tools (SearXNG)
 
 ### Phase 5: Agent Engine (1 week)
-- [ ] Tool executor
-- [ ] ReAct loop
-- [ ] Token budget
+- [x] Tool executor
+- [x] ReAct loop
+- [x] Token budget
 
 ### Phase 6: Polish (1 week)
 - [ ] Testing
