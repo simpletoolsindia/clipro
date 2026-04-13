@@ -7,10 +7,24 @@
 ## CRITICAL RULES (READ FIRST)
 
 ### Agent Configuration
-| Agent | Machine | Primary Tasks |
-|-------|---------|---------------|
-| **PC Agent** | This machine | UI components, TAMBUI setup |
-| **MB Agent** | Different machine | Ollama/LLM, Native tools, Agent engine |
+| Agent | Machine | Primary Tasks | Code Reference |
+|-------|---------|---------------|----------------|
+| **PC Agent** | This machine | UI components, TAMBUI setup | `/Users/sridhar/openclaude/` |
+| **MB Agent** | Different machine | Ollama/LLM, Native tools, Agent engine | `~/openclaude/` |
+
+### Code Reference Repository (MUST CLONE)
+```bash
+# Both agents MUST clone OpenClaude for reference:
+git clone https://github.com/Gitlawb/openclaude.git ~/openclaude
+
+# Reference path for code migration:
+~/openclaude/src/
+├── components/     # React components to migrate
+├── ink/           # TUI framework
+├── services/api/   # LLM API clients
+├── tools/         # Tool implementations
+└── hooks/         # State management
+```
 
 ### TDD Workflow (MANDATORY)
 ```
