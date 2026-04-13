@@ -1,14 +1,18 @@
 package com.clipro.llm.providers;
 
 import com.clipro.llm.LlmHttpClient;
+import com.clipro.llm.SseParser;
 import com.clipro.llm.models.ChatCompletionRequest;
 import com.clipro.llm.models.ChatCompletionResponse;
+import com.clipro.llm.models.ChatCompletionChunk;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
  * Ollama provider using OpenAI-compatible API.
@@ -21,6 +25,7 @@ public class OllamaProvider {
     private static final String MODELS_ENDPOINT = "/api/tags";
 
     private final LlmHttpClient httpClient;
+    private final SseParser sseParser;
     private String currentModel;
 
     public OllamaProvider() {
@@ -29,11 +34,13 @@ public class OllamaProvider {
 
     public OllamaProvider(String baseUrl) {
         this.httpClient = new LlmHttpClient(URI.create(baseUrl));
+        this.sseParser = new SseParser(httpClient.getObjectMapper());
         this.currentModel = "qwen3-coder:32b";
     }
 
     public OllamaProvider(String baseUrl, String model) {
         this.httpClient = new LlmHttpClient(URI.create(baseUrl));
+        this.sseParser = new SseParser(httpClient.getObjectMapper());
         this.currentModel = model;
     }
 
@@ -65,6 +72,30 @@ public class OllamaProvider {
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to parse response: " + response.body(), e);
                 }
+            });
+    }
+
+    /**
+     * Send a streaming chat completion request.
+     * @param request The chat completion request
+     * @param onChunk Callback for each streaming chunk
+     * @return CompletableFuture that completes when streaming is done
+     */
+    public CompletableFuture<Void> chatStream(ChatCompletionRequest request, Consumer<ChatCompletionChunk> onChunk) {
+        if (request.getModel() == null) {
+            request.setModel(currentModel);
+        }
+
+        Map<String, Object> body = Map.of(
+            "model", request.getModel() != null ? request.getModel() : currentModel,
+            "messages", request.getMessages(),
+            "stream", true
+        );
+
+        return httpClient.postStreaming(CHAT_ENDPOINT, body)
+            .thenAccept(response -> {
+                String bodyStr = response.body();
+                sseParser.parseSseStream(bodyStr, onChunk, () -> {});
             });
     }
 
