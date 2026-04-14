@@ -8,6 +8,8 @@ import com.clipro.ui.Terminal;
  */
 public class MessageBox {
 
+    private static final ThinkingBlock thinkingBlock = new ThinkingBlock();
+
     public static String render(Message message) {
         return switch (message.getRole()) {
             case USER -> renderUser(message.getContent(), message.isStreaming());
@@ -48,7 +50,9 @@ public class MessageBox {
         sb.append(Terminal.boxRow("", Terminal.getColumns()));
         sb.append("\n");
 
-        String wrapped = wordWrap(content, Terminal.getColumns() - 4);
+        // Process content for thinking blocks with rainbow rendering
+        String processed = thinkingBlock.render(content, streaming);
+        String wrapped = wordWrap(processed, Terminal.getColumns() - 4);
         for (String line : wrapped.split("\n")) {
             sb.append(Terminal.BORDER_V + " " + line + Terminal.padRight("", Terminal.getColumns() - line.length() - 3) + Terminal.BORDER_V + "\n");
         }
@@ -58,6 +62,35 @@ public class MessageBox {
         sb.append(Terminal.boxBottom(Terminal.getColumns()));
         if (streaming) sb.append(Terminal.brightCyan(" ▌"));
         return sb.toString();
+    }
+
+    /**
+     * Render assistant message with thinking block processing.
+     * Use this for messages that may contain thinking tags.
+     */
+    public static String renderAssistantWithThinking(String content, boolean streaming) {
+        return renderAssistant(content, streaming);
+    }
+
+    /**
+     * Toggle thinking block expansion.
+     */
+    public static void toggleThinkingExpanded() {
+        thinkingBlock.toggleExpanded();
+    }
+
+    /**
+     * Enable/disable shimmer animation for thinking blocks.
+     */
+    public static void setThinkingShimmerEnabled(boolean enabled) {
+        thinkingBlock.setShimmerEnabled(enabled);
+    }
+
+    /**
+     * Advance thinking block animation frame.
+     */
+    public static void tickThinkingAnimation() {
+        thinkingBlock.tick();
     }
 
     public static String renderSystem(String content) {
