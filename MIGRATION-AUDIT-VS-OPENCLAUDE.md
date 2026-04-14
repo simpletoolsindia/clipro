@@ -26,7 +26,7 @@ CLIPRO has achieved **~55-60% functional coverage** of OpenClaude's core feature
 | **State Management** | Redux/store | Manual state | 40% | PARTIAL |
 | **Bash Security** | Advanced AST | Basic sandbox | 30% | PARTIAL |
 
-### Overall Migration Score: **~68%**
+### Overall Migration Score: **~72%**
 
 ---
 
@@ -45,8 +45,8 @@ CLIPRO has achieved **~55-60% functional coverage** of OpenClaude's core feature
 | Wave | Feature | Status |
 |------|---------|--------|
 | 1A | Enhanced Input System ✅ COMPLETE | |
-| 1C | MCP Integration (Quarkus) | PENDING |
-| 2A | Syntax Highlighting ⏳ NEXT | |
+| 1C | MCP Integration (Quarkus) ⏳ NEXT | |
+| 2A | Syntax Highlighting ✅ COMPLETE | |
 | 2B | Multi-line Input + Vim | PENDING |
 | 2C | Sub-agents / Team | PENDING |
 | 2D | Advanced Vim Mode | PENDING |
