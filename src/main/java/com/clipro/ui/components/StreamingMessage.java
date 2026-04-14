@@ -1,5 +1,7 @@
 package com.clipro.ui.components;
 
+import com.clipro.ui.Terminal;
+
 import java.util.function.Consumer;
 
 /**

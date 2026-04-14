@@ -12,6 +12,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
+ * Streaming token callback interface.
+ */
+interface StreamCallback {
+    void onToken(String token);
+    void onChunk(ChatCompletionChunk chunk);
+}
+
+/**
  * Agent engine with ReAct loop (Reasoning + Acting + Observation).
  */
 public class AgentEngine {
@@ -74,6 +82,139 @@ public class AgentEngine {
         messages.add(Message.user(userMessage));
 
         return runLoop(messages, 0);
+    }
+
+    /**
+     * Run the agent loop with streaming tokens.
+     * Tokens are streamed via onResponse callback for real-time UI updates.
+     */
+    public CompletableFuture<String> runStreaming(String userMessage) {
+        List<Message> messages = new ArrayList<>();
+        messages.add(Message.user(userMessage));
+
+        return runStreamingLoop(messages, 0, new StringBuilder());
+    }
+
+    /**
+     * Run the streaming ReAct loop with token-by-token updates.
+     */
+    private CompletableFuture<String> runStreamingLoop(
+            List<Message> messages,
+            int iteration,
+            StringBuilder fullResponse) {
+
+        if (iteration >= maxIterations) {
+            return CompletableFuture.completedFuture(fullResponse.toString());
+        }
+
+        ChatCompletionRequest request = new ChatCompletionRequest(
+            provider.getCurrentModel(),
+            messages
+        );
+        toolRegistry.getSchemas().forEach(request::addTool);
+
+        StringBuilder currentResponse = new StringBuilder();
+
+        return provider.chatStream(request, chunk -> {
+            // Stream each token to UI immediately
+            if (chunk != null && chunk.getChoices() != null && chunk.getChoices().length > 0) {
+                ChatCompletionChunk.Choice choice = chunk.getChoices()[0];
+                String delta = chunk.getDeltaContent();
+                if (delta != null && !delta.isEmpty()) {
+                    currentResponse.append(delta);
+                    fullResponse.append(delta);
+                    // Notify UI callback
+                    if (onResponse != null) {
+                        onResponse.accept(delta);
+                    }
+                }
+            }
+        }).thenCompose(v -> {
+            // Streaming done, check for tool calls
+            String content = currentResponse.toString();
+            String reasoning = extractReasoning(content);
+
+            if (onThought != null && reasoning != null) {
+                onThought.accept(reasoning);
+            }
+
+            // Check for tool calls by making a non-streaming request to parse
+            return parseAndExecuteTools(messages, content, iteration, fullResponse);
+        }).exceptionally(ex -> {
+            return "Error: " + ex.getMessage();
+        });
+    }
+
+    /**
+     * Parse response for tool calls and execute them.
+     */
+    private CompletableFuture<String> parseAndExecuteTools(
+            List<Message> messages,
+            String content,
+            int iteration,
+            StringBuilder fullResponse) {
+
+        // Make a non-streaming request to get structured tool calls
+        ChatCompletionRequest request = new ChatCompletionRequest(
+            provider.getCurrentModel(),
+            messages
+        );
+        toolRegistry.getSchemas().forEach(request::addTool);
+
+        return provider.chat(request)
+            .thenCompose(response -> {
+                Message assistantMsg = response.getFirstMessage();
+                if (assistantMsg == null) {
+                    return CompletableFuture.completedFuture(fullResponse.toString());
+                }
+
+                ToolCall[] toolCalls = assistantMsg.getToolCalls();
+                if (toolCalls != null && toolCalls.length > 0) {
+                    return executeToolCallsStreaming(toolCalls, messages, assistantMsg, iteration, fullResponse);
+                }
+
+                return CompletableFuture.completedFuture(fullResponse.toString());
+            });
+    }
+
+    /**
+     * Execute tool calls and continue streaming loop.
+     */
+    private CompletableFuture<String> executeToolCallsStreaming(
+            ToolCall[] toolCalls,
+            List<Message> messages,
+            Message assistantMsg,
+            int iteration,
+            StringBuilder fullResponse) {
+
+        List<Message> toolMessages = new ArrayList<>();
+
+        for (ToolCall call : toolCalls) {
+            String toolName = call.getFunction().getName();
+            String args = call.getFunction().getArguments();
+
+            if (onToolCall != null) {
+                onToolCall.accept(toolName + "(" + args + ")");
+            }
+
+            Tool tool = toolRegistry.get(toolName);
+            String result = tool != null ? tool.execute(parseArgs(args)) : "Error: Unknown tool: " + toolName;
+
+            toolMessages.add(Message.tool(result, call.getId()));
+            tokenBudget.addUsage(result.length() / 4);
+        }
+
+        messages.add(assistantMsg);
+        messages.addAll(toolMessages);
+
+        if (tokenBudget.isOverBudget(DEFAULT_TOKEN_BUDGET)) {
+            return CompletableFuture.completedFuture(
+                "Token budget exceeded. Consider starting a new conversation."
+            );
+        }
+
+        // Continue streaming loop
+        return runStreamingLoop(messages, iteration + 1, fullResponse);
     }
 
     /**

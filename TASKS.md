@@ -229,6 +229,14 @@ openclaude/src/
 | P2.4.3 | `FullscreenLayout` | ✅ `FullscreenLayoutTest` | `src/components/FullscreenLayout.tsx` | ✅ PC DONE |
 | P2.4.4 | `App.java` integration | ✅ `AppTuiTest` | - | ✅ PC DONE |
 
+### P2.5: Streaming Integration (NEW)
+| Ticket | Task | Test | Reference | Agent |
+|--------|------|------|-----------|-------|
+| P2.5.1 | `StreamingMessage` in FullscreenLayout | ✅ StreamingTest | `src/components/` | ✅ **PC/MB DONE** |
+| P2.5.2 | `AgentEngine.runStreaming()` | ✅ StreamingTest | - | ✅ **PC/MB DONE** |
+| P2.5.3 | `UIController.sendMessageStreaming()` | ✅ StreamingTest | - | ✅ **PC/MB DONE** |
+| P2.5.4 | Real-time token updates | ⏳ StreamingE2E | - | PC |
+
 ---
 
 ## PHASE 3: Vim Mode

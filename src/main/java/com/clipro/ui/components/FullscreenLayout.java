@@ -12,6 +12,8 @@ public class FullscreenLayout {
     private final MessageList messages;
     private final StatusBar status;
     private final InputField input;
+    private StreamingMessage currentStreamingMessage;
+    private int lastMessageIndex = -1;
 
     public FullscreenLayout() {
         this.header = new HeaderBar();
@@ -25,6 +27,45 @@ public class FullscreenLayout {
         this.messages = new MessageList();
         this.status = new StatusBar();
         this.input = new InputField();
+    }
+
+    /**
+     * Start a streaming assistant message that updates in real-time.
+     * @param onUpdate Callback for each token update
+     * @return The StreamingMessage for updating
+     */
+    public StreamingMessage startStreamingMessage(java.util.function.Consumer<String> onUpdate) {
+        currentStreamingMessage = new StreamingMessage(MessageRole.ASSISTANT, onUpdate);
+        messages.add(currentStreamingMessage);
+        lastMessageIndex = messages.size() - 1;
+        return currentStreamingMessage;
+    }
+
+    /**
+     * Update the last streaming message content.
+     */
+    public void updateStreamingMessage(String content) {
+        if (currentStreamingMessage != null) {
+            currentStreamingMessage.clear();
+            currentStreamingMessage.append(content);
+        }
+    }
+
+    /**
+     * Complete the current streaming message.
+     */
+    public void completeStreamingMessage(String finalContent) {
+        if (currentStreamingMessage != null) {
+            currentStreamingMessage.complete(finalContent);
+            currentStreamingMessage = null;
+        }
+    }
+
+    /**
+     * Check if currently streaming.
+     */
+    public boolean isStreaming() {
+        return currentStreamingMessage != null && !currentStreamingMessage.isComplete();
     }
 
     public HeaderBar getHeader() {

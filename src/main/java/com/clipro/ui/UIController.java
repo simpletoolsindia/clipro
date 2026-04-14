@@ -9,6 +9,7 @@ import com.clipro.tools.git.*;
 import com.clipro.tools.shell.BashTool;
 import com.clipro.tools.web.*;
 import com.clipro.ui.components.*;
+import com.clipro.llm.models.ChatCompletionChunk;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -98,6 +99,61 @@ public class UIController {
                 if (onStatusUpdate != null) onStatusUpdate.accept("Error");
                 return "Error: " + ex.getMessage();
             });
+    }
+
+    /**
+     * Send user message with streaming tokens displayed in real-time.
+     * Uses SSE streaming for immediate token updates.
+     */
+    public CompletableFuture<String> sendMessageStreaming(String message) {
+        // Add user message to UI
+        layout.addUserMessage(message);
+        if (onStatusUpdate != null) onStatusUpdate.accept("Streaming...");
+
+        // Create streaming message with real-time updates
+        StringBuilder streamedContent = new StringBuilder();
+        StreamingMessage streamingMsg = layout.startStreamingMessage(content -> {
+            // This callback fires on each token
+            if (onTokenUpdate != null) {
+                onTokenUpdate.accept(streamedContent.toString());
+            }
+        });
+
+        // Set up token collection
+        agent.onResponse(token -> {
+            streamedContent.append(token);
+            streamingMsg.append(token);
+        });
+
+        agent.onThought(thought -> {
+            layout.addSystemMessage("[thinking] " + truncate(thought, 100));
+        });
+
+        agent.onToolCall(call -> {
+            layout.addSystemMessage("[tool] " + call);
+            if (onStatusUpdate != null) onStatusUpdate.accept("Executing: " + extractToolName(call));
+        });
+
+        // Run with streaming
+        return agent.runStreaming(message)
+            .thenApply(response -> {
+                streamingMsg.complete(response);
+                updateTokenCount();
+                if (onStatusUpdate != null) onStatusUpdate.accept("Ready");
+                return response;
+            })
+            .exceptionally(ex -> {
+                streamingMsg.complete("[error] " + ex.getMessage());
+                if (onStatusUpdate != null) onStatusUpdate.accept("Error");
+                return "Error: " + ex.getMessage();
+            });
+    }
+
+    /**
+     * Check if UI is currently streaming.
+     */
+    public boolean isStreaming() {
+        return layout.isStreaming();
     }
 
     /**

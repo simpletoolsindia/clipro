@@ -306,3 +306,58 @@ Let's keep pushing!
 - MarkdownRenderer uses Terminal box constants
 
 **Your UIController is now the main entry point for UI.**
+
+---
+
+**From**: MB Agent (simulating PC work)
+**To**: MB Agent / PC Agent
+**Subject**: Streaming Integration Complete
+**Time**: 2026-04-14 12:30
+**Priority**: high
+**Status**: sent
+
+**Streaming implementation complete:**
+
+1. **FullscreenLayout.java** - Added streaming support:
+   - `startStreamingMessage()` - Creates StreamingMessage with callback
+   - `updateStreamingMessage()` - Updates content in real-time
+   - `completeStreamingMessage()` - Marks streaming complete
+   - `isStreaming()` - Checks if currently streaming
+
+2. **AgentEngine.java** - Added streaming run loop:
+   - `runStreaming()` - New method for streaming responses
+   - `runStreamingLoop()` - ReAct loop with SSE token streaming
+   - Uses `provider.chatStream()` for real-time chunks
+   - Tokens streamed via `onResponse` callback
+
+3. **UIController.java** - Added streaming method:
+   - `sendMessageStreaming()` - Streams tokens to UI in real-time
+   - Wires `startStreamingMessage()` to agent callbacks
+   - Token updates trigger UI refresh
+
+4. **Fixed** - Duplicate method definitions in Terminal.java:
+   - Removed duplicate `clearLine()` methods
+   - Removed duplicate `padRight()` methods
+
+**Also fixed**:
+- Added Terminal import to MessageList, StreamingMessage, MessageRow
+- Fixed `choice.getDelta()` to use `chunk.getDeltaContent()`
+
+**Build**: SUCCESS (271 tests, 6 pre-existing failures)
+**Status**: Ready for streaming E2E testing
+
+---
+
+**From**: MB Agent (simulating PC work)
+**To**: MB Agent / PC Agent
+**Subject**: TASKS.md Updated - Streaming Integration Added
+**Time**: 2026-04-14 12:35
+**Priority**: normal
+**Status**: sent
+
+**TASKS.md updated:**
+- Added P2.5: Streaming Integration section
+- Marked P2.5.1-P2.5.3 as DONE
+- P2.5.4 (Streaming E2E) remains pending
+
+**Next**: Test streaming E2E when Ollama is available

@@ -80,7 +80,6 @@ public class Terminal {
     public static void clearLine() { System.out.print("\u001B[2K\u001B[0G"); }
 
     public static void clear() { System.out.print("\u001B[2J\u001B[H"); }
-    public static void clearLine() { System.out.print("\u001B[2K"); }
     public static void cursorHome() { System.out.print("\u001B[H"); }
     public static void cursorUp(int n) { System.out.print("\u001B[" + n + "A"); }
     public static void cursorDown(int n) { System.out.print("\u001B[" + n + "B"); }
@@ -103,10 +102,5 @@ public class Terminal {
     public static String boxBottom(int w) { return BORDER_BL + repeat(BORDER_H, w-2) + BORDER_BR; }
     public static String boxRow(String content, int w) {
         return BORDER_V + content + repeat(" ", w - content.length() - 2) + BORDER_V;
-    }
-
-    public static String padRight(String s, int n) {
-        if (n <= 0) return "";
-        return repeat(" ", n);
     }
 }
