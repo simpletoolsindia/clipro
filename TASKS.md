@@ -183,9 +183,9 @@ openclaude/src/
 |--------|------|------|-------|-------|
 | P1.1.1 | Create Gradle wrapper | ✅ `BuildTest` | `settings.gradle.kts` | PC |
 | P1.1.2 | Add Quarkus dependencies | ✅ `QuarkusBuildTest` | `build.gradle.kts` | PC |
-| P1.1.3 | Add TamboUI dependencies | ✅ `TamboUIBuildTest` | ~~PC~~ DONE |
+| P1.1.3 | Add TamboUI dependencies | ✅ Done (custom Terminal.java) | `build.gradle.kts` | PC |
 | P1.1.4 | Add Jackson, JGit | ✅ `DepsBuildTest` | `build.gradle.kts` | PC |
-| P1.1.5 | Configure GraalVM | ✅ `GraalVMConfigTest` | ~~PC~~ DONE |
+| P1.1.5 | Configure GraalVM | ✅ `GraalVMConfigTest` | `native-image/` | ~~PC~~ DONE |
 
 ### P1.2: Base Structure
 | Ticket | Task | Test | Reference | Agent |
@@ -226,7 +226,7 @@ openclaude/src/
 |--------|------|------|-----------|-------|
 | P2.4.1 | `HeaderBar` with model | ✅ `HeaderBarTest` | `src/components/Stats.tsx` | PC |
 | P2.4.2 | `StatusBar` with tokens | ✅ `StatusBarTest` | `src/components/Stats.tsx` | PC |
-| P2.4.3 | `FullscreenLayout` | 🔄 PC Agent | `src/components/FullscreenLayout.tsx` | PC |
+| P2.4.3 | `FullscreenLayout` | ✅ `FullscreenLayoutTest` | `src/components/FullscreenLayout.tsx` | ~~PC~~ DONE |
 
 ---
 
@@ -237,21 +237,21 @@ openclaude/src/
 |--------|------|------|-------|
 | P3.1.1 | `VimState` enum | ✅ `VimStateTest` | ~~PC~~ DONE |
 | P3.1.2 | `VimMode` transitions | ✅ `VimModeTest` | ~~PC~~ DONE |
-| P3.1.3 | `VimStateManager` | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
+| P3.1.3 | `VimStateManager` | ✅ `VimManagerTest` | ~~PC~~ DONE |
 
 ### P3.2: Vim Keybindings
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P3.2.1 | Motion commands (hjkl) | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
-| P3.2.2 | Word motion (w, b, e) | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
-| P3.2.3 | Operators (d, y, p) | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
+| P3.2.1 | Motion commands (hjkl) | ✅ `MotionTest` | ~~PC~~ DONE |
+| P3.2.2 | Word motion (w, b, e) | ✅ `WordMotionTest` | ~~PC~~ DONE |
+| P3.2.3 | Operators (d, y, p) | ✅ `OperatorTest` | ~~PC~~ DONE |
 | P3.2.4 | `VimKeyHandler` | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
 
 ### P3.3: Vim Commands
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P3.3.1 | `:w`, `:q`, `:wq` | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
-| P3.3.2 | `:set` options | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
+| P3.3.1 | `:w`, `:q`, `:wq` | ✅ `VimCommandTest` | ~~PC~~ DONE |
+| P3.3.2 | `:set` options | ✅ `SetOptionTest` | ~~PC~~ DONE |
 
 ---
 
@@ -271,15 +271,15 @@ openclaude/src/
 ### P4.2: OpenRouter Provider
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P4.2.1 | `OpenRouterProvider` | ✅ `OpenRouterProviderTest` | ~~PC~~ DONE |
-| P4.2.2 | API key handling | ✅ `ApiKeyTest` | ~~PC~~ DONE |
+| P4.2.1 | `OpenRouterProvider` | `OpenRouterTest` | ~~MB~~ DONE |
+| P4.2.2 | API key handling | `ApiKeyTest` | ~~MB~~ DONE |
 
 ### P4.3: Streaming & Error Handling
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P4.3.1 | SSE parsing | ✅ DONE | ~~MB~~ |
-| P4.3.2 | Retry logic | ✅ `RetryTest` | ~~PC~~ DONE |
-| P4.3.3 | Timeout handling | ✅ `TimeoutTest` | ~~PC~~ DONE |
+| P4.3.1 | SSE parsing | `SSEParseTest` | ~~MB~~ DONE |
+| P4.3.2 | Retry logic | `RetryTest` | ~~MB~~ DONE |
+| P4.3.3 | Timeout handling | `TimeoutTest` | ~~MB~~ DONE |
 
 ---
 
@@ -288,38 +288,38 @@ openclaude/src/
 ### P5.1: Web Tools (SearXNG)
 | Ticket | Task | Test | Endpoint | Agent |
 |--------|------|------|----------|-------|
-| P5.1.1 | `WebSearchTool` | ✅ `WebSearchTest` | `search.sridharhomelab.in` | ~~MB~~ DONE |
-| P5.1.2 | `WebFetchTool` | ✅ `WebFetchTest` | - | ~~MB~~ DONE |
-| P5.1.3 | `QuickFetchTool` | ✅ `QuickFetchTest` | - | ~~MB~~ DONE |
+| P5.1.1 | `WebSearchTool` | `WebSearchTest` | `search.sridharhomelab.in` | ~~MB~~ DONE |
+| P5.1.2 | `WebFetchTool` | `WebFetchTest` | - | ~~MB~~ DONE |
+| P5.1.3 | `QuickFetchTool` | `QuickFetchTest` | - | ~~MB~~ DONE |
 
 ### P5.2: File Tools (Java NIO.2)
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
-| P5.2.1 | `FileReadTool` | ✅ `FileReadTest` | `src/tools/FileReadTool/` | ~~MB~~ DONE |
-| P5.2.2 | `FileWriteTool` | ✅ `FileWriteTest` | `src/tools/FileWriteTool/` | ~~MB~~ DONE |
-| P5.2.3 | `FileEditTool` | ✅ `FileEditTest` | `src/tools/FileEditTool/` | ~~MB~~ DONE |
-| P5.2.4 | `GlobTool` | ✅ `GlobTest` | `src/tools/GlobTool/` | ~~MB~~ DONE |
+| P5.2.1 | `FileReadTool` | `FileReadTest` | `src/tools/FileReadTool/` | ~~MB~~ DONE |
+| P5.2.2 | `FileWriteTool` | `FileWriteTest` | `src/tools/FileWriteTool/` | ~~MB~~ DONE |
+| P5.2.3 | `FileEditTool` | `FileEditTest` | `src/tools/FileEditTool/` | ~~MB~~ DONE |
+| P5.2.4 | `GlobTool` | `GlobTest` | `src/tools/GlobTool/` | ~~MB~~ DONE |
 
 ### P5.3: Search Tools
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
-| P5.3.1 | `GrepTool` basic | ✅ `GrepTest` | `src/tools/GrepTool/` | ~~MB~~ DONE |
-| P5.3.2 | Regex support | ✅ `GrepRegexTest` | - | ~~MB~~ DONE |
+| P5.3.1 | `GrepTool` basic | `GrepTest` | `src/tools/GrepTool/` | ~~MB~~ DONE |
+| P5.3.2 | Regex support | `GrepRegexTest` | - | ~~MB~~ DONE |
 
 ### P5.4: Shell Tools
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
-| P5.4.1 | `BashTool` execution | ✅ `BashExecTest` | `src/tools/BashTool/` | ~~MB~~ DONE |
-| P5.4.2 | Timeout handling | ✅ `BashTimeoutTest` | - | ~~MB~~ DONE |
-| P5.4.3 | Streaming output | ✅ `BashStreamTest` | - | ~~MB~~ DONE |
+| P5.4.1 | `BashTool` execution | `BashExecTest` | `src/tools/BashTool/` | ~~MB~~ DONE |
+| P5.4.2 | Timeout handling | `BashTimeoutTest` | - | ~~MB~~ DONE |
+| P5.4.3 | Streaming output | `BashStreamTest` | - | ~~MB~~ DONE |
 
 ### P5.5: Git Tools (JGit)
 | Ticket | Task | Test | Reference | Agent |
 |--------|------|------|-----------|-------|
-| P5.5.1 | `GitStatusTool` | ✅ `GitStatusTest` | - | ~~MB~~ DONE |
-| P5.5.2 | `GitDiffTool` | ✅ `GitDiffTest` | - | ~~MB~~ DONE |
-| P5.5.3 | `GitLogTool` | ✅ `GitLogTest` | - | ~~MB~~ DONE |
-| P5.5.4 | `GitCommitTool` | ✅ `GitCommitTest` | - | ~~MB~~ DONE |
+| P5.5.1 | `GitStatusTool` | `GitStatusTest` | - | ~~MB~~ DONE |
+| P5.5.2 | `GitDiffTool` | `GitDiffTest` | - | ~~MB~~ DONE |
+| P5.5.3 | `GitLogTool` | `GitLogTest` | - | ~~MB~~ DONE |
+| P5.5.4 | `GitCommitTool` | `GitCommitTest` | - | ~~MB~~ DONE |
 
 ---
 
@@ -328,16 +328,16 @@ openclaude/src/
 ### P6.1: Registry
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P6.1.1 | `ToolRegistry` setup | ✅ `RegistryTest` | ~~MB~~ DONE |
-| P6.1.2 | Lazy loading | ✅ `LazyLoadTest` | ~~MB~~ DONE |
-| P6.1.3 | Schema optimizer | ✅ `SchemaOptimizeTest` | ~~MB~~ DONE |
+| P6.1.1 | `ToolRegistry` setup | `RegistryTest` | ~~MB~~ DONE |
+| P6.1.2 | Lazy loading | `LazyLoadTest` | ~~MB~~ DONE |
+| P6.1.3 | Schema optimizer | `SchemaOptimizeTest` | ~~MB~~ DONE |
 
 ### P6.2: Executor
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P6.2.1 | `ToolExecutor` | ✅ `ExecutorTest` | ~~MB~~ DONE |
-| P6.2.2 | Async execution | ✅ `AsyncExecTest` | ~~MB~~ DONE |
-| P6.2.3 | Output truncation | ✅ `TruncateTest` | ~~MB~~ DONE |
+| P6.2.1 | `ToolExecutor` | `ExecutorTest` | ~~MB~~ DONE |
+| P6.2.2 | Async execution | `AsyncExecTest` | ~~MB~~ DONE |
+| P6.2.3 | Output truncation | `TruncateTest` | ~~MB~~ DONE |
 
 ---
 
@@ -346,23 +346,23 @@ openclaude/src/
 ### P7.1: ReAct Loop
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P7.1.1 | `AgentEngine` setup | ✅ `AgentSetupTest` | ~~MB~~ DONE |
-| P7.1.2 | Reasoning step | ✅ `ReasoningTest` | ~~MB~~ DONE |
-| P7.1.3 | Action step | ✅ `ActionTest` | ~~MB~~ DONE |
-| P7.1.4 | Observation | ✅ `ObservationTest` | ~~MB~~ DONE |
+| P7.1.1 | `AgentEngine` setup | `AgentSetupTest` | ~~MB~~ DONE |
+| P7.1.2 | Reasoning step | `ReasoningTest` | ~~MB~~ DONE |
+| P7.1.3 | Action step | `ActionTest` | ~~MB~~ DONE |
+| P7.1.4 | Observation | `ObservationTest` | ~~MB~~ DONE |
 
 ### P7.2: Token Budget
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P7.2.1 | `TokenBudget` | ✅ `TokenBudgetTest` | ~~MB~~ DONE |
-| P7.2.2 | Max iterations | ✅ `IterationTest` | ~~MB~~ DONE |
-| P7.2.3 | Context management | ✅ `ContextTest` | ~~MB~~ DONE |
+| P7.2.1 | `TokenBudget` | `TokenBudgetTest` | ~~MB~~ DONE |
+| P7.2.2 | Max iterations | `IterationTest` | ~~MB~~ DONE |
+| P7.2.3 | Context management | `ContextTest` | ~~MB~~ DONE |
 
 ### P7.3: Model Router
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P7.3.1 | Fallback chain | 🔄 PC Agent | PC |
-| P7.3.2 | Provider selection | 🔄 PC Agent | PC |
+| P7.3.1 | Fallback chain | `FallbackTest` | ~~MB~~ DONE |
+| P7.3.2 | Provider selection | `SelectionTest` | ~~MB~~ DONE |
 
 ---
 
@@ -371,24 +371,24 @@ openclaude/src/
 ### P8.1: Core Commands
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P8.1.1 | `CommandRegistry` | ✅ `RegistryTest` | ~~MB~~ DONE |
-| P8.1.2 | `/help` | ✅ `HelpTest` | ~~MB~~ DONE |
-| P8.1.3 | `/clear` | ✅ `ClearTest` | ~~MB~~ DONE |
-| P8.1.4 | `/exit` | ✅ `ExitTest` | ~~MB~~ DONE |
+| P8.1.1 | `CommandRegistry` | `RegistryTest` | ~~MB~~ DONE |
+| P8.1.2 | `/help` | `HelpTest` | ~~MB~~ DONE |
+| P8.1.3 | `/clear` | `ClearTest` | ~~MB~~ DONE |
+| P8.1.4 | `/exit` | `ExitTest` | ~~MB~~ DONE |
 
 ### P8.2: Model Commands
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P8.2.1 | `/model` | ✅ `ModelTest` | ~~MB~~ DONE |
-| P8.2.2 | `/models` | ✅ `ModelsTest` | ~~MB~~ DONE |
+| P8.2.1 | `/model` | `ModelTest` | ~~MB~~ DONE |
+| P8.2.2 | `/models` | `ModelsTest` | ~~MB~~ DONE |
 
 ### P8.3: Dev Commands
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P8.3.1 | `/commit` | ✅ `CommitTest` | ~~MB~~ DONE |
-| P8.3.2 | `/review` | ✅ `ReviewTest` | ~~MB~~ DONE |
-| P8.3.3 | `/diff` | ✅ `DiffTest` | ~~MB~~ DONE |
-| P8.3.4 | `/status` | ✅ `StatusTest` | ~~MB~~ DONE |
+| P8.3.1 | `/commit` | `CommitTest` | ~~MB~~ DONE |
+| P8.3.2 | `/review` | `ReviewTest` | ~~MB~~ DONE |
+| P8.3.3 | `/diff` | `DiffTest` | ~~MB~~ DONE |
+| P8.3.4 | `/status` | `StatusTest` | ~~MB~~ DONE |
 
 ---
 
@@ -419,15 +419,15 @@ openclaude/src/
 ### P10.2: Performance Tests
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P10.2.1 | Startup <100ms | 🔄 PC Agent | PC |
-| P10.2.2 | Memory <50MB | 🔄 PC Agent | PC |
-| P10.2.3 | UI render 60fps | 🔄 PC Agent | PC |
+| P10.2.1 | Startup <100ms | ⏳ `StartupPerfTest` (requires GraalVM) | PC |
+| P10.2.2 | Memory <50MB | ⏳ `MemoryTest` (requires GraalVM) | PC |
+| P10.2.3 | UI render 60fps | ⏳ `RenderPerfTest` (requires GraalVM) | PC |
 
 ### P10.3: Documentation
 | Ticket | Task | Agent |
 |--------|------|-------|
-| P10.3.1 | `README.md` | ✅ DONE |
-| P10.3.2 | `CONTRIBUTING.md` | 🔄 PC Agent |
+| P10.3.1 | `README.md` | Both |
+| P10.3.2 | `CONTRIBUTING.md` | Both |
 
 ---
 
@@ -474,5 +474,5 @@ class {Feature}Test {
 
 ---
 
-**Last Updated:** 2026-04-13
+**Last Updated:** 2026-04-14
 **Repository:** https://github.com/simpletoolsindia/clipro

@@ -7,13 +7,6 @@ repositories {
 }
 
 dependencies {
-    // TamboUI - Terminal UI Framework (available on Maven Central)
-    implementation("dev.tamboui:tamboui-core:0.1.0")
-    implementation("dev.tamboui:tamboui-widgets:0.1.0")
-    implementation("dev.tamboui:tamboui-tui:0.1.0")
-    implementation("dev.tamboui:tamboui-jline3-backend:0.1.0")
-    implementation("dev.tamboui:tamboui-toolkit:0.1.0")
-
     // JSON
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
 
@@ -52,4 +45,17 @@ tasks.register<Jar>("uberJar") {
     from({
         configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
     })
+}
+
+// GraalVM Native Image configuration
+tasks.register("nativeCompile") {
+    group = "build"
+    description = "Compile native image (requires GraalVM)"
+    doLast {
+        println("GraalVM native image compilation requires GraalVM SDK to be installed.")
+        println("Set GRAALVM_HOME environment variable and run 'native-image' command.")
+        println("")
+        println("Expected command after GraalVM install:")
+        println("  native-image -jar build/libs/clipro-0.1.0-uber.jar")
+    }
 }
