@@ -9,6 +9,8 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * HTTP client wrapper for LLM providers.
@@ -20,6 +22,8 @@ public class LlmHttpClient {
     private final ObjectMapper objectMapper;
     private URI baseUrl;
     private Duration timeout;
+    private int maxRetries;
+    private long retryDelayMs;
 
     public LlmHttpClient() {
         this(URI.create("http://localhost:11434/v1"));
@@ -28,6 +32,8 @@ public class LlmHttpClient {
     public LlmHttpClient(URI baseUrl) {
         this.baseUrl = baseUrl;
         this.timeout = Duration.ofSeconds(30);
+        this.maxRetries = 3;
+        this.retryDelayMs = 1000;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(timeout)
                 .build();
@@ -42,8 +48,20 @@ public class LlmHttpClient {
         return timeout;
     }
 
+    public int getMaxRetries() {
+        return maxRetries;
+    }
+
     public void setTimeout(Duration timeout) {
         this.timeout = timeout;
+    }
+
+    public void setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    public void setRetryDelayMs(long retryDelayMs) {
+        this.retryDelayMs = retryDelayMs;
     }
 
     /**
@@ -102,5 +120,67 @@ public class LlmHttpClient {
 
     public ObjectMapper getObjectMapper() {
         return objectMapper;
+    }
+
+    /**
+     * Execute an action with retry logic.
+     * @param action The action to execute
+     * @param <T> The return type
+     * @return The result
+     * @throws RuntimeException if all retries fail
+     */
+    public <T> T executeWithRetry(Supplier<T> action) {
+        Exception lastException = null;
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                return action.get();
+            } catch (Exception e) {
+                lastException = e;
+                if (i < maxRetries - 1) {
+                    try {
+                        Thread.sleep(retryDelayMs);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(ie);
+                    }
+                }
+            }
+        }
+        throw new RuntimeException(lastException);
+    }
+
+    /**
+     * Execute an async action with retry logic.
+     * @param action The async action to execute
+     * @param <T> The return type
+     * @return CompletableFuture with the result
+     */
+    public <T> CompletableFuture<T> executeWithRetryAsync(Supplier<CompletableFuture<T>> action) {
+        CompletableFuture<T> result = new CompletableFuture<>();
+        executeWithRetryAsyncHelper(action, result, 0);
+        return result;
+    }
+
+    private <T> void executeWithRetryAsyncHelper(Supplier<CompletableFuture<T>> action,
+                                                 CompletableFuture<T> result, int attempt) {
+        action.get().handle((value, ex) -> {
+            if (ex != null) {
+                if (attempt < maxRetries - 1) {
+                    try {
+                        Thread.sleep(retryDelayMs);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        result.completeExceptionally(ie);
+                        return null;
+                    }
+                    executeWithRetryAsyncHelper(action, result, attempt + 1);
+                } else {
+                    result.completeExceptionally(ex);
+                }
+            } else {
+                result.complete(value);
+            }
+            return null;
+        });
     }
 }
