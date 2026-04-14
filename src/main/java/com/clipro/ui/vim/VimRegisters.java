@@ -1,12 +1,15 @@
 package com.clipro.ui.vim;
 
+import java.util.Map;
+import java.util.HashMap;
+
 /**
  * Vim registers for yank/delete operations.
  * Supports: 0-9, a-z, ", +, *
  */
 public class VimRegisters {
 
-    private final Map<Character, String> registers = new java.util.HashMap<>();
+    private final Map<Character, String> registers = new HashMap<>();
     private char defaultRegister = '"';
     private char lastYankRegister = '0';
 

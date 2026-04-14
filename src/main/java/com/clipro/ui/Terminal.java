@@ -97,6 +97,10 @@ public class Terminal {
 
     public static String ansi(String code) { return "\u001B[" + code + "m"; }
 
+    public static String suggestion(String t) { return MAGENTA + t + RESET; }
+
+    public static String inverse(String t) { return "\u001B[7m" + t + "\u001B[27m"; }
+
     public static String repeat(String s, int n) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < n; i++) sb.append(s);

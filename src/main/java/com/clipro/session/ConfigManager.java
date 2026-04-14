@@ -13,6 +13,7 @@ public class ConfigManager {
     private static final String DEFAULT_DIR = System.getProperty("user.home") + "/.clipro";
     private static final String CONFIG_FILE = "config.json";
     private static final String SECRETS_FILE = "secrets.properties";
+    private static ConfigManager instance;
 
     private final Path configDir;
     private final Map<String, Object> config;
@@ -43,6 +44,13 @@ public class ConfigManager {
         this.secrets = new HashMap<>();
         ensureDirectory();
         load();
+    }
+
+    public static ConfigManager getInstance() {
+        if (instance == null) {
+            instance = new ConfigManager();
+        }
+        return instance;
     }
 
     private void ensureDirectory() {

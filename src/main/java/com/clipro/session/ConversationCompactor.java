@@ -1,7 +1,6 @@
 package com.clipro.session;
 
 import com.clipro.llm.models.Message;
-import com.clipro.ui.components.MessageRole;
 import java.util.*;
 
 public class ConversationCompactor {
@@ -27,7 +26,7 @@ public class ConversationCompactor {
         int systemCount = 0;
 
         for (Message m : messages) {
-            if (m.getRole() == MessageRole.SYSTEM && systemCount < preserveSystemMessages) {
+            if ("system".equals(m.getRole()) && systemCount < preserveSystemMessages) {
                 preserved.add(m); systemCount++;
             }
         }
@@ -40,14 +39,21 @@ public class ConversationCompactor {
         }
 
         String summary = createSummary(toCompact);
-        preserved.add(0, new Message("compacted-" + System.currentTimeMillis(), MessageRole.SYSTEM, "[Previous: " + summary + "]", false));
+        Message summaryMsg = new Message("system", "[Previous: " + summary + "]");
+        summaryMsg.setName("compacted-" + System.currentTimeMillis());
+        preserved.add(0, summaryMsg);
         return new CompactionResult(preserved, toCompact.size(), true);
     }
 
     private String createSummary(List<Message> old) {
         if (old.isEmpty()) return "";
         int u=0,a=0,t=0;
-        for (Message m : old) { switch (m.getRole()) { case USER -> u++; case ASSISTANT -> a++; case TOOL -> t++; default -> {} } }
+        for (Message m : old) {
+            String r = m.getRole();
+            if ("user".equals(r)) u++;
+            else if ("assistant".equals(r)) a++;
+            else if ("tool".equals(r)) t++;
+        }
         return u + " user msgs, " + a + " assistant, " + t + " tools";
     }
 

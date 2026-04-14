@@ -325,6 +325,7 @@ public class Theme {
         public Builder setWarning(String v) { this.warning = v; return this; }
         public Builder setBackground(String v) { this.background = v; return this; }
         public Builder setUserMessageBackground(String v) { this.userMessageBackground = v; return this; }
+        public Builder setSuggestion(String v) { this.suggestion = v; return this; }
         public Theme build() { return new Theme(this); }
     }
 }

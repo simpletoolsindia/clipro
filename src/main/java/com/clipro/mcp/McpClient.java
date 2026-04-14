@@ -177,10 +177,10 @@ public class McpClient {
     }
 
     /**
-     * Connection state record.
+     * Connection state class.
      */
-    public record ConnectionState() {
-        volatile String status = "disconnected";
-        volatile String error = null;
+    public static class ConnectionState {
+        public volatile String status = "disconnected";
+        public volatile String error = null;
     }
 }

@@ -1,5 +1,7 @@
 package com.clipro.ui.components;
 
+import com.clipro.llm.ThinkingParser;
+
 /**
  * Thinking block renderer with collapsible UI.
  * Renders thinking content with rainbow colors and shimmer animation.
@@ -9,8 +11,8 @@ package com.clipro.ui.components;
 public class ThinkingBlock {
 
     private final ThinkingParser parser;
-    private final RainbowRenderer renderer;
-    private final ShimmerAnimator animator;
+    private final boolean shimmerEnabled;
+    private volatile boolean shimmerPhase = false;
 
     private boolean expanded = false;
     private boolean showCollapsedIndicator = true;
@@ -21,16 +23,49 @@ public class ThinkingBlock {
     private static final String DIM = "\u001B[2m";
     private static final String ITALIC = "\u001B[3m";
 
+    // Rainbow colors
+    private static final String[] RAINBOW = {
+        "\u001B[38;2;235;95;87m",   // red
+        "\u001B[38;2;245;139;87m",  // orange
+        "\u001B[38;2;250;195;95m",  // yellow
+        "\u001B[38;2;145;200;130m", // green
+        "\u001B[38;2;130;170;220m", // blue
+        "\u001B[38;2;155;130;200m", // indigo
+        "\u001B[38;2;200;130;180m", // violet
+    };
+
+    // Shimmer variants (brighter)
+    private static final String[] SHIMMER = {
+        "\u001B[38;2;255;120;100m",  // brighter red
+        "\u001B[38;2;255;160;110m",  // brighter orange
+        "\u001B[38;2;255;210;120m",  // brighter yellow
+        "\u001B[38;2;170;220;150m",  // brighter green
+        "\u001B[38;2;150;190;240m",  // brighter blue
+        "\u001B[38;2;175;150;220m",  // brighter indigo
+        "\u001B[38;2;220;150;200m",  // brighter violet
+    };
+
     public ThinkingBlock() {
         this.parser = new ThinkingParser();
-        this.renderer = parser.getRenderer();
-        this.animator = new ShimmerAnimator(renderer);
+        this.shimmerEnabled = true;
     }
 
     public ThinkingBlock(ThinkingParser parser) {
         this.parser = parser;
-        this.renderer = parser.getRenderer();
-        this.animator = new ShimmerAnimator(renderer);
+        this.shimmerEnabled = true;
+    }
+
+    public ThinkingBlock(boolean shimmerEnabled) {
+        this.parser = new ThinkingParser();
+        this.shimmerEnabled = shimmerEnabled;
+    }
+
+    /**
+     * Render a word with rainbow coloring.
+     */
+    private String renderWord(String word, int index, boolean shimmer) {
+        String[] colors = shimmer ? SHIMMER : RAINBOW;
+        return colors[index % colors.length] + word + RESET;
     }
 
     /**
@@ -89,7 +124,7 @@ public class ThinkingBlock {
         StringBuilder sb = new StringBuilder();
 
         String prefix = block.isUltrathink() ? "▸ " : "◇ ";
-        sb.append(renderer.renderWord(prefix, 0, animator.isShimmerPhase()));
+        sb.append(renderWord(prefix, 0, shimmerPhase && shimmerEnabled));
 
         String content = block.getContent();
 
@@ -103,7 +138,7 @@ public class ThinkingBlock {
 
         // Streaming indicator
         if (isStreaming) {
-            sb.append(renderer.renderWord("▌", 0, animator.isShimmerPhase()));
+            sb.append(renderWord("▌", 0, shimmerPhase && shimmerEnabled));
         }
 
         sb.append("\n");
@@ -123,7 +158,7 @@ public class ThinkingBlock {
 
         sb.append(DIM).append(ITALIC);
         sb.append(" ".repeat(indentSize));
-        sb.append(renderer.renderWord(indicator, 2, animator.isShimmerPhase()));
+        sb.append(renderWord(indicator, 2, shimmerPhase && shimmerEnabled));
         sb.append(RESET);
         sb.append("\n");
 
@@ -154,7 +189,7 @@ public class ThinkingBlock {
         for (int i = 0; i < Math.min(words.length, 20); i++) {
             if (isUltrathink) {
                 // Full rainbow for ultrathink
-                sb.append(renderer.renderWord(words[i], i, animator.isShimmerPhase()));
+                sb.append(renderWord(words[i], i, shimmerPhase && shimmerEnabled));
             } else {
                 // Dim for regular thinking
                 sb.append(words[i]);
@@ -195,7 +230,7 @@ public class ThinkingBlock {
             }
 
             // The trigger with rainbow
-            sb.append(renderer.renderWord(trigger.getWord(), 0, animator.isShimmerPhase()));
+            sb.append(renderWord(trigger.getWord(), 0, shimmerPhase && shimmerEnabled));
             lastEnd = trigger.getEnd();
         }
 
@@ -229,7 +264,7 @@ public class ThinkingBlock {
      * Render ultrathink keyword with full rainbow animation.
      */
     public String renderUltrathinkKeyword(String keyword) {
-        return renderer.renderUltrathink(keyword, animator.isShimmerPhase());
+        return renderWord(keyword, 0, shimmerPhase && shimmerEnabled);
     }
 
     /**
@@ -271,14 +306,14 @@ public class ThinkingBlock {
      * Advance animation frame.
      */
     public void tick() {
-        animator.tick();
+        shimmerPhase = !shimmerPhase;
     }
 
     /**
      * Enable/disable shimmer animation.
      */
     public void setShimmerEnabled(boolean enabled) {
-        animator.setEnabled(enabled);
+        // handled by constructor - kept for API compatibility
     }
 
     /**
@@ -289,17 +324,10 @@ public class ThinkingBlock {
     }
 
     /**
-     * Get the animator instance.
+     * Check if shimmer is currently in bright phase.
      */
-    public ShimmerAnimator getAnimator() {
-        return animator;
-    }
-
-    /**
-     * Get the renderer instance.
-     */
-    public RainbowRenderer getRenderer() {
-        return renderer;
+    public boolean isShimmerPhase() {
+        return shimmerPhase;
     }
 
     private String truncate(String text, int maxLen) {

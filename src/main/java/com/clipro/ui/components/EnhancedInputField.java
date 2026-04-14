@@ -1,6 +1,7 @@
 package com.clipro.ui.components;
 
 import com.clipro.ui.Terminal;
+import com.clipro.ui.vim.VimState;
 import java.util.*;
 
 /**
@@ -22,7 +23,7 @@ public class EnhancedInputField {
     private String prompt = "▶ ";
     private boolean vimMode = false;
     private boolean showSuggestions = false;
-    private List<Suggestion> suggestions = new ArrayList<>();
+    private List<TypeaheadEngine.Suggestion> suggestions = new ArrayList<>();
     private int suggestionIndex = 0;
     private boolean multilineMode = false;
     private List<String> lines = new ArrayList<>();
@@ -192,10 +193,10 @@ public class EnhancedInputField {
         }
     }
 
-    public Suggestion acceptSuggestion() {
+    public TypeaheadEngine.Suggestion acceptSuggestion() {
         if (suggestions.isEmpty() || suggestionIndex < 0) return null;
 
-        Suggestion selected = suggestions.get(suggestionIndex);
+        TypeaheadEngine.Suggestion selected = suggestions.get(suggestionIndex);
         buffer.setLength(0);
 
         if (selected.type() == TypeaheadEngine.SuggestionType.COMMAND) {
@@ -252,7 +253,7 @@ public class EnhancedInputField {
 
         // Vim mode indicator
         if (vimMode) {
-            sb.append(Terminal.dim(" [").append(vimState.name().charAt(0)).append("]"));
+            sb.append(Terminal.dim(" [" + vimState.name().charAt(0) + "]"));
         }
 
         return sb.toString();
@@ -268,7 +269,7 @@ public class EnhancedInputField {
 
         // Render suggestion dropdown
         for (int i = 0; i < Math.min(suggestions.size(), 5); i++) {
-            Suggestion s = suggestions.get(i);
+            TypeaheadEngine.Suggestion s = suggestions.get(i);
             String prefix = (i == suggestionIndex) ? "▶ " : "  ";
             sb.append(prefix)
               .append(Terminal.suggestion("/" + s.name()))
@@ -331,15 +332,19 @@ public class EnhancedInputField {
     public boolean isMultiline() { return multilineMode; }
     public boolean isVimMode() { return vimMode; }
     public List<String> getHistory() { return new ArrayList<>(history); }
-    public List<Suggestion> getSuggestions() { return suggestions; }
+    public List<TypeaheadEngine.Suggestion> getSuggestions() { return suggestions; }
     public boolean isShowingSuggestions() { return showSuggestions; }
     public TypeaheadEngine getTypeahead() { return typeahead; }
 
     public void setPrompt(String prompt) { this.prompt = prompt; }
     public void setVimMode(boolean enabled) { this.vimMode = enabled; }
     public void setMultilineMode(boolean enabled) { this.multilineMode = enabled; }
-    public void setTypeahead(TypeaheadEngine engine) { this.typeahead.registerCommands(engine.getSuggestions().stream().map(s -> new TypeaheadEngine.CommandSuggestion(s.name(), s.description(), s.category(), s.score())).toList()); }
-
-    // === Nested Suggestion record ===
-    public record Suggestion(String name, String description, String category, double score, TypeaheadEngine.SuggestionType type) {}
+    public void setTypeahead(TypeaheadEngine engine) {
+        // Copy suggestions from engine
+        List<TypeaheadEngine.CommandSuggestion> cmds = new ArrayList<>();
+        for (var s : engine.search("", TypeaheadEngine.SuggestionType.COMMAND)) {
+            cmds.add(new TypeaheadEngine.CommandSuggestion(s.name(), s.description(), s.category(), s.score()));
+        }
+        typeahead.registerCommands(cmds);
+    }
 }

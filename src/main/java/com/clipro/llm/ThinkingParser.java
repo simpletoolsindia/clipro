@@ -13,6 +13,18 @@ import java.util.List;
  */
 public class ThinkingParser {
 
+    // Rainbow colors for rendering (ANSI escape codes)
+    private static final String[] RAINBOW = {
+        "\u001B[38;2;235;95;87m",   // red
+        "\u001B[38;2;245;139;87m",  // orange
+        "\u001B[38;2;250;195;95m",  // yellow
+        "\u001B[38;2;145;200;130m", // green
+        "\u001B[38;2;130;170;220m", // blue
+        "\u001B[38;2;155;130;200m", // indigo
+        "\u001B[38;2;200;130;180m", // violet
+    };
+    private static final String RESET = "\u001B[0m";
+
     // Pattern for <thinking>...</thinking> blocks
     private static final Pattern THINKING_BLOCK_PATTERN =
         Pattern.compile("(?i)<thinking>(.*?)</thinking>", Pattern.DOTALL);
@@ -82,12 +94,31 @@ public class ThinkingParser {
         public boolean isUltrathink() { return isUltrathink; }
     }
 
-    private final RainbowRenderer renderer;
     private boolean collapseEnabled = true;
     private int maxCollapsedLength = 100;
 
     public ThinkingParser() {
-        this.renderer = new RainbowRenderer();
+        // Use built-in rainbow rendering - no external RainbowRenderer needed
+    }
+
+    /**
+     * Render a word with rainbow coloring.
+     */
+    public String renderRainbowWord(String word, int index) {
+        return RAINBOW[index % RAINBOW.length] + word + RESET;
+    }
+
+    /**
+     * Render text with rainbow spectrum.
+     */
+    public String renderRainbow(String text) {
+        String[] words = text.split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            sb.append(renderRainbowWord(words[i], i));
+            if (i < words.length - 1) sb.append(" ");
+        }
+        return sb.toString();
     }
 
     /**
@@ -147,11 +178,14 @@ public class ThinkingParser {
             ));
         }
 
+        // Get existing blocks to check overlap
+        List<ThinkingBlock> existingBlocks = parseBlocks(text);
+
         // Find standalone thinking keywords (not inside blocks)
         Matcher thinkingMatcher = THINKING_KEYWORD_PATTERN.matcher(text);
         while (thinkingMatcher.find()) {
             // Skip if inside a thinking block or ultrathink
-            if (isInsideBlock(triggers, thinkingMatcher.start())) continue;
+            if (isInsideBlock(existingBlocks, thinkingMatcher.start())) continue;
             if (isInsideTrigger(triggers, thinkingMatcher.start())) continue;
 
             triggers.add(new ThinkingTrigger(
@@ -239,10 +273,14 @@ public class ThinkingParser {
     }
 
     /**
-     * Get the RainbowRenderer for rendering.
+     * Get rainbow color for index (for compatibility).
      */
-    public RainbowRenderer getRenderer() {
-        return renderer;
+    public String getRainbowColor(int index) {
+        return RAINBOW[index % RAINBOW.length];
+    }
+
+    public String getResetCode() {
+        return RESET;
     }
 
     // Helper methods
