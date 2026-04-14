@@ -80,6 +80,11 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | **Migration Score** | **~65%** overall |
 | **UI Parity Score** | **~40%** |
 | **Code Size vs Original** | ~9% of OpenClaude LOC |
+| **Pending Tickets** | **40 total** |
+| — CRITICAL tickets | 5 |
+| — HIGH priority | 9 |
+| — MEDIUM priority | 17 |
+| — LOW priority | 15 |
 
 ### Migration Scorecard
 
@@ -1093,7 +1098,1035 @@ if (line.startsWith("|")) {
 
 ---
 
-## Part 6: Working Well (What Was Done Right)
+## Part 6: Pending Tickets — 100% Migration Checklist
+
+**Legend:**
+- ❌ **NOT STARTED** — File doesn't exist, must be created from scratch
+- ⚠️ **HALF-IMPLEMENTED** — File exists but needs completion/integration
+- ✅ **DONE** — No ticket needed
+
+Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenClaude.
+
+---
+
+### CRITICAL Tickets (Must Fix for Pixel-Perfect UI)
+
+| # | Ticket | File(s) | Type | OpenClaude Reference |
+|---|--------|---------|------|---------------------|
+| C-01 | Integrate ThinkingBlock into MessageBox rendering | `MessageBox.java` | ⚠️ HALF | `src/components/Message.tsx` |
+| C-02 | Virtual scrolling with height caching + smooth scroll | `VirtualMessageList.java` | ⚠️ HALF | `src/components/VirtualMessageList.tsx` (1,082L) |
+| C-03 | NewMessagesPill — "↓ N new messages" overlay | `FullscreenLayout.java` | ⚠️ HALF | `src/components/FullscreenLayout.tsx` |
+| C-04 | StickyPromptHeader — context row when scrolled | `FullscreenLayout.java` | ⚠️ HALF | `src/components/FullscreenLayout.tsx` |
+| C-05 | Syntax highlighting in MarkdownRenderer code blocks | `MarkdownRenderer.java`, `SyntaxHighlighter.java` | ⚠️ HALF | `src/components/HighlightedCode.tsx` |
+
+---
+
+### HIGH Priority Tickets
+
+| # | Ticket | File(s) | Type | OpenClaude Reference |
+|---|--------|---------|------|---------------------|
+| H-01 | PromptInput multi-line: Tab indent, Shift-Tab, arrow nav | `EnhancedInputField.java` | ⚠️ HALF | `src/components/PromptInput/` (2,376L) |
+| H-02 | Typeahead file path completion with filesystem traversal | `TypeaheadEngine.java` | ⚠️ HALF | `src/components/PromptInput/useTypeahead.tsx` (1,392L) |
+| H-03 | History search Ctrl+R reverse-i-search mode | `HistorySearch.java` | ⚠️ HALF | `src/components/PromptInput/HistorySearchDialog.tsx` |
+| H-04 | Slash command overlay SuggestionsDropdown | `CommandCompleter.java` | ⚠️ HALF | `src/components/PromptInput/PromptInputFooterSuggestions.tsx` |
+| H-05 | Permission mode indicator in StatusBar (READ ● / BASH ● / RESTRICTED ●) | `StatusBar.java` | ⚠️ HALF | `src/components/StatusLine.tsx` |
+| H-06 | MCP server discovery + server management in McpClient | `McpClient.java` | ⚠️ HALF | `src/tools/MCPTool/` (700L) |
+| H-07 | LSP Tool — Language Server Protocol (go-to-def, refs, hover) | `src/main/java/com/clipro/tools/lsp/LSPTool.java` | ❌ NOT STARTED | `src/tools/LSPTool/` (2,100L) |
+| H-08 | OpenAI Provider — GPT-4, GPT-4o, streaming, tool calling | `src/main/java/com/clipro/llm/providers/OpenAIProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
+| H-09 | Theme hot-switching via /theme CLI command | `CommandRegistry.java`, `ThemeManager.java` | ⚠️ HALF | `src/commands/theme/theme.tsx` |
+
+---
+
+### MEDIUM Priority Tickets
+
+| # | Ticket | File(s) | Type | OpenClaude Reference |
+|---|--------|---------|------|---------------------|
+| M-01 | StatsComponent ASCII charts with token/cost graphs | `StatsComponent.java` | ⚠️ HALF | `src/components/Stats.tsx` (1,227L) |
+| M-02 | Conversation compaction UI notification | `ConversationCompactor.java`, `MessageRole.java` | ⚠️ HALF | `src/utils/messages.ts` |
+| M-03 | Agent CLI commands: /spawn, /kill, /list | `CommandRegistry.java` | ❌ NOT STARTED | `src/commands/agent/` |
+| M-04 | MCP CLI commands: /mcp list, /mcp add, /mcp remove | `CommandRegistry.java` | ❌ NOT STARTED | `src/commands/mcp/` |
+| M-05 | Theme CLI commands: /theme dark, /theme light, /theme preview | `CommandRegistry.java` | ❌ NOT STARTED | `src/commands/theme/theme.tsx` |
+| M-06 | Tool result background tint (indigo #191923) | `MessageBox.java`, `Theme.java` | ⚠️ HALF | `src/components/Message.tsx` |
+| M-07 | Cost tracking in StatusBar (OpenRouter usage data) | `StatusBar.java` | ❌ NOT STARTED | `src/components/StatusLine.tsx` |
+| M-08 | Rate limit display in StatusBar (5h/7d windows) | `StatusBar.java` | ❌ NOT STARTED | `src/components/StatusLine.tsx` |
+| M-09 | Markdown table rendering with alignment | `MarkdownRenderer.java` | ⚠️ HALF | `src/components/Markdown.tsx` |
+| M-10 | Code block line numbers in SyntaxHighlighter | `SyntaxHighlighter.java`, `MarkdownRenderer.java` | ❌ NOT STARTED | `src/components/HighlightedCode.tsx` |
+| M-11 | Image attachment rendering [Image: path] | `MessageBox.java` | ❌ NOT STARTED | `src/components/Message.tsx` |
+| M-12 | User message background color (#373737) | `MessageBox.java`, `Theme.java` | ⚠️ HALF | `src/components/Message.tsx` |
+| M-13 | grouped_tool_use message type rendering | `MessageList.java`, `MessageBox.java` | ❌ NOT STARTED | `src/components/Messages.tsx` |
+| M-14 | collapsed_read_search message type rendering | `MessageList.java` | ❌ NOT STARTED | `src/components/Messages.tsx` |
+| M-15 | BashTool AST parsing (tree-sitter or regex) for command validation | `BashTool.java` | ⚠️ HALF | `src/tools/BashTool/` (10,987L) |
+| M-16 | BashTool Haiku classifier for auto-permission | `BashTool.java` | ❌ NOT STARTED | `src/tools/BashTool/haiku.ts` |
+| M-17 | BashTool sed command validation | `BashTool.java` | ❌ NOT STARTED | `src/tools/BashTool/` |
+| M-18 | BashTool permission persistence across sessions | `BashTool.java`, `ConfigManager.java` | ❌ NOT STARTED | `src/tools/BashTool/` |
+| M-19 | FileReadTool image processing (PNG/JPEG dimension extraction) | `FileReadTool.java` | ❌ NOT STARTED | `src/tools/FileReadTool/` (1,400L) |
+| M-20 | FileEditTool inline diff display with color | `FileEditTool.java` | ⚠️ HALF | `src/tools/FileEditTool/` (1,527L) |
+| M-21 | WebSearchTool multi-provider support (SearXNG, Tavily, Serper) | `WebSearchTool.java` | ⚠️ HALF | `src/tools/WebSearchTool/` (800L) |
+| M-22 | WebFetchTool HTML parsing and content extraction | `WebFetchTool.java` | ⚠️ HALF | `src/tools/WebFetchTool/` (536L) |
+| M-23 | TaskTool nested task support (parent/child relationships) | `TaskTool.java` | ⚠️ HALF | `src/tools/TaskTool/` |
+| M-24 | AgentManager tool schema loading from agent config | `AgentManager.java` | ⚠️ HALF | `src/tools/AgentTool/` (2,500L) |
+| M-25 | AgentTeam teardown and member cleanup | `AgentTeam.java` | ⚠️ HALAL | `src/tools/TeamCreateTool/` |
+
+---
+
+### LOW Priority Tickets
+
+| # | Ticket | File(s) | Type | OpenClaude Reference |
+|---|--------|---------|------|---------------------|
+| L-01 | Vim macros (q/ register recording and playback) | `VimMode.java`, `VimKeyHandler.java` | ❌ NOT STARTED | `src/hooks/useVimInput.ts` |
+| L-02 | Vim substitute (:s/pattern/replacement/flags) | `VimKeyHandler.java` | ❌ NOT STARTED | `src/hooks/useVimInput.ts` |
+| L-03 | Teammate view — visual agent status in sidebar | `AgentTeam.java`, new `TeammateView.java` | ❌ NOT STARTED | `src/components/agents/` |
+| L-04 | NotebookEditTool — Jupyter .ipynb cell editing | `src/main/java/com/clipro/tools/notebook/NotebookEditTool.java` | ❌ NOT STARTED | `src/tools/NotebookEditTool/` |
+| L-05 | SkillTool — load and execute skills from ~/.config/clipro/skills/ | `src/main/java/com/clipro/tools/skill/SkillTool.java` | ❌ NOT STARTED | `src/tools/SkillTool/` (1,118L) |
+| L-06 | AWS Bedrock Provider (Claude on AWS) | `src/main/java/com/clipro/llm/providers/BedrockProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
+| L-07 | Google Gemini Provider | `src/main/java/com/clipro/llm/providers/GeminiProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
+| L-08 | GitHub Models Provider (Copilot) | `src/main/java/com/clipro/llm/providers/GitHubModelsProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
+| L-09 | Azure OpenAI Provider | `src/main/java/com/clipro/llm/providers/AzureOpenAIProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
+| L-10 | Remote session support (SSH to remote CLIPRO) | `src/main/java/com/clipro/session/RemoteSession.java` | ❌ NOT STARTED | `src/utils/remote.ts` |
+| L-11 | JavaFX rich UI completion (replace stub) | `JavaFXAdapter.java` | ❌ STUB | `src/ui/javafx/` (if present) |
+| L-12 | Permission mode display in PromptInput | `EnhancedInputField.java` | ❌ NOT STARTED | `src/components/PromptInput/` |
+| L-13 | Image paste support in input field | `InputField.java` | ❌ NOT STARTED | `src/components/PromptInput/PromptInput.tsx` |
+| L-14 | Queued commands editing in PromptInput | `EnhancedInputField.java` | ❌ NOT STARTED | `src/components/PromptInput/QueuedCommands.tsx` |
+| L-15 | Block count indicators for thinking blocks | `ThinkingBlock.java`, `MessageBox.java` | ❌ NOT STARTED | `src/components/Message.tsx` |
+
+---
+
+### Ticket Detail: CRITICAL
+
+#### TICKET C-01: Integrate ThinkingBlock into MessageBox Rendering
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/MessageBox.java`
+**Lines:** ~141 (currently)
+**Problem:** `ThinkingBlock.java` (309L) and `ThinkingParser.java` (294L) exist and work correctly, but `MessageBox.renderAssistant()` never calls them. Assistant messages render `<thinking>` tags as raw text.
+**Fix Required:**
+1. In `MessageBox.renderAssistant(String content)`:
+   - Add `ThinkingParser parser = new ThinkingParser();`
+   - Call `parser.parse(content)` to extract thinking blocks and text blocks
+   - For each thinking block: call `ThinkingBlock.renderStreaming(content)` with rainbow colors
+   - For each text block: call `MarkdownRenderer.render(content)`
+2. `ThinkingBlock.java` line 309 has `render()` method ready to use
+3. Reference: OpenClaude `src/components/Message.tsx` lines ~100-300 (`switch (contentBlock.type)`)
+
+---
+
+#### TICKET C-02: Virtual Scrolling with Height Caching + Smooth Scroll
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/VirtualMessageList.java`
+**Lines:** 138 (currently) → needs ~500+ lines
+**Problem:** Only has basic scroll offset (integer). No height tracking, no smooth scroll, no keyboard navigation, no sticky detection.
+**Fix Required:**
+1. Add `Map<Integer, Integer> itemHeights` — cache each message's rendered height (call `MessageBox.render()` once per message to measure)
+2. Add `heightCache` invalidation on content change
+3. Add smooth scroll methods:
+   - `scrollToIndex(int index)` — scroll to specific message
+   - `scrollToBottom()` — auto-scroll to latest
+   - `scrollBy(int delta)` — smooth delta scroll
+4. Add `ScrollBoxHandle` interface:
+   - `scrollTo(int y)`, `scrollBy(int dy)`, `getScrollTop()`
+   - `subscribe(ScrollListener listener)` for scroll events
+   - `isSticky()` — detect if at bottom for auto-scroll
+5. Add j/k keyboard navigation in `handleKey(KeyEvent e)`:
+   - 'j' → `scrollToIndex(currentIndex + 1)`
+   - 'k' → `scrollToIndex(currentIndex - 1)`
+6. Reference: OpenClaude `src/components/VirtualMessageList.tsx` (1,082 lines)
+
+---
+
+#### TICKET C-03: NewMessagesPill Overlay
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/FullscreenLayout.java`
+**Lines:** 192 (currently)
+**Problem:** When user scrolls UP during streaming, there is no indicator showing new messages arrived below.
+**Fix Required:**
+1. Add field: `private int newMessageCount = 0;`
+2. Add method: `showNewMessagesPill(int count)` — renders "↓ N new messages ▼"
+3. Trigger logic:
+   - When user calls `scrollUp()` → set `newMessageCount++` and show pill
+   - When user calls `scrollToBottom()` → clear count and hide pill
+   - When streaming completes → increment count if user is scrolled up
+4. Position: overlay at bottom of message area (above prompt divider)
+5. On click/Enter: `scrollToBottom()` + clear count
+6. Reference: OpenClaude `src/components/FullscreenLayout.tsx` lines ~200+ (`NewMessagesPill`)
+
+---
+
+#### TICKET C-04: StickyPromptHeader
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/FullscreenLayout.java`
+**Lines:** 192 (currently)
+**Problem:** When user scrolls up to read old messages, they lose context of what they're discussing.
+**Fix Required:**
+1. Add 1-row sticky header that appears when `scrollOffset > 0`
+2. Shows truncated last user message: max 50 chars + "..."
+3. Format: `User: <truncated message>`
+4. Auto-hide when `scrollOffset == 0` (at bottom)
+5. Position: top of message area, fixed
+6. Reference: OpenClaude `src/components/FullscreenLayout.tsx` (`StickyPromptHeader`)
+
+---
+
+#### TICKET C-05: Syntax Highlighting in MarkdownRenderer Code Blocks
+**Status:** ⚠️ HALF-IMPLEMENTED
+**Files:** `src/main/java/com/clipro/ui/components/MarkdownRenderer.java`, `src/main/java/com/clipro/ui/components/SyntaxHighlighter.java`
+**Problem:** `MarkdownRenderer.renderCodeBlock()` renders code as plain text. `SyntaxHighlighter.java` exists with 18+ languages but `highlightWithDef()` (line 184) returns basic styling — regex patterns are defined but not applied.
+**Fix Required:**
+1. In `MarkdownRenderer.renderCodeBlock(String code, String lang)`:
+   - Detect language from fence: `python`, `java`, `javascript`, etc.
+   - Call `SyntaxHighlighter.highlight(code, language)` instead of plain text
+2. In `SyntaxHighlighter.highlightWithDef()` (line 184):
+   - Apply the regex patterns defined in the language maps
+   - Return ANSI-colored tokens instead of basic `[KEYWORD]` tags
+3. Add line numbers via `renderLineNumbers(int lineCount)`:
+   - Use `Terminal.DIM` for line number color
+   - Right-align: `  1`, `  2`, ` 10`, `100`
+4. Reference: OpenClaude `src/components/HighlightedCode.tsx`
+
+---
+
+### Ticket Detail: HIGH
+
+#### TICKET H-01: PromptInput Multi-line Support
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/EnhancedInputField.java`
+**Lines:** 345 (currently)
+**Problem:** `multiline` flag exists (line 40) but Tab/Shift-Tab don't indent, arrow keys don't navigate lines.
+**Fix Required:**
+1. Track cursor as `(int cursorRow, int cursorCol)` instead of single char offset
+2. Tab key → insert 4 spaces at cursor position
+3. Shift-Tab → remove up to 4 spaces from start of current line
+4. Up/Down arrows in multi-line mode:
+   - Up → move cursor to same column in previous line
+   - Down → move cursor to same column in next line
+5. Track line boundaries in a `List<Integer> lineStarts` array
+6. Reference: OpenClaude `src/components/PromptInput/useMultilineInput.ts`
+
+---
+
+#### TICKET H-02: Typeahead File Path Completion
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/TypeaheadEngine.java`
+**Lines:** 199 (currently)
+**Problem:** Only registers commands. No filesystem traversal at all.
+**Fix Required:**
+1. Add `indexFiles(String directory, int maxDepth)` — recursively index files
+   - Skip `node_modules/`, `.git/`, `target/`, `build/`, `__pycache__/`
+   - Store in `Map<String, FileSuggestion> fileIndex`
+2. Add `completeFilePath(String partial)`:
+   - Extract directory part and filename part from partial path
+   - Fuzzy match filename against `fileIndex`
+   - Return top 5 matches with full paths
+3. Add `completeDirectory(String partial)`:
+   - Suggest subdirectories for tab completion
+4. Trigger detection in `EnhancedInputField`:
+   - On `/read ` → trigger file path completion
+   - On `/edit ` → trigger file path completion
+   - On `from "` or `import ` → trigger module completion
+5. Reference: OpenClaude `src/components/PromptInput/useTypeahead.tsx` lines ~300+
+
+---
+
+#### TICKET H-03: History Search Ctrl+R (reverse-i-search)
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/HistorySearch.java`
+**Lines:** 69 (currently)
+**Problem:** Only has `handleHistoryUp()` / `handleHistoryDown()`. No search mode.
+**Fix Required:**
+1. Add `searchMode: boolean` field
+2. Add `searchQuery: String` field
+3. On Ctrl+R keypress:
+   - Enter search mode
+   - Show `(reverse-i-search) : ` prompt
+   - Each keystroke filters history matching `searchQuery`
+4. Display: `(reverse-i-search) query: matched_text`
+5. Ctrl+R again in search mode → cycle to next older match
+6. Enter → accept current match, exit search mode, set input to matched text
+7. Escape → cancel search, restore original input, exit search mode
+8. Reference: OpenClaude `src/components/PromptInput/HistorySearchDialog.tsx`
+
+---
+
+#### TICKET H-04: Slash Command Overlay (SuggestionsDropdown)
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/CommandCompleter.java`
+**Lines:** 280 (currently — works but no overlay UI)
+**Problem:** `CommandCompleter` has fuzzy matching logic but no dropdown UI overlay.
+**Fix Required:**
+1. Add `SuggestionsOverlay` class that renders dropdown at bottom of input area
+2. Trigger on `/` prefix in input field
+3. Show top 8 matching commands with:
+   - Command name (highlighted fuzzy match characters)
+   - Description from `CommandInfo`
+4. Arrow Up/Down → navigate suggestions
+5. Enter/Tab → select and complete
+6. Escape → dismiss overlay
+7. In `FullscreenLayout.renderWithInput()`: render overlay above input field
+8. Reference: OpenClaude `src/components/PromptInput/PromptInputFooterSuggestions.tsx`
+
+---
+
+#### TICKET H-05: Permission Mode Indicator in StatusBar
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/StatusBar.java`
+**Lines:** 60 (currently)
+**Problem:** StatusBar shows `Tokens: X/Y │ Latency │ Status` but no permission mode.
+**Fix Required:**
+1. Add `private PermissionMode permissionMode` field
+2. Add `setPermissionMode(PermissionMode mode)` method
+3. In `renderCompact()`: append ` │ [MODE ●]`
+   - `READ_ONLY` → `READ ●` in green
+   - `BASH` → `BASH ●` in yellow
+   - `RESTRICTED` → `RESTRICTED ●` in red
+4. Read permission mode from `ConfigManager` or `BashTool.getPermissionMode()`
+5. Update on permission change (from BashTool prompts)
+6. Reference: OpenClaude `src/components/StatusLine.tsx` permission section
+
+---
+
+#### TICKET H-06: MCP Server Discovery and Management
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/mcp/McpClient.java`
+**Lines:** 186 (currently — basic JSON-RPC only)
+**Problem:** Can call tools but can't discover/start/stop MCP servers.
+**Fix Required:**
+1. Add `discoverServers()`:
+   - Read `~/.config/clipro/mcp.json`
+   - Parse server configs: `{ "name": "filesystem", "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home"] }`
+2. Add `startServer(String name)`:
+   - Spawn process with stdio (stdin/stdout)
+   - Parse JSON-RPC messages from stdout
+   - Send JSON-RPC messages to stdin
+3. Add `listServers()` → return configured server names
+4. Add `listTools(String server)` → return tools from server's tool list
+5. Add `stopServer(String name)` → kill process
+6. Parse MCP tool schemas → convert to CLIPRO `ToolDefinition` format
+7. Reference: OpenClaude `src/tools/MCPTool/` (700+ lines)
+
+---
+
+#### TICKET H-07: LSP Tool — Language Server Protocol
+**Status:** ❌ NOT STARTED
+**File:** Create `src/main/java/com/clipro/tools/lsp/LSPTool.java`
+**Lines:** ~600-800 (new file)
+**Problem:** No LSP support for go-to-definition, find-references, hover, etc.
+**Fix Required:**
+1. Create `LSPTool.java` implementing Language Server Protocol over TCP/stdio
+2. Implement:
+   - `initialize(String language, String rootPath)` — start LSP server process
+     - Python: `pip install pyright` → `pyright-langserver`
+     - TypeScript: `typescript-language-server --stdio`
+     - Rust: `rust-analyzer`
+     - Go: `gopls`
+     - Java: `jdtls` or `eclipse.jdt.ls`
+   - `textDocument/definition(String uri, int line, int col)` → location
+   - `textDocument/references(String uri, int line, int col)` → locations[]
+   - `textDocument/hover(String uri, int line, int col)` → markdown content
+   - `textDocument/completion(String uri, int line, int col)` → completions[]
+   - `textDocument/publishDiagnostics(String uri)` → lint errors
+   - `workspace/symbol(String query)` → symbols across project
+3. Register LSP tools in `ToolRegistry`
+4. Reference: OpenClaude `src/tools/LSPTool/` (2,100 lines of TypeScript)
+
+---
+
+#### TICKET H-08: OpenAI Provider
+**Status:** ❌ NOT STARTED
+**File:** Create `src/main/java/com/clipro/llm/providers/OpenAIProvider.java`
+**Lines:** ~200 (new file)
+**Problem:** No GPT-4, GPT-4o, GPT-3.5-turbo support.
+**Fix Required:**
+1. Create `OpenAIProvider.java` extending `LlmProvider`
+2. API endpoint: `POST https://api.openai.com/v1/chat/completions`
+3. Models: `gpt-4o`, `gpt-4-turbo`, `gpt-4`, `gpt-3.5-turbo`
+4. Request format:
+   ```json
+   {
+     "model": "gpt-4o",
+     "messages": [...],
+     "stream": true,
+     "tools": [...]
+   }
+   ```
+5. Implement SSE streaming via `text/event-stream` response
+6. Parse `data: [DONE]` for completion
+7. Implement function calling (tool_use)
+8. Register in `ProviderManager`
+9. Reference: `AnthropicProvider.java:158` as template
+
+---
+
+#### TICKET H-09: Theme Hot-Switching via /theme Command
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/cli/CommandRegistry.java`
+**Problem:** Theme switching requires editing config file and restart. No runtime command.
+**Fix Required:**
+1. Add `/theme` command in `CommandRegistry.java`:
+   - `/theme` → show current theme
+   - `/theme dark` → switch to dark
+   - `/theme light` → switch to light
+   - `/theme dark-ansi` → switch to dark-ansi
+   - `/theme light-ansi` → switch to light-ansi
+   - `/theme dark-daltonized` → switch to daltonized
+   - `/theme light-daltonized` → switch to daltonized
+   - `/theme auto` → auto-detect from terminal
+   - `/theme preview` → render all 6 themes side-by-side
+2. On theme change: call `ThemeManager.setTheme(ThemeName.XYZ)`
+3. Re-render all UI components: call `fullscreenLayout.render()` with new theme
+4. Persist to `~/.config/clipro/settings.json`
+5. Reference: OpenClaude `src/commands/theme/theme.tsx`
+
+---
+
+### Ticket Detail: MEDIUM
+
+#### TICKET M-01: StatsComponent ASCII Charts
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/StatsComponent.java`
+**Lines:** 216 (currently)
+**Problem:** Shows basic stats text, no ASCII charts or graphs.
+**Fix Required:**
+1. Add ASCII bar chart rendering:
+   - Token usage over time: `░░░░░░░█░░░░░` style
+   - Message count per minute
+   - Cost per hour
+2. Tab layout: Overview | Tokens | Cost | Session
+3. Implement simple bar chart with Unicode blocks: `░▒▓█`
+4. Show metrics:
+   - Tokens used: `████████░░ 80%`
+   - API cost: `$12.34 this session`
+   - Messages: `45 total (23 user, 22 assistant)`
+   - Duration: `2h 34m`
+5. Reference: OpenClaude `src/components/Stats.tsx` (1,227 lines) — simplify for TUI
+
+---
+
+#### TICKET M-02: Conversation Compaction UI Notification
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/session/ConversationCompactor.java`
+**Lines:** 89 (currently)
+**Problem:** Compactor removes old messages but no UI feedback.
+**Fix Required:**
+1. Add `COMPACT` entry in `MessageRole.java` enum
+2. In `AgentEngine` after `compact()` call:
+   - Create system message: `"Context compacted — X messages removed to stay within token budget"`
+   - Add to `VirtualMessageStore`
+   - Render with dimmed/italic styling
+3. Make compaction collapsible:
+   - `ConversationCompactor.getCompactedMessages()` returns removed messages
+   - Show `[Show X compacted messages]` toggle
+   - On expand: render compacted messages in dimmed style
+4. Reference: OpenClaude `src/utils/messages.ts` compaction events
+
+---
+
+#### TICKET M-03: Agent CLI Commands
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/cli/CommandRegistry.java`
+**Problem:** No CLI commands for managing agents.
+**Fix Required:**
+Add these commands in `CommandRegistry.java`:
+- `/spawn <model> [prompt]` → spawn sub-agent with model, optional initial prompt
+- `/kill <agent-id>` → terminate running agent
+- `/list` → list all agents with status (idle/running/thinking)
+- `/team create <name>` → create new agent team
+- `/team add <team> <agent-id>` → add agent to team
+- `/team remove <team> <agent-id>` → remove agent from team
+- `/team list` → list all teams and their members
+Register in `CommandRegistry.registerCommands()`
+
+---
+
+#### TICKET M-04: MCP CLI Commands
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/cli/CommandRegistry.java`
+**Problem:** No CLI commands for managing MCP servers.
+**Fix Required:**
+Add these commands in `CommandRegistry.java`:
+- `/mcp` → show all configured MCP servers
+- `/mcp list` → list running MCP servers with tool count
+- `/mcp add <name> <command> [args...]` → add server config to `~/.config/clipro/mcp.json`
+- `/mcp remove <name>` → remove server config
+- `/mcp start <name>` → start MCP server process
+- `/mcp stop <name>` → stop MCP server process
+- `/mcp tools <server>` → list tools available from server
+
+---
+
+#### TICKET M-05: Theme CLI Commands
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/cli/CommandRegistry.java`
+**Problem:** No `/theme` commands (see TICKET H-09 for full detail).
+**Fix Required:** See TICKET H-09 above.
+
+---
+
+#### TICKET M-06: Tool Result Background Tint
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/MessageBox.java`
+**Lines:** 141 (currently)
+**Problem:** Tool results render as plain text, no background color.
+**Fix Required:**
+1. Add `TOOL_RESULT_BG = "#191923"` to `Theme.java` colors
+2. In `MessageBox.renderTool(String content)`:
+   - Apply background color: ANSI `背景色` equivalent
+   - Use `Terminal.inverse()` or custom escape: `\x1b[48;5;236m` (dark blue-grey)
+3. Match OpenClaude: `#191923` indigo tint for tool output
+4. Reference: OpenClaude `src/components/Message.tsx` (`UserToolResultMessage`)
+
+---
+
+#### TICKET M-07: Cost Tracking in StatusBar
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/ui/components/StatusBar.java`
+**Problem:** No API cost display.
+**Fix Required:**
+1. Add `private double sessionCost = 0.0` field
+2. Add `recordCost(double cost)` method
+3. In `OpenRouterProvider.chat()`: parse `usage` from API response:
+   ```json
+   { "usage": { "cost": 0.0015 } }
+   ```
+4. In `StatusBar.renderCompact()`: append ` │ $12.34` (session cost)
+5. Reset on new session
+6. Reference: OpenClaude `src/components/StatusLine.tsx` cost section
+
+---
+
+#### TICKET M-08: Rate Limit Display in StatusBar
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/ui/components/StatusBar.java`
+**Problem:** No 5-hour or 7-day rate limit indicators.
+**Fix Required:**
+1. Add `Map<Long, Long> requestTimestamps5h` and `requestTimestamps7d`
+2. On each API request: add timestamp to both maps
+3. Prune old timestamps on each request
+4. In `StatusBar.renderCompact()`: append ` │ 5h: 45/100 │ 7d: 234/1000`
+5. Parse `X-RateLimit-Remaining` headers from OpenRouter API
+6. Show warning color when >80% used
+7. Reference: OpenClaude `src/components/StatusLine.tsx` (`rateLimits`)
+
+---
+
+#### TICKET M-09: Markdown Table Rendering
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/MarkdownRenderer.java`
+**Lines:** 158 (currently)
+**Problem:** Tables render as plain text (pipes visible).
+**Fix Required:**
+1. Detect table lines: `if (line.startsWith("|") && line.endsWith("|"))`
+2. Parse header row and separator row: `| col1 | col2 |`
+3. Parse alignment: `| :--- | :---: | ---: |` (left/center/right)
+4. Calculate max width per column
+5. Render with box-drawing characters:
+   ```
+   ┌─────────┬─────────┐
+   │ Name    │ Status  │
+   ├─────────┼─────────┤
+   │ Alice   │ Active  │
+   │ Bob     │ Idle    │
+   └─────────┴─────────┘
+   ```
+6. Reference: OpenClaude `src/components/Markdown.tsx` table rendering
+
+---
+
+#### TICKET M-10: Code Block Line Numbers
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/ui/components/SyntaxHighlighter.java`
+**Problem:** No line numbers in code blocks.
+**Fix Required:**
+1. Add `renderLineNumbers(int lineCount, int gutterWidth)` method:
+   ```java
+   public static String renderLineNumbers(int lineCount, int gutterWidth) {
+       StringBuilder sb = new StringBuilder();
+       for (int i = 1; i <= lineCount; i++) {
+           String num = String.valueOf(i);
+           sb.append(Terminal.dim(String.format("%" + gutterWidth + "s", num)));
+           sb.append(" ");
+       }
+       return sb.toString();
+   }
+   ```
+2. In `MarkdownRenderer.renderCodeBlock()`:
+   - Call `renderLineNumbers(lineCount, gutterWidth)`
+   - Prepend to each line of code
+3. `gutterWidth = String.valueOf(codeLines.size()).length()`
+4. Reference: OpenClaude `src/components/HighlightedCode.tsx` (`gutterWidth`)
+
+---
+
+#### TICKET M-11: Image Attachment Rendering
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/ui/components/MessageBox.java`
+**Problem:** No image display.
+**Fix Required:**
+1. Detect `[Image: /path/to/image.png]` in message content
+2. Display as: `📎 image.png [1280x720]` with hyperlink
+3. Optional: use Kitty/ITerm2 image protocol if terminal supports it:
+   - `\x1b]1337;File=name=...;size=123;inline=1:$(base64 < image.png)\x7`
+4. Fallback: show file path as clickable link via OSC 8
+5. Reference: OpenClaude `src/components/Message.tsx` (`UserImageMessage`)
+
+---
+
+#### TICKET M-12: User Message Background Color
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/ui/components/MessageBox.java`, `src/main/java/com/clipro/ui/tamboui/Theme.java`
+**Problem:** User messages render without background color.
+**Fix Required:**
+1. Add `USER_MESSAGE_BG = "#373737"` to `Theme.java` colors
+2. Add `USER_MESSAGE_BG_HOVER = "#404040"` for hover
+3. In `MessageBox.renderUser(String content)`:
+   - Wrap content in background color box
+   - Use `Terminal.setBackgroundColor(Terminal.USER_MESSAGE_BG)`
+4. Match OpenClaude: `#373737` dark grey background for user messages
+5. Reference: OpenClaude `src/components/Message.tsx` (`UserTextMessage`)
+
+---
+
+#### TICKET M-13: grouped_tool_use Message Type
+**Status:** ❌ NOT STARTED
+**Files:** `src/main/java/com/clipro/ui/components/MessageList.java`, `src/main/java/com/clipro/ui/components/MessageBox.java`
+**Problem:** Multiple sequential tool calls don't collapse.
+**Fix Required:**
+1. In `MessageRole.java`: add `GROUPED_TOOL_USE` enum value
+2. In `MessageList.render()`: detect consecutive `TOOL` messages
+3. Group them under collapsible section:
+   ```
+   ┌─ [TOOL_CALL] 3 tools executed ─────────────┐
+   │ ▶ /read src/main/App.java                   │
+   │ ▶ /bash ls -la                              │
+   │ ▶ /grep "TODO"                              │
+   └─────────────────────────────────────────────┘
+   ```
+4. Click to expand/collapse
+5. Reference: OpenClaude `src/components/Messages.tsx` (`grouped_tool_use`)
+
+---
+
+#### TICKET M-14: collapsed_read_search Message Type
+**Status:** ❌ NOT STARTED
+**Files:** `src/main/java/com/clipro/ui/components/MessageList.java`
+**Problem:** Grep/search results don't collapse.
+**Fix Required:**
+1. In `MessageRole.java`: add `COLLAPSED_SEARCH` enum value
+2. In `MessageList.render()`: detect search result messages
+3. Render as collapsible:
+   ```
+   ┌─ [SEARCH] 47 matches in 12 files ────────────┐
+   │ ▶ src/main/App.java:3                       │
+   │ ▶ src/main/Agent.java:7                     │
+   └─────────────────────────────────────────────┘
+   ```
+4. Click to expand full results
+5. Reference: OpenClaude `src/components/Messages.tsx` (`collapsed_read_search`)
+
+---
+
+#### TICKET M-15: BashTool AST Parsing
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/tools/shell/BashTool.java`
+**Lines:** 391 (currently)
+**Problem:** Basic regex validation. OpenClaude uses tree-sitter for AST parsing.
+**Fix Required:**
+1. Option A: Use tree-sitter Java binding (complex)
+2. Option B: Use regex-based command parsing:
+   - Parse compound commands: `cmd1 && cmd2 || cmd3 ; cmd4 | cmd5`
+   - Extract individual commands: `rm`, `mv`, `cp`, `dd`, etc.
+   - Validate each command against safe command list
+   - Detect command substitution: `$(cmd)`, `` `cmd` ``
+   - Detect redirects: `>`, `>>`, `<`, `2>`, `&>`
+3. Check each extracted command against `SAFE_COMMANDS` set
+4. Flag suspicious patterns: `rm -rf`, `dd if=`, `mkfs`, etc.
+5. Reference: OpenClaude `src/tools/BashTool/parser.ts` or `tree-sitter`
+
+---
+
+#### TICKET M-16: BashTool Haiku Classifier
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/tools/shell/BashTool.java`
+**Problem:** No automatic permission classification for Haiku models.
+**Fix Required:**
+1. Create `HaikuClassifier.java` class
+2. Load Haiku model (lightweight classifier)
+3. On unknown command:
+   - Classify risk level: LOW / MEDIUM / HIGH / DESTRUCTIVE
+   - Match against known patterns (dangerous commands, path traversal, etc.)
+   - Recommend permission level
+4. Auto-mode: apply recommended permission without prompting
+5. Reference: OpenClaude `src/tools/BashTool/haiku.ts` (if available in openclaude)
+
+---
+
+#### TICKET M-17: BashTool Sed Validation
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/tools/shell/BashTool.java`
+**Problem:** Sed commands not validated.
+**Fix Required:**
+1. Detect `sed` command in input
+2. Validate sed flags: `-e`, `-i`, `-n`, `-r`, `-E` (allow); `-f` (warn)
+3. For `-i` (in-place edit):
+   - Warn for destructive patterns: `sed -i 's/.*//g' file` (deletes content)
+   - Check for `--in-place=.bak` backup flag
+4. Validate regex patterns for correctness
+5. Reference: OpenClaude `src/tools/BashTool/validators/sed.ts`
+
+---
+
+#### TICKET M-18: BashTool Permission Persistence
+**Status:** ❌ NOT STARTED
+**Files:** `src/main/java/com/clipro/tools/shell/BashTool.java`, `src/main/java/com/clipro/session/ConfigManager.java`
+**Problem:** Permissions reset on each session.
+**Fix Required:**
+1. In `BashTool`: track approved commands in session
+2. On command approval:
+   - Save command pattern + permission level to `~/.config/clipro/permissions.json`
+   - Format: `{ "command": "git commit *", "level": "BASH", "expires": "2026-04-15" }`
+3. On session start:
+   - Load permissions from `permissions.json`
+   - Filter out expired permissions
+4. Auto-approve if command matches persisted pattern
+5. Reference: OpenClaude `src/tools/BashTool/permissions.ts`
+
+---
+
+#### TICKET M-19: FileReadTool Image Processing
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/tools/file/FileReadTool.java`
+**Lines:** 158 (currently)
+**Problem:** PNG/JPEG files not processed for dimension extraction.
+**Fix Required:**
+1. Detect image files by extension: `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`
+2. Use Java image API to extract dimensions:
+   ```java
+   BufferedImage img = ImageIO.read(new File(path));
+   int width = img.getWidth();
+   int height = img.getHeight();
+   ```
+3. Append dimension info: `[PNG 1280x720]`
+4. For very large images: show first 10KB + dimension info
+5. Reference: OpenClaude `src/tools/FileReadTool/image.ts`
+
+---
+
+#### TICKET M-20: FileEditTool Inline Diff Display
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/tools/file/FileEditTool.java`
+**Lines:** 131 (currently)
+**Problem:** Edit results don't show colored diff.
+**Fix Required:**
+1. After edit, compute unified diff:
+   - Get original file content
+   - Get new content after edit
+   - Compute line-level diff using `java-diff-utils` or custom algorithm
+2. Render diff in `DiffColorizer`:
+   - Green `+` lines for additions
+   - Red `-` lines for deletions
+   - Cyan ` ` lines for context
+3. Format:
+   ```
+   - old line 1
+   + new line 1
+     unchanged line
+   ```
+4. Show in tool result with `DiffColorizer` ANSI colors
+5. Reference: OpenClaude `src/tools/FileEditTool/diff.ts`
+
+---
+
+#### TICKET M-21: WebSearchTool Multi-Provider
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/tools/web/WebSearchTool.java`
+**Lines:** 117 (currently)
+**Problem:** Only SearXNG. OpenClaude supports multiple providers.
+**Fix Required:**
+1. Add provider interface: `SearchProvider` with `search(query) → results[]`
+2. Implement providers:
+   - `SearXNGProvider` — existing
+   - `TavilyProvider` — requires API key
+   - `SerperProvider` — requires API key
+3. Provider selection:
+   - Auto-select based on API key availability
+   - Fallback: SearXNG (self-hosted)
+4. Result format: `{ title, url, snippet }`
+5. Reference: OpenClaude `src/tools/WebSearchTool/providers/` (800L total)
+
+---
+
+#### TICKET M-22: WebFetchTool HTML Parsing
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/tools/web/WebFetchTool.java`
+**Lines:** 114 (currently)
+**Problem:** Only fetches raw HTML. No content extraction.
+**Fix Required:**
+1. Use JSoup or similar for HTML parsing:
+   - Extract `<article>`, `<main>`, `<p>` content
+   - Remove `<script>`, `<style>`, `<nav>`, `<footer>`
+   - Preserve code blocks (`<pre>`, `<code>`)
+2. Detect content type:
+   - Wikipedia → extract lead paragraph
+   - GitHub README → render as markdown
+   - StackOverflow → extract question + top answer
+   - Generic → extract paragraphs
+3. Truncate to 8,000 tokens with "..." if too long
+4. Reference: OpenClaude `src/tools/WebFetchTool/fetch.ts`
+
+---
+
+#### TICKET M-23: TaskTool Nested Task Support
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/tools/TaskTool.java`
+**Lines:** 151 (currently)
+**Problem:** Only flat task list. No parent/child relationships.
+**Fix Required:**
+1. Add task fields: `parentId`, `children[]`, `depth`
+2. Commands:
+   - `/task create "name" --parent <parent-id>` → create subtask
+   - `/task list --tree` → show task hierarchy
+   - `/task complete <id>` → mark complete, may auto-complete parent if all children done
+3. Rendering:
+   ```
+   ✓ Task 1
+     ├─ ○ Task 1.1
+     ├─ ✓ Task 1.2
+     └─ ○ Task 1.3
+   ```
+4. Reference: OpenClaude `src/tools/TaskTool/`
+
+---
+
+#### TICKET M-24: AgentManager Tool Schema Loading
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/agent/AgentManager.java`
+**Lines:** 191 (currently)
+**Problem:** Agents spawn but don't load custom tool schemas.
+**Fix Required:**
+1. Add `loadToolSchema(String agentConfig)` method
+2. Parse agent config from `~/.config/clipro/agents/<name>.json`:
+   ```json
+   {
+     "name": "reviewer",
+     "model": "qwen3-coder:32b",
+     "tools": ["Read", "Grep", "Bash"],
+     "systemPrompt": "You are a code reviewer..."
+   }
+   ```
+3. Register only specified tools for this agent
+4. Tool schema defines which tools agent can use
+5. Reference: OpenClaude `src/tools/AgentTool/schema.ts`
+
+---
+
+#### TICKET M-25: AgentTeam Teardown and Cleanup
+**Status:** ⚠️ HALF-IMPLEMENTED
+**File:** `src/main/java/com/clipro/agent/AgentTeam.java`
+**Lines:** 84 (currently)
+**Problem:** Teams can be created but not properly torn down.
+**Fix Required:**
+1. Add `teardown()` method:
+   - Send interrupt to all agent threads
+   - Wait for completion (with timeout)
+   - Force kill if stuck
+2. Add `removeMember(String agentId)`:
+   - Stop agent
+   - Remove from team members map
+3. Add `isActive()` check for all members
+4. On exit: auto-call `teardown()` if team exists
+5. Reference: OpenClaude `src/tools/TeamCreateTool/cleanup.ts`
+
+---
+
+### Ticket Detail: LOW
+
+#### TICKET L-01: Vim Macros (q/)
+**Status:** ❌ NOT STARTED
+**Files:** `src/main/java/com/clipro/ui/vim/VimMode.java`, `src/main/java/com/clipro/ui/vim/VimKeyHandler.java`
+**Problem:** No macro recording/playback.
+**Fix Required:**
+1. Add `Map<Character, String> macros` to `VimMode`
+2. Recording: 'q' followed by register char (a-z) → enter recording mode
+   - Store each keystroke in `recordingBuffer`
+   - 'q' again → stop recording, save to `macros.get(register)`
+3. Playback: 'q' followed by register → execute `macros.get(register)` as keystrokes
+4. Count prefix: `3@x` → replay macro x 3 times
+
+---
+
+#### TICKET L-02: Vim Substitute (:s)
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/ui/vim/VimKeyHandler.java`
+**Problem:** No `:s/pattern/replacement/flags` command.
+**Fix Required:**
+1. In command mode, parse `:s/([^/]*)/([^/]*)/([cg]?)`
+2. Apply to current line or `:%s/` (entire input)
+3. `g` flag → replace all occurrences
+4. `c` flag → confirm each replacement
+5. Reference: Standard vim `:s` behavior
+
+---
+
+#### TICKET L-03: Teammate View
+**Status:** ❌ NOT STARTED
+**Files:** `src/main/java/com/clipro/agent/AgentTeam.java`, new `src/main/java/com/clipro/ui/components/TeammateView.java`
+**Problem:** No visual display of team members.
+**Fix Required:**
+1. Create `TeammateView.java` component
+2. Render team members in status area or sidebar:
+   ```
+   Team: code-review
+   ├─ alice (thinking...)  ██████░░ 60%
+   ├─ bob (idle)
+   └─ charlie (acting)  [====>    ] 40%
+   ```
+3. Show agent status: thinking / acting / idle / error
+4. Show progress bar for long operations
+5. Reference: OpenClaude `src/components/agents/TeammateView.tsx`
+
+---
+
+#### TICKET L-04: NotebookEditTool
+**Status:** ❌ NOT STARTED
+**File:** Create `src/main/java/com/clipro/tools/notebook/NotebookEditTool.java`
+**Lines:** ~300 (new file)
+**Problem:** No Jupyter notebook editing support.
+**Fix Required:**
+1. Parse `.ipynb` JSON format
+2. Implement cell operations:
+   - `addCell(String code, String type)` — type: code or markdown
+   - `deleteCell(int index)`
+   - `updateCell(int index, String content)`
+   - `moveCell(int from, int to)`
+3. Render notebook in TUI:
+   ```
+   ┌─ [1] Python ─────────────────────────────────┐
+   │  import pandas as pd                          │
+   └───────────────────────────────────────────────┘
+   ┌─ [2] Markdown ───────────────────────────────┐
+   │  # Data Analysis Results                      │
+   └───────────────────────────────────────────────┘
+   ```
+4. Reference: OpenClaude `src/tools/NotebookEditTool/`
+
+---
+
+#### TICKET L-05: SkillTool
+**Status:** ❌ NOT STARTED
+**File:** Create `src/main/java/com/clipro/tools/skill/SkillTool.java`
+**Lines:** ~400 (new file)
+**Problem:** No skills system for extending capabilities.
+**Fix Required:**
+1. Create `~/.config/clipro/skills/` directory
+2. Skill format (YAML or JSON):
+   ```yaml
+   name: "code-review"
+   description: "Performs a code review"
+   parameters:
+     - name: path
+       type: string
+       required: true
+   prompt: |
+     Review the code at {{path}}.
+     Focus on: bugs, security, performance.
+   ```
+3. `SkillTool` loads skills from directory
+4. `/skill code-review --path src/` → execute skill
+5. Inject skill prompt into agent messages
+6. Reference: OpenClaude `src/tools/SkillTool/` (1,118 lines)
+
+---
+
+#### TICKET L-06 to L-10: Additional LLM Providers
+**Status:** ❌ NOT STARTED
+**Files:** Create in `src/main/java/com/clipro/llm/providers/`
+
+| # | Provider | File | Notes |
+|---|----------|------|-------|
+| L-06 | AWS Bedrock | `BedrockProvider.java` | Claude via AWS, AWS SDK, IAM auth |
+| L-07 | Google Gemini | `GeminiProvider.java` | Gemini API, vertex AI |
+| L-08 | GitHub Models | `GitHubModelsProvider.java` | Copilot models via GitHub API |
+| L-09 | Azure OpenAI | `AzureOpenAIProvider.java` | Azure-hosted GPT |
+
+Use `AnthropicProvider.java` as template for all.
+
+---
+
+#### TICKET L-10: Remote Session Support
+**Status:** ❌ NOT STARTED
+**File:** Create `src/main/java/com/clipro/session/RemoteSession.java`
+**Lines:** ~300 (new file)
+**Problem:** No SSH-based remote session support.
+**Fix Required:**
+1. `clipro ssh user@host` command
+2. Connect to remote CLIPRO via HTTP API
+3. Mirror messages between local and remote
+4. Show remote status in UI: `[remote: user@host]`
+5. Reference: OpenClaude `src/utils/remote.ts`
+
+---
+
+#### TICKET L-11: JavaFX Rich UI
+**Status:** ❌ STUB
+**File:** `src/main/java/com/clipro/ui/javafx/JavaFXAdapter.java`
+**Lines:** 18 (currently — empty stub)
+**Problem:** No rich UI implementation.
+**Fix Required:**
+1. Implement `TuiAdapter` interface with JavaFX
+2. Use `javafx.scene.control.ListView` for message list
+3. Use `javafx.scene.web.WebView` for markdown rendering
+4. Rich text: `TextFlow` with styled `Text` nodes
+5. This is optional — TUI is primary
+
+---
+
+#### TICKET L-12: Permission Mode in PromptInput
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/ui/components/EnhancedInputField.java`
+**Problem:** Permission mode not shown in input area.
+**Fix Required:**
+1. Add permission indicator in input prefix: `READ ▶` / `BASH ▶` / `REST ▶`
+2. Color-coded: green READ, yellow BASH, red RESTRICTED
+3. Show below input or in input prefix
+
+---
+
+#### TICKET L-13: Image Paste in Input
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/ui/components/InputField.java`
+**Problem:** No paste handler for images.
+**Fix Required:**
+1. Detect paste event (Ctrl+V / Cmd+V)
+2. Check clipboard for image data
+3. Encode as base64: `data:image/png;base64,<base64>`
+4. Insert as `[Image: /tmp/clipro-paste-1.png]` reference
+5. Save to temp file
+
+---
+
+#### TICKET L-14: Queued Commands
+**Status:** ❌ NOT STARTED
+**File:** `src/main/java/com/clipro/ui/components/EnhancedInputField.java`
+**Problem:** No command queue editing.
+**Fix Required:**
+1. Queue multiple commands before execution
+2. Edit queued commands with arrow keys
+3. `/` prefix → queue command
+4. Show queue indicator: `[2 queued]`
+5. Reference: OpenClaude `src/components/PromptInput/PromptInputQueuedCommands.tsx`
+
+---
+
+#### TICKET L-15: Thinking Block Count Indicators
+**Status:** ❌ NOT STARTED
+**Files:** `src/main/java/com/clipro/ui/components/ThinkingBlock.java`, `src/main/java/com/clipro/ui/components/MessageBox.java`
+**Problem:** No indicator showing number of thinking blocks.
+**Fix Required:**
+1. Count thinking blocks in message: `int blockCount = countThinkingBlocks(content)`
+2. Show: `[thinking: 2 blocks]` or `💭 2`
+3. Position: top-right of assistant message box
+4. Click → expand all thinking blocks
+
+---
+
+## Part 8: Working Well (What Was Done Right)
 
 - ✅ **Permission modes** (READ_ONLY/BASH/RESTRICTED) with sandbox
 - ✅ **BashTool security** — destructive command block, path traversal prevention
@@ -1107,10 +2140,13 @@ if (line.startsWith("|")) {
 - ✅ **VirtualMessageStore** — Windowing and pagination for large conversations
 - ✅ **Git tools** — Status, diff, log, commit (exceeds OpenClaude)
 - ✅ **ProviderManager** — Health checks and provider switching UI
+- ✅ **DiffColorizer** — Syntax-colored diff rendering
+- ✅ **ScheduleCronTool** — Cron job scheduling
+- ✅ **AskUserQuestionTool** — User prompts
 
 ---
 
-## Part 7: Line Count Summary
+## Part 9: Line Count Summary
 
 | Category | OpenClaude LOC | CLIPRO LOC | Ratio |
 |----------|----------------|-----------|-------|
