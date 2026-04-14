@@ -71,6 +71,14 @@ public class Terminal {
     public static String user(String t) { return USER_COLOR + bold(t) + RESET; }
     public static String assistant(String t) { return CLAUDE_COLOR + t + RESET; }
 
+    public static String brightCyan(String t) { return BRIGHT_CYAN + t + RESET; }
+
+    public static String padRight(String s, int length) {
+        return s + repeat(" ", Math.max(0, length - s.length()));
+    }
+
+    public static void clearLine() { System.out.print("\u001B[2K\u001B[0G"); }
+
     public static void clear() { System.out.print("\u001B[2J\u001B[H"); }
     public static void clearLine() { System.out.print("\u001B[2K"); }
     public static void cursorHome() { System.out.print("\u001B[H"); }

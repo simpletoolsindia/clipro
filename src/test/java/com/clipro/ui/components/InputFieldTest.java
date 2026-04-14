@@ -91,7 +91,7 @@ class InputFieldTest {
 
         assertEquals("test command", result);
         assertTrue(input.isEmpty());
-        assertEquals(1, input.getHistorySize());
+        assertEquals(1, input.getHistory().size());
     }
 
     @Test
@@ -108,7 +108,7 @@ class InputFieldTest {
         InputField input = new InputField();
         input.submit(); // Empty submission
 
-        assertEquals(0, input.getHistorySize());
+        assertEquals(0, input.getHistory().size());
     }
 
     @Test
@@ -118,7 +118,7 @@ class InputFieldTest {
 
         String output = input.render();
         assertTrue(output.contains("hi"));
-        assertTrue(output.contains("> "));
+        assertTrue(output.contains("▶"));
         assertTrue(output.contains("\033[7m")); // Cursor
     }
 

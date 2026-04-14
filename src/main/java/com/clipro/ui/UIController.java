@@ -123,6 +123,13 @@ public class UIController {
     }
 
     /**
+     * Get AgentEngine for advanced operations.
+     */
+    public AgentEngine getAgent() {
+        return agent;
+    }
+
+    /**
      * Render current state.
      */
     public String render() {

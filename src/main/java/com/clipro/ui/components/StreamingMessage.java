@@ -77,7 +77,7 @@ public class StreamingMessage extends Message {
     }
 
     public String render() {
-        return MessageBox.renderAssistant(getContentWithCursor());
+        return MessageBox.renderAssistant(getContentWithCursor(), !complete);
     }
 
     public String renderMarkdown() {

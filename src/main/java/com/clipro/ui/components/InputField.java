@@ -108,7 +108,8 @@ public class InputField {
     }
 
     public String renderWithCursor() {
-        return "\r" + Terminal.clearLine() + render();
+        Terminal.clearLine();
+        return "\r" + render();
     }
 
     // Vim motion commands
