@@ -81,6 +81,14 @@ public class LlmHttpClient {
      * Make a POST request with a JSON body.
      */
     public CompletableFuture<HttpResponse<String>> postAsync(String endpoint, Map<String, Object> body) {
+        return postAsync(endpoint, body, Map.of("Content-Type", "application/json"));
+    }
+
+    /**
+     * Make a POST request with custom headers.
+     */
+    public CompletableFuture<HttpResponse<String>> postAsync(String endpoint, Map<String, Object> body,
+                                                             Map<String, String> headers) {
         URI uri = baseUrl.resolve(endpoint);
         String jsonBody;
         try {
@@ -88,10 +96,12 @@ public class LlmHttpClient {
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
         }
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(uri)
                 .timeout(timeout)
-                .header("Content-Type", "application/json")
+                .header("Content-Type", "application/json");
+        headers.forEach(requestBuilder::header);
+        HttpRequest request = requestBuilder
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
@@ -101,6 +111,17 @@ public class LlmHttpClient {
      * Make a streaming POST request using SSE.
      */
     public CompletableFuture<HttpResponse<String>> postStreaming(String endpoint, Map<String, Object> body) {
+        return postStreaming(endpoint, body, Map.of(
+            "Content-Type", "application/json",
+            "Accept", "text/event-stream"
+        ));
+    }
+
+    /**
+     * Make a streaming POST request with custom headers.
+     */
+    public CompletableFuture<HttpResponse<String>> postStreaming(String endpoint, Map<String, Object> body,
+                                                               Map<String, String> headers) {
         URI uri = baseUrl.resolve(endpoint);
         String jsonBody;
         try {
@@ -108,11 +129,12 @@ public class LlmHttpClient {
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
         }
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(uri)
                 .timeout(Duration.ofMinutes(5))
-                .header("Content-Type", "application/json")
-                .header("Accept", "text/event-stream")
+                .header("Accept", "text/event-stream");
+        headers.forEach(requestBuilder::header);
+        HttpRequest request = requestBuilder
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());

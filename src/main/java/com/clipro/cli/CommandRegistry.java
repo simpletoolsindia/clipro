@@ -1,6 +1,7 @@
 package com.clipro.cli;
 
 import com.clipro.agent.AgentEngine;
+import com.clipro.agent.AgentManager;
 import com.clipro.tools.Tool;
 import com.clipro.tools.file.GrepTool;
 import com.clipro.tools.git.GitCommitTool;
@@ -22,6 +23,7 @@ public class CommandRegistry {
     private final List<Tool> tools;
     private final Map<String, Tool> toolMap;
     private AgentContext agentContext;
+    private AgentManager agentManager;
 
     public CommandRegistry() {
         this.commands = new HashMap<>();
@@ -33,6 +35,14 @@ public class CommandRegistry {
 
     public void setAgentContext(AgentContext ctx) {
         this.agentContext = ctx;
+    }
+
+    public void setAgentManager(AgentManager manager) {
+        this.agentManager = manager;
+    }
+
+    public AgentManager getAgentManager() {
+        return agentManager;
     }
 
     private void registerDefaultCommands() {
@@ -186,6 +196,21 @@ public class CommandRegistry {
         register(new Command("clean", "Clean build", (ctx) -> executeCommand(ctx, "./gradlew clean")));
         register(new Command("jar", "Build JAR", (ctx) -> executeCommand(ctx, "./gradlew uberJar")));
         register(new Command("debug", "Debug mode", (ctx) -> ctx.getArgs().isEmpty() ? "Debug: off" : "Debug: " + ctx.getArgs()));
+
+        // Agent commands
+        register(new Command("agent", "Manage agents", this::executeAgent));
+        register(new Command("team", "Team management", (ctx) -> agentManager != null ? agentManager.renderAgentStatus() : "Agent manager not initialized"));
+
+        // MCP commands
+        register(new Command("mcp", "MCP tool management", (ctx) -> {
+            return "MCP Tools:\n" +
+                   "  - MCP integration ready\n" +
+                   "  - Configure via ~/.clipro/mcp.json\n" +
+                   "  Use /mcp add <name> <command> to register";
+        }));
+        register(new Command("mcp-add", "Add MCP tool", (ctx) -> "MCP: /mcp-add not yet implemented"));
+        register(new Command("mcp-list", "List MCP tools", (ctx) -> "MCP: No tools registered"));
+        register(new Command("mcp-remove", "Remove MCP tool", (ctx) -> "MCP: /mcp-remove not yet implemented"));
     }
 
     private void registerDefaultTools() {
@@ -509,6 +534,61 @@ public class CommandRegistry {
 
     private boolean hasApiKey() {
         return false; // Check ConfigManager for actual key
+    }
+
+    // Agent command handler
+    private String executeAgent(CommandContext ctx) {
+        if (agentManager == null) {
+            agentManager = new AgentManager();
+        }
+
+        String args = ctx.getArgs().trim();
+        if (args.isEmpty()) {
+            return agentManager.renderAgentStatus();
+        }
+
+        String[] parts = args.split("\\s+", 3);
+        String action = parts[0].toLowerCase();
+
+        switch (action) {
+            case "list":
+                return agentManager.renderAgentStatus();
+            case "create":
+                if (parts.length >= 2) {
+                    String name = parts[1];
+                    String prompt = parts.length >= 3 ? parts[2] : "You are a helpful assistant.";
+                    String model = ctx.getCurrentModel();
+                    String id = agentManager.createAgent(name, model, prompt);
+                    if (id != null) {
+                        return "Agent created: " + id + " (model: " + model + ")";
+                    }
+                    return "Failed to create agent. Max agents reached.";
+                }
+                return "Usage: /agent create <name> [prompt]";
+            case "switch":
+                if (parts.length >= 2) {
+                    if (agentManager.switchAgent(parts[1])) {
+                        return "Switched to agent: " + parts[1];
+                    }
+                    return "Agent not found: " + parts[1];
+                }
+                return "Usage: /agent switch <id>";
+            case "remove":
+            case "delete":
+                if (parts.length >= 2) {
+                    if (agentManager.removeAgent(parts[1])) {
+                        return "Agent removed: " + parts[1];
+                    }
+                    return "Failed to remove agent: " + parts[1] + " (may be main agent)";
+                }
+                return "Usage: /agent remove <id>";
+            default:
+                return "Agent commands:\n" +
+                       "  /agent list    - Show all agents\n" +
+                       "  /agent create  - Create new agent\n" +
+                       "  /agent switch  - Switch to agent\n" +
+                       "  /agent remove  - Remove agent";
+        }
     }
 
     /**

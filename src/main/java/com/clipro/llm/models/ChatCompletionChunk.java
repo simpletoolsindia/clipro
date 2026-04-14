@@ -64,6 +64,20 @@ public class ChatCompletionChunk {
         return null;
     }
 
+    /**
+     * Convenience method to set delta content directly.
+     */
+    public void setDeltaContent(String content) {
+        if (choices == null || choices.length == 0) {
+            choices = new Choice[1];
+            choices[0] = new Choice();
+        }
+        if (choices[0].getDelta() == null) {
+            choices[0].setDelta(new Delta());
+        }
+        choices[0].getDelta().setContent(content);
+    }
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Choice {
         private int index;
