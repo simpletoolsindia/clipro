@@ -17,6 +17,7 @@ public class ChatCompletionResponse {
     private String model;
     private List<Choice> choices;
     private Usage usage;
+    private String content;  // Raw content field for providers
 
     public ChatCompletionResponse() {}
 
@@ -77,8 +78,12 @@ public class ChatCompletionResponse {
 
     public String getFirstContent() {
         Message msg = getFirstMessage();
-        return msg != null ? msg.getContent() : null;
+        if (msg != null && msg.getContent() != null) return msg.getContent();
+        return content;
     }
+
+    public void setContent(String content) { this.content = content; }
+    public String getContent() { return content; }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Choice {

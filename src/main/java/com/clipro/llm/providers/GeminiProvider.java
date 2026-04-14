@@ -23,7 +23,7 @@ public class GeminiProvider implements LlmProvider {
     private static final String MODELS_ENDPOINT = "/models";
     private static final String CHAT_ENDPOINT = "/chat/completions";
 
-    private final LlmHttpClient httpClient;
+    private LlmHttpClient httpClient;
     private final SseParser sseParser;
     private String currentModel;
     private String apiKey;
@@ -134,12 +134,12 @@ public class GeminiProvider implements LlmProvider {
     }
 
     private Map<String, String> getHeaders() {
-        Map.Builder<String, String> headers = Map.builder();
+        Map<String, String> headers = new java.util.HashMap<>();
         headers.put("Content-Type", "application/json");
         if (useVertexAI) {
             headers.put("Authorization", "Bearer " + getVertexToken());
         }
-        return headers.build();
+        return headers;
     }
 
     private String getVertexToken() {

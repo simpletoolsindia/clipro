@@ -20,6 +20,10 @@ public class StatusBar {
     private String vimMode = "";
     private String statusText = "Ready";
 
+    // H-05: Permission mode
+    public enum PermissionMode { READ, BASH, RESTRICTED }
+    private PermissionMode permissionMode = PermissionMode.BASH;
+
     // Rate limit tracking
     private int rateLimit5hUsed = 0;
     private int rateLimit5hTotal = 100;
@@ -46,6 +50,10 @@ public class StatusBar {
     public void setStatusText(String text) { this.statusText = text; }
     public String getStatusText() { return statusText; }
 
+    // H-05: Permission mode methods
+    public void setPermissionMode(PermissionMode mode) { this.permissionMode = mode; }
+    public PermissionMode getPermissionMode() { return permissionMode; }
+
     // Cost tracking methods (M-07)
     public void recordCost(double cost) { this.sessionCost += cost; }
     public void setSessionCost(double cost) { this.sessionCost = cost; }
@@ -69,6 +77,9 @@ public class StatusBar {
         int width = Terminal.getColumns();
         StringBuilder sb = new StringBuilder();
 
+        // H-05: Permission mode indicator
+        String permission = getPermissionModeDisplay();
+
         // Token display
         String tokens = Terminal.dim("Tokens: ") + Terminal.cyan(inputTokens + "/" + outputTokens);
 
@@ -91,7 +102,7 @@ public class StatusBar {
         // Status text
         String status = statusText.equals("Ready") ? Terminal.green(statusText) : Terminal.yellow(statusText);
 
-        String content = tokens + cost + rateLimit + latency + vim + Terminal.dim(" │ ") + status;
+        String content = permission + tokens + cost + rateLimit + latency + vim + Terminal.dim(" │ ") + status;
 
         // Box style
         return Terminal.BORDER_BL + Terminal.repeat(Terminal.BORDER_H, width - 2) + Terminal.BORDER_BR + "\r" +
@@ -119,6 +130,23 @@ public class StatusBar {
         } else {
             return String.format("%.0f", cost);
         }
+    }
+
+    /**
+     * Get permission mode display string with color. H-05.
+     */
+    private String getPermissionModeDisplay() {
+        String text = switch (permissionMode) {
+            case READ -> "READ ●";
+            case BASH -> "BASH ●";
+            case RESTRICTED -> "REST ●";
+        };
+        String color = switch (permissionMode) {
+            case READ -> Terminal.green(text);
+            case BASH -> Terminal.yellow(text);
+            case RESTRICTED -> Terminal.red(text);
+        };
+        return Terminal.dim(" │ ") + color;
     }
 
     /**

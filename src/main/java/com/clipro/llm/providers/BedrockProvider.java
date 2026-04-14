@@ -24,7 +24,7 @@ public class BedrockProvider implements LlmProvider {
     private static final String CHAT_ENDPOINT = "/model/anthropic.claude-3-5-sonnet-20241022-v1:0/invoke";
     private static final String STREAM_ENDPOINT = "/model/anthropic.claude-3-5-sonnet-20241022-v1:0.invoke-with-pagination";
 
-    private final LlmHttpClient httpClient;
+    private LlmHttpClient httpClient;
     private final SseParser sseParser;
     private String currentModel;
     private String awsRegion;
@@ -130,7 +130,7 @@ public class BedrockProvider implements LlmProvider {
      */
     @SuppressWarnings("unchecked")
     private List<Map<String, Object>> convertToBedrockMessages(List<?> messages) {
-        return (List<Map<String, Object>>) (List<?) messages;
+        return (List<Map<String, Object>>) (List<?>) messages;
     }
 
     /**

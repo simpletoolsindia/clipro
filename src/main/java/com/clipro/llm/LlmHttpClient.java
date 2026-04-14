@@ -7,6 +7,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -24,6 +25,7 @@ public class LlmHttpClient {
     private Duration timeout;
     private int maxRetries;
     private long retryDelayMs;
+    private Map<String, String> customHeaders = new HashMap<>();
 
     public LlmHttpClient() {
         this(URI.create("http://localhost:11434/v1"));
@@ -64,16 +66,31 @@ public class LlmHttpClient {
         this.retryDelayMs = retryDelayMs;
     }
 
+    public void addHeader(String key, String value) { customHeaders.put(key, value); }
+    public void removeHeader(String key) { customHeaders.remove(key); }
+    public Map<String, String> getHeaders() { return Map.copyOf(customHeaders); }
+
     /**
      * Make a GET request to the given endpoint.
      */
     public CompletableFuture<HttpResponse<String>> getAsync(String endpoint) {
+        return getAsync(endpoint, Map.of());
+    }
+
+    /**
+     * Make a GET request to the given endpoint with custom headers.
+     */
+    public CompletableFuture<HttpResponse<String>> getAsync(String endpoint, Map<String, String> headers) {
         URI uri = baseUrl.resolve(endpoint);
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(uri)
                 .timeout(timeout)
-                .GET()
-                .build();
+                .GET();
+        // Merge custom headers with provided headers
+        Map<String, String> allHeaders = new HashMap<>(customHeaders);
+        allHeaders.putAll(headers);
+        allHeaders.forEach(builder::header);
+        HttpRequest request = builder.build();
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 

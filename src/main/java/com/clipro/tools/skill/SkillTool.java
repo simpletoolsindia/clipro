@@ -234,7 +234,7 @@ public class SkillTool implements Tool {
         if (paramStart < 0) return params;
 
         int searchStart = paramStart + "parameters:".length();
-        int paramEnd = content.indexOf('\n\n', searchStart);
+        int paramEnd = content.indexOf("\n\n", searchStart);
         if (paramEnd < 0) paramEnd = content.length();
 
         String paramBlock = content.substring(searchStart, paramEnd);
