@@ -37,8 +37,8 @@
 | P11.1 | BashTool permission/security | ✅ Done | PermissionMode enum, destructive cmd block |
 | P11.2 | CommandRegistry expansion | ✅ Done | 22+ commands, type-safe getTool |
 | P11.3 | Message virtualization | ✅ Done | VirtualMessageStore with windowing |
-| P11.4 | ProviderManager UI | 🔲 Pending | Visual provider switch |
-| P11.5 | Vim mode full impl | 🔲 Pending | Full vim keybindings |
+| P11.4 | ProviderManager UI | ✅ Done | Visual provider switch, LlmProvider interface |
+| P11.5 | Vim mode full impl | 🔲 Pending | Improved motions, needs command mode |
 | P11.6 | Agent spawning | 🔲 Pending | Sub-agent support |
 
 ---
