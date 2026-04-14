@@ -11,6 +11,7 @@ public class StatusBar {
     private int outputTokens = 0;
     private long latencyMs = 0;
     private String vimMode = "";
+    private String statusText = "Ready";
 
     public StatusBar() {}
 
@@ -22,6 +23,8 @@ public class StatusBar {
     public long getLatencyMs() { return latencyMs; }
     public void setVimMode(String mode) { this.vimMode = mode; }
     public String getVimMode() { return vimMode; }
+    public void setStatusText(String text) { this.statusText = text; }
+    public String getStatusText() { return statusText; }
 
     public String render() {
         int width = Terminal.getColumns();
@@ -39,7 +42,10 @@ public class StatusBar {
         // Vim mode
         String vim = vimMode.isEmpty() ? "" : Terminal.yellow(" | " + vimMode);
 
-        String content = tokens + latency + vim;
+        // Status text
+        String status = statusText.equals("Ready") ? Terminal.green(statusText) : Terminal.yellow(statusText);
+
+        String content = tokens + latency + vim + Terminal.dim(" | ") + status;
 
         // Box style
         return Terminal.BORDER_BL + Terminal.repeat(Terminal.BORDER_H, width - 2) + Terminal.BORDER_BR + "\r" +

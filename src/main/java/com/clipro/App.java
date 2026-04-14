@@ -3,6 +3,8 @@ package com.clipro;
 import com.clipro.agent.AgentEngine;
 import com.clipro.cli.CommandRegistry;
 import com.clipro.logging.Logger;
+import com.clipro.ui.Terminal;
+import com.clipro.ui.components.FullscreenLayout;
 import com.clipro.tools.file.*;
 import com.clipro.tools.git.*;
 import com.clipro.tools.shell.BashTool;
@@ -13,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * CLIPRO - Java AI Coding CLI
- * LOCAL-FIRST approach: Ollama + Native Tools
+ * Pixel-perfect OpenClaude UI with LOCAL-FIRST Ollama
  */
 public class App {
 
@@ -23,6 +25,7 @@ public class App {
     private final AgentEngine agent;
     private final CommandRegistry commands;
     private final CommandRegistry.CommandContext commandContext;
+    private final FullscreenLayout layout;
     private boolean running = true;
 
     public App() {
@@ -31,6 +34,7 @@ public class App {
         this.commands = new CommandRegistry();
         this.commandContext = new CommandRegistry.CommandContext();
         commandContext.setAgentContext(new AppAgentContext());
+        this.layout = new FullscreenLayout(agent.getProvider().getCurrentModel());
         registerDefaultTools();
         LOG.info("CLIPRO initialized successfully");
     }
@@ -55,49 +59,59 @@ public class App {
 
     public void run() {
         LOG.info("Starting CLIPRO...");
+        layout.init();
         printBanner();
         try (Scanner scanner = new Scanner(System.in)) {
             while (running && scanner.hasNextLine()) {
                 processInput(scanner.nextLine());
             }
+        } finally {
+            layout.shutdown();
         }
     }
 
     private void processInput(String input) {
         if (input == null || input.trim().isEmpty()) return;
+
+        // Add user message to UI
+        layout.addUserMessage(input);
+        layout.getStatus().setStatusText("Thinking...");
+
         String cmdResult = commands.execute(input, commandContext);
         if (cmdResult != null) {
-            UI.info(cmdResult);
+            layout.addSystemMessage(cmdResult);
+            render();
             return;
         }
-        UI.info("Thinking...");
+
         CompletableFuture<String> future = agent.run(input);
         future.thenAccept(response -> {
-            UI.info("\n" + response);
-            UI.info("\n[Ready]");
+            layout.addAssistantMessage(response);
+            layout.getStatus().setStatusText("Ready");
+            render();
         }).exceptionally(ex -> {
-            UI.error("Error: " + ex.getMessage());
+            layout.addSystemMessage("Error: " + ex.getMessage());
+            layout.getStatus().setStatusText("Error");
+            render();
             return null;
         });
+
         try {
             future.join();
         } catch (Exception e) {
-            UI.error("Error: " + e.getMessage());
+            layout.addSystemMessage("Error: " + e.getMessage());
+            render();
         }
     }
 
+    private void render() {
+        System.out.print(layout.render());
+    }
+
     private void printBanner() {
-        System.out.println();
-        UI.info("╔═══════════════════════════════════════════╗");
-        UI.info("║         CLIPRO - Java AI CLI            ║");
-        UI.info("║         LOCAL-FIRST: Ollama             ║");
-        UI.info("╚═══════════════════════════════════════════╝");
-        System.out.println();
-        UI.info("Model: " + agent.getProvider().getCurrentModel());
-        UI.info("Tools: " + agent.getToolRegistry().getToolNames().size() + " registered");
-        System.out.println();
-        UI.info("Type /help for commands, or ask me anything!");
-        UI.info("[Ready]");
+        layout.getHeader().setConnected(true);
+        layout.getHeader().setStatus("Ready");
+        System.out.print(layout.render());
     }
 
     public void stop() {
@@ -112,7 +126,8 @@ public class App {
         }
         @Override
         public void clearHistory() {
-            UI.info("History cleared");
+            layout.clearMessages();
+            render();
         }
         @Override
         public void exit() {
@@ -125,6 +140,8 @@ public class App {
         LOG.info("Starting...");
         App app = new App();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Terminal.showCursor();
+            Terminal.exitAltScreen();
             LOG.info("Shutdown hook triggered");
         }));
         app.run();
