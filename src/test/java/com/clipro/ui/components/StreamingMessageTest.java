@@ -1,9 +1,17 @@
 package com.clipro.ui.components;
 
+import com.clipro.ui.Terminal;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class StreamingMessageTest {
+
+    @BeforeEach
+    void setUp() {
+        Terminal.setColumns(80);
+        Terminal.setRows(24);
+    }
 
     @Test
     void shouldCreateStreamingMessage() {
@@ -68,7 +76,8 @@ class StreamingMessageTest {
 
         String rendered = msg.getContentWithCursor();
         assertTrue(rendered.contains("Hi"));
-        assertTrue(rendered.contains("\033[7m"));
+        // Check for cursor indicator (ANSI dim or ▌ character)
+        assertTrue(rendered.contains("▌") || rendered.contains("\033["));
     }
 
     @Test

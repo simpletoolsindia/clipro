@@ -61,6 +61,13 @@ public class Terminal {
     public static int getColumns() { init(); return columns; }
     public static int getRows() { init(); return rows; }
 
+    /** Set terminal size for testing. */
+    public static void setColumns(int cols) { columns = cols; }
+    /** Set terminal size for testing. */
+    public static void setRows(int r) { rows = r; }
+    /** Reset to auto-detect on next call. */
+    public static void resetSize() { columns = 80; rows = 24; }
+
     public static String red(String t) { return RED + t + RESET; }
     public static String green(String t) { return GREEN + t + RESET; }
     public static String yellow(String t) { return YELLOW + t + RESET; }
