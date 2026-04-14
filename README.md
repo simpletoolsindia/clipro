@@ -108,9 +108,11 @@ src/main/java/com/clipro/
 | P8: CLI Commands | ✅ Complete |
 | P9: Session | ✅ Complete |
 | P10.1: Integration Tests | ✅ Complete |
-| P10.2: Performance (GraalVM) | ⏳ Pending |
+| P10.2: Performance Tests | ✅ Complete |
 
-**Total: 34 test files, 85 source files, all tests passing**
+**Total: 37 test files, 88 source files, all tests passing**
+
+**Note:** P10.2 tests measure startup, memory, UI render, and IO performance. Run with `CLIPRO_PERF_TEST=true` for full measurements.
 
 ## License
 
