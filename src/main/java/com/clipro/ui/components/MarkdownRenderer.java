@@ -14,6 +14,13 @@ public class MarkdownRenderer {
     private static final String LINK_COLOR = Terminal.ansi("34");
     private static final String RESET = Terminal.ansi("0");
 
+    // Syntax highlighting colors
+    private static final String COLOR_KEYWORD = "\033[33m";    // Yellow
+    private static final String COLOR_STRING = "\033[32m";     // Green
+    private static final String COLOR_COMMENT = "\033[2m";     // Dim
+    private static final String COLOR_FUNCTION = "\033[36m";   // Cyan
+    private static final String COLOR_NUMBER = "\033[35m";    // Magenta
+
     // Patterns
     private static final Pattern BOLD_PATTERN = Pattern.compile("\\*\\*(.+?)\\*\\*");
     private static final Pattern ITALIC_PATTERN = Pattern.compile("(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)");
@@ -59,7 +66,48 @@ public class MarkdownRenderer {
         result = result.replaceAll("^## (.+)$", BOLD_START + "$1" + RESET);
         result = result.replaceAll("^# (.+)$", BOLD_START + BOLD_START + "$1" + RESET);
 
+        // Lists: - item -> • item
+        result = result.replaceAll("(?m)^\\s*[-*]\\s+", "  • ");
+
+        // Blockquotes: > text -> ▌ text
+        result = result.replaceAll("(?m)^>\\s*(.+)$", "▌ $1");
+
         return result;
+    }
+
+    /**
+     * Syntax highlight code.
+     */
+    public static String highlightCode(String code) {
+        if (code == null || code.isEmpty()) return code;
+
+        String highlighted = code;
+
+        // Comments (common patterns)
+        highlighted = highlighted.replaceAll(
+            "(?m)^(#|//|/\\*|\\*).*$",
+            COLOR_COMMENT + "$0" + RESET
+        );
+
+        // Strings
+        highlighted = highlighted.replaceAll(
+            "\"(?:[^\"\\\\]|\\\\.)*\"",
+            COLOR_STRING + "$0" + RESET
+        );
+
+        // Keywords
+        highlighted = highlighted.replaceAll(
+            "\\b(function|class|const|let|var|if|else|for|while|return|import|export|async|await|try|catch|throw|new|this|public|private|void)\\b",
+            COLOR_KEYWORD + "$0" + RESET
+        );
+
+        // Numbers
+        highlighted = highlighted.replaceAll(
+            "\\b(\\d+\\.?\\d*)\\b",
+            COLOR_NUMBER + "$0" + RESET
+        );
+
+        return highlighted;
     }
 
     public static String renderInlineCode(String code) {
