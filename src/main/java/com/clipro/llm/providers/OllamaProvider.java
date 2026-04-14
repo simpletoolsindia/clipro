@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * Ollama provider using OpenAI-compatible API.
  * Priority: LOCAL-FIRST (1st choice)
  */
-public class OllamaProvider {
+public class OllamaProvider implements LlmProvider {
 
     private static final String DEFAULT_BASE_URL = "http://localhost:11434/v1";
     private static final String CHAT_ENDPOINT = "/chat/completions";
@@ -126,5 +126,16 @@ public class OllamaProvider {
 
     public LlmHttpClient getHttpClient() {
         return httpClient;
+    }
+
+    public static List<String> getDefaultModels() {
+        return List.of(
+            "qwen3-coder:32b",
+            "qwen2.5-coder:14b",
+            "llama3.3:70b",
+            "codellama:34b",
+            "mistral:7b",
+            "phi4:latest"
+        );
     }
 }

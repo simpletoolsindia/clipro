@@ -19,7 +19,7 @@ import java.util.function.Consumer;
  * Priority: SECOND (after Ollama local)
  * Reference: https://openrouter.ai/docs
  */
-public class OpenRouterProvider {
+public class OpenRouterProvider implements LlmProvider {
 
     private static final String DEFAULT_BASE_URL = "https://openrouter.ai/api/v1";
     private static final String CHAT_ENDPOINT = "/chat/completions";
@@ -139,5 +139,20 @@ public class OpenRouterProvider {
 
     public LlmHttpClient getHttpClient() {
         return httpClient;
+    }
+
+    public boolean hasApiKey() {
+        return apiKey != null && !apiKey.isEmpty();
+    }
+
+    public static List<String> getDefaultModels() {
+        return List.of(
+            "qwen/qwen3.6-plus",
+            "anthropic/claude-sonnet-4",
+            "anthropic/claude-opus-4",
+            "openai/gpt-4o",
+            "google/gemini-2.0-flash-thinking-exp",
+            "meta-llama/llama-3.3-70b-instruct"
+        );
     }
 }
