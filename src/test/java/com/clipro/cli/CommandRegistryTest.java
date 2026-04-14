@@ -25,7 +25,7 @@ class CommandRegistryTest {
         
         String result = registry.execute("/help", ctx);
         assertNotNull(result);
-        assertTrue(result.contains("Available Commands"));
+        assertTrue(result.contains("CLIPRO Commands"));
     }
 
     @Test

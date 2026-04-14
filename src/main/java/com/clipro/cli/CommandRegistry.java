@@ -1,5 +1,14 @@
 package com.clipro.cli;
 
+import com.clipro.agent.AgentEngine;
+import com.clipro.tools.Tool;
+import com.clipro.tools.file.GrepTool;
+import com.clipro.tools.git.GitCommitTool;
+import com.clipro.tools.git.GitDiffTool;
+import com.clipro.tools.git.GitLogTool;
+import com.clipro.tools.git.GitStatusTool;
+import com.clipro.tools.shell.BashTool;
+
 import java.util.*;
 import java.util.function.Function;
 
@@ -10,16 +19,26 @@ import java.util.function.Function;
 public class CommandRegistry {
 
     private final Map<String, Command> commands;
+    private final List<Tool> tools;
+    private final Map<String, Tool> toolMap;
+    private AgentContext agentContext;
 
     public CommandRegistry() {
         this.commands = new HashMap<>();
+        this.tools = new ArrayList<>();
+        this.toolMap = new HashMap<>();
         registerDefaultCommands();
+        registerDefaultTools();
+    }
+
+    public void setAgentContext(AgentContext ctx) {
+        this.agentContext = ctx;
     }
 
     private void registerDefaultCommands() {
         // Core commands
-        register(new Command("help", "Show help", (ctx) -> showHelp()));
-        register(new Command("clear", "Clear conversation", (ctx) -> {
+        register(new Command("help", "Show all commands", (ctx) -> showHelp()));
+        register(new Command("clear", "Clear conversation history", (ctx) -> {
             ctx.clearHistory();
             return "Conversation cleared.";
         }));
@@ -33,15 +52,106 @@ public class CommandRegistry {
         }));
 
         // Model commands
-        register(new Command("model", "Show/set current model", (ctx) -> {
+        register(new Command("model", "Show current model", (ctx) -> {
             String model = ctx.getCurrentModel();
             return "Current model: " + model;
         }));
+        register(new Command("models", "List available models", (ctx) -> {
+            return "Available models:\n" +
+                   "  - qwen/qwen3.6-plus (OpenRouter)\n" +
+                   "  - qwen3-coder:32b (Ollama)\n" +
+                   "  - llama3.3:70b (Ollama)\n" +
+                   "Use /model <name> to switch.";
+        }));
 
-        // Git commands
-        register(new Command("status", "Show git status", (ctx) -> "Use git_status tool instead"));
-        register(new Command("diff", "Show git diff", (ctx) -> "Use git_diff tool instead"));
-        register(new Command("commit", "Commit changes", (ctx) -> "Use git_commit tool instead"));
+        // Git commands - direct execution
+        register(new Command("status", "Show git status", this::executeGitStatus));
+        register(new Command("diff", "Show git diff", this::executeGitDiff));
+        register(new Command("log", "Show git log", this::executeGitLog));
+        register(new Command("commit", "Commit changes with message", this::executeGitCommit));
+
+        // Search commands
+        register(new Command("grep", "Search in files (Usage: /grep pattern)", this::executeGrep));
+        register(new Command("find", "Find files by pattern", this::executeFind));
+
+        // Shell commands
+        register(new Command("bash", "Execute bash command", this::executeBash));
+        register(new Command("sh", "Execute shell command", this::executeBash));
+
+        // Provider commands
+        register(new Command("provider", "Show/set LLM provider", (ctx) -> {
+            return "Available providers:\n" +
+                   "  1. Ollama (local, fast)\n" +
+                   "  2. OpenRouter (cloud, 300+ models)\n" +
+                   "Use /provider <name> to switch.";
+        }));
+
+        // Token/info commands
+        register(new Command("tokens", "Show token usage", (ctx) -> {
+            if (ctx.hasAgentContext()) {
+                return "Token usage: " + ctx.getTokenInfo();
+            }
+            return "Token info not available.";
+        }));
+        register(new Command("info", "Show system info", (ctx) -> {
+            return "CLIPRO v0.1.0\n" +
+                   "Model: " + ctx.getCurrentModel() + "\n" +
+                   "Tools: " + toolMap.size() + " registered\n" +
+                   "Commands: " + commands.size() + " available";
+        }));
+
+        // Permission mode commands
+        register(new Command("mode", "Show/set permission mode (READ_ONLY/BASH/RESTRICTED)", (ctx) -> {
+            String mode = ctx.getArgs().trim().toUpperCase();
+            if (mode.isEmpty()) {
+                BashTool bash = getTool(BashTool.class);
+                if (bash != null) {
+                    return "Current mode: " + bash.getPermissionMode();
+                }
+                return "BashTool not available.";
+            }
+            BashTool bash = getTool(BashTool.class);
+            if (bash != null) {
+                try {
+                    bash.setPermissionMode(BashTool.PermissionMode.valueOf(mode));
+                    return "Permission mode set to: " + mode;
+                } catch (IllegalArgumentException e) {
+                    return "Invalid mode. Use: READ_ONLY, BASH, or RESTRICTED";
+                }
+            }
+            return "BashTool not available.";
+        }));
+
+        // Shortcuts
+        register(new Command("ls", "List directory", (ctx) -> executeCommand(ctx, "ls -la")));
+        register(new Command("pwd", "Print working directory", (ctx) -> executeCommand(ctx, "pwd")));
+        register(new Command("whoami", "Show current user", (ctx) -> executeCommand(ctx, "whoami")));
+        register(new Command("date", "Show current date", (ctx) -> executeCommand(ctx, "date")));
+    }
+
+    private void registerDefaultTools() {
+        // Register tools for direct command execution
+        addTool(new GitStatusTool());
+        addTool(new GitDiffTool());
+        addTool(new GitLogTool());
+        addTool(new GitCommitTool());
+        addTool(new GrepTool());
+        addTool(new BashTool());
+    }
+
+    public void addTool(Tool tool) {
+        tools.add(tool);
+        toolMap.put(tool.getName(), tool);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Tool> T getTool(Class<T> clazz) {
+        for (Tool tool : tools) {
+            if (clazz.isInstance(tool)) {
+                return (T) tool;
+            }
+        }
+        return null;
     }
 
     public void register(Command command) {
@@ -75,16 +185,138 @@ public class CommandRegistry {
         }
 
         String[] parts = trimmed.split("\\s+", 2);
-        String name = parts[0].substring(1); // Remove leading /
+        String name = parts[0].substring(1).toLowerCase(); // Remove leading /
         String args = parts.length > 1 ? parts[1] : "";
 
+        context.setArgs(args);
         Command cmd = commands.get(name);
+
         if (cmd == null) {
+            // Check if it's a tool
+            Tool tool = toolMap.get(name);
+            if (tool != null) {
+                return executeTool(tool, args);
+            }
             return "Unknown command: /" + name + ". Type /help for available commands.";
         }
 
-        context.setArgs(args);
         return cmd.execute(context);
+    }
+
+    /**
+     * Execute a tool directly.
+     */
+    private String executeTool(Tool tool, String args) {
+        Map<String, Object> params = new HashMap<>();
+        if (!args.isEmpty()) {
+            // Simple parsing for common patterns
+            if (tool.getName().equals("git_status")) {
+                return tool.execute(params);
+            } else if (tool.getName().equals("git_log")) {
+                return tool.execute(params);
+            } else if (tool.getName().equals("git_diff")) {
+                return tool.execute(params);
+            } else if (tool.getName().equals("grep")) {
+                String[] parts = args.split("\\s+", 2);
+                if (parts.length >= 1) {
+                    params.put("pattern", parts[0]);
+                }
+                if (parts.length >= 2) {
+                    params.put("path", parts[1]);
+                }
+                return tool.execute(params);
+            } else if (tool.getName().equals("bash")) {
+                params.put("command", args);
+                return tool.execute(params);
+            }
+        }
+        return tool.execute(params);
+    }
+
+    private String executeCommand(CommandContext ctx, String command) {
+        BashTool bash = getTool(BashTool.class);
+        if (bash != null) {
+            Map<String, Object> params = Map.of("command", command);
+            return bash.execute(params);
+        }
+        return "BashTool not available.";
+    }
+
+    // Git command handlers
+    private String executeGitStatus(CommandContext ctx) {
+        GitStatusTool tool = getTool(GitStatusTool.class);
+        if (tool != null) {
+            return tool.execute(Map.of());
+        }
+        return "GitStatusTool not available.";
+    }
+
+    private String executeGitDiff(CommandContext ctx) {
+        GitDiffTool tool = getTool(GitDiffTool.class);
+        if (tool != null) {
+            return tool.execute(Map.of());
+        }
+        return "GitDiffTool not available.";
+    }
+
+    private String executeGitLog(CommandContext ctx) {
+        GitLogTool tool = getTool(GitLogTool.class);
+        if (tool != null) {
+            return tool.execute(Map.of());
+        }
+        return "GitLogTool not available.";
+    }
+
+    private String executeGitCommit(CommandContext ctx) {
+        GitCommitTool tool = getTool(GitCommitTool.class);
+        if (tool != null) {
+            String msg = ctx.getArgs().trim();
+            if (msg.isEmpty()) {
+                return "Usage: /commit <message>\nExample: /commit Fix bug in login";
+            }
+            return tool.execute(Map.of("message", msg));
+        }
+        return "GitCommitTool not available.";
+    }
+
+    private String executeGrep(CommandContext ctx) {
+        GrepTool tool = getTool(GrepTool.class);
+        if (tool != null) {
+            String args = ctx.getArgs().trim();
+            if (args.isEmpty()) {
+                return "Usage: /grep <pattern> [path]\nExample: /grep TODO src/";
+            }
+            String[] parts = args.split("\\s+", 2);
+            Map<String, Object> params = new HashMap<>();
+            params.put("pattern", parts[0]);
+            if (parts.length > 1) {
+                params.put("path", parts[1]);
+            }
+            return tool.execute(params);
+        }
+        return "GrepTool not available.";
+    }
+
+    private String executeFind(CommandContext ctx) {
+        BashTool bash = getTool(BashTool.class);
+        if (bash != null) {
+            String args = ctx.getArgs().trim();
+            String cmd = args.isEmpty() ? "find . -type f" : "find " + args;
+            return bash.execute(Map.of("command", cmd));
+        }
+        return "BashTool not available.";
+    }
+
+    private String executeBash(CommandContext ctx) {
+        BashTool bash = getTool(BashTool.class);
+        if (bash != null) {
+            String cmd = ctx.getArgs().trim();
+            if (cmd.isEmpty()) {
+                return "Usage: /bash <command>\nExample: /bash ls -la";
+            }
+            return bash.execute(Map.of("command", cmd));
+        }
+        return "BashTool not available.";
     }
 
     /**
@@ -92,16 +324,58 @@ public class CommandRegistry {
      */
     public String showHelp() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Available Commands:\n\n");
+        sb.append("╔══════════════════════════════════════════════════════════════╗\n");
+        sb.append("║                    CLIPRO Commands                            ║\n");
+        sb.append("╠══════════════════════════════════════════════════════════════╣\n");
 
-        for (Command cmd : commands.values()) {
-            sb.append("/").append(cmd.getName())
-              .append(" - ").append(cmd.getDescription())
-              .append("\n");
+        // Core commands
+        sb.append("║ Core Commands                                                ║\n");
+        sb.append("║   /help      - Show this help                                ║\n");
+        sb.append("║   /clear     - Clear conversation                           ║\n");
+        sb.append("║   /exit      - Exit CLIPRO                                   ║\n");
+        sb.append("║   /quit      - Exit CLIPRO                                   ║\n");
+        sb.append("╠══════════════════════════════════════════════════════════════╣\n");
+
+        // Model commands
+        sb.append("║ Model Commands                                               ║\n");
+        sb.append("║   /model     - Show current model                           ║\n");
+        sb.append("║   /models    - List available models                        ║\n");
+        sb.append("║   /provider  - Show/switch LLM provider                    ║\n");
+        sb.append("╠══════════════════════════════════════════════════════════════╣\n");
+
+        // Git commands
+        sb.append("║ Git Commands                                                ║\n");
+        sb.append("║   /status    - Show git status                              ║\n");
+        sb.append("║   /diff      - Show changes                                 ║\n");
+        sb.append("║   /log       - Show commit history                          ║\n");
+        sb.append("║   /commit    - Commit with message                          ║\n");
+        sb.append("╠══════════════════════════════════════════════════════════════╣\n");
+
+        // Search commands
+        sb.append("║ Search Commands                                             ║\n");
+        sb.append("║   /grep      - Search in files                              ║\n");
+        sb.append("║   /find      - Find files                                   ║\n");
+        sb.append("╠══════════════════════════════════════════════════════════════╣\n");
+
+        // Shell commands
+        sb.append("║ Shell Commands                                              ║\n");
+        sb.append("║   /bash      - Execute bash command                         ║\n");
+        sb.append("║   /ls        - List directory                              ║\n");
+        sb.append("║   /pwd       - Print working directory                      ║\n");
+        sb.append("║   /whoami    - Current user                                ║\n");
+        sb.append("╠══════════════════════════════════════════════════════════════╣\n");
+
+        // Info commands
+        sb.append("║ Info Commands                                               ║\n");
+        sb.append("║   /tokens    - Show token usage                             ║\n");
+        sb.append("║   /info      - System information                          ║\n");
+        sb.append("║   /mode      - Permission mode (READ_ONLY/BASH/RESTRICTED)  ║\n");
+        sb.append("╚══════════════════════════════════════════════════════════════╝\n");
+
+        sb.append("\nTools (").append(tools.size()).append(" registered):\n");
+        for (Tool tool : tools) {
+            sb.append("  - ").append(tool.getName()).append(": ").append(tool.getDescription()).append("\n");
         }
-
-        sb.append("\nTools:\n");
-        sb.append("Use natural language to trigger tools.\n");
 
         return sb.toString();
     }
@@ -138,8 +412,14 @@ public class CommandRegistry {
         public void setAgentContext(AgentContext ctx) { this.agentContext = ctx; }
         public AgentContext getAgentContext() { return agentContext; }
 
+        public boolean hasAgentContext() { return agentContext != null; }
+
         public String getCurrentModel() {
             return agentContext != null ? agentContext.getCurrentModel() : "unknown";
+        }
+
+        public String getTokenInfo() {
+            return agentContext != null ? agentContext.getTokenInfo() : "unknown";
         }
 
         public void clearHistory() {
@@ -158,5 +438,6 @@ public class CommandRegistry {
         String getCurrentModel();
         void clearHistory();
         void exit();
+        default String getTokenInfo() { return "unknown"; }
     }
 }
