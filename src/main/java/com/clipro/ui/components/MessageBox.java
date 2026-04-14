@@ -27,6 +27,9 @@ public class MessageBox {
             case ASSISTANT -> renderAssistant(message.getContent(), message.isStreaming());
             case SYSTEM -> renderSystem(message.getContent());
             case TOOL -> renderTool(message.getContent());
+            case COMPACT -> renderCompact(message.getContent());           // M-02
+            case GROUPED_TOOL_USE -> renderGroupedToolUse(message.getContent());  // M-13
+            case COLLAPSED_SEARCH -> renderCollapsedSearch(message.getContent()); // M-14
         };
     }
 
@@ -302,6 +305,95 @@ public class MessageBox {
         for (String line : wrapped.split("\n")) {
             sb.append(bgToolResult).append(Terminal.dim("  │ " + line)).append(bgReset).append("\n");
         }
+        return sb.toString();
+    }
+
+    /**
+     * M-02: Render compaction notification.
+     */
+    public static String renderCompact(String content) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Terminal.boxTop(Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow(Terminal.dim("[COMPACT]") + " Context Compaction", Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
+
+        sb.append(Terminal.BORDER_V + " " + Terminal.yellow("Context was compacted to save tokens.") + "\n");
+        sb.append(Terminal.BORDER_V + " " + Terminal.dim(content) + "\n");
+        sb.append(Terminal.BORDER_V + " " + Terminal.brightCyan("[click to expand]") + "\n");
+
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxBottom(Terminal.getColumns()));
+        return sb.toString();
+    }
+
+    /**
+     * M-11: Render image attachment.
+     */
+    public static String renderImage(String path, int width, int height) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Terminal.boxTop(Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow(Terminal.cyan("[IMAGE]"), Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
+
+        String fileName = path.contains("/") ? path.substring(path.lastIndexOf("/") + 1) : path;
+        sb.append(Terminal.BORDER_V + " " + Terminal.cyan("📎 " + fileName) + " [" + width + "x" + height + "]\n");
+        sb.append(Terminal.BORDER_V + " " + Terminal.dim("[Image preview not available in terminal]") + "\n");
+
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxBottom(Terminal.getColumns()));
+        return sb.toString();
+    }
+
+    /**
+     * M-13: Render grouped tool use messages.
+     */
+    public static String renderGroupedToolUse(String content) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Terminal.boxTop(Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow(Terminal.green("[TOOL_CALL]") + " Multiple tools executed", Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
+
+        // Parse content as list of tools
+        for (String line : content.split("\n")) {
+            if (!line.trim().isEmpty()) {
+                sb.append(Terminal.BORDER_V + " " + Terminal.green("▶ ") + line + "\n");
+            }
+        }
+
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxBottom(Terminal.getColumns()));
+        return sb.toString();
+    }
+
+    /**
+     * M-14: Render collapsed search results.
+     */
+    public static String renderCollapsedSearch(String content) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Terminal.boxTop(Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow(Terminal.yellow("[SEARCH]") + " " + content, Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
+
+        sb.append(Terminal.BORDER_V + " " + Terminal.dim("[click to expand]") + "\n");
+
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxBottom(Terminal.getColumns()));
         return sb.toString();
     }
 
