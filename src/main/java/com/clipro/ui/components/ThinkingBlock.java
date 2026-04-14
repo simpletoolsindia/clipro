@@ -260,6 +260,21 @@ public class ThinkingBlock {
         return DIM + ITALIC + summary + RESET;
     }
 
+    // L-15: Get count for indicator
+    public int getThinkingBlockCount(String content) {
+        return parser.countThinkingBlocks(content);
+    }
+
+    /**
+     * L-15: Render thinking block count indicator with emoji.
+     */
+    public String renderCountIndicator(String content) {
+        int count = parser.countThinkingBlocks(content);
+        if (count == 0) return "";
+        if (count == 1) return Terminal.cyan("💭 1");
+        return Terminal.cyan("💭 " + count);
+    }
+
     /**
      * Render ultrathink keyword with full rainbow animation.
      */

@@ -27,6 +27,12 @@ public class InputField {
         this.prompt = prompt;
     }
 
+    // L-13: Image paste support
+    public void insertImagePaste(String filePath, int width, int height) {
+        String imageRef = "[Image: " + filePath + " (" + width + "x" + height + ")]";
+        insert(imageRef);
+    }
+
     public void setPrompt(String prompt) { this.prompt = prompt; }
     public void setMasked(boolean masked) { this.masked = masked; }
     public void setVimMode(String mode) { this.vimMode = mode; }

@@ -28,6 +28,13 @@ public class EnhancedInputField {
     private boolean multilineMode = false;
     private List<String> lines = new ArrayList<>();
 
+    // L-12: Permission mode indicator
+    private String permissionMode = "BASH";
+
+    // L-14: Command queue
+    private List<String> commandQueue = new ArrayList<>();
+    private boolean queueMode = false;
+
     // Vim state
     private VimState vimState = VimState.NORMAL;
     private String vimOperator = "";
@@ -239,8 +246,29 @@ public class EnhancedInputField {
 
     // === Rendering ===
 
+    /**
+     * Get color-coded permission mode indicator (L-12).
+     */
+    private String getPermissionIndicator() {
+        return switch (permissionMode) {
+            case "READ" -> Terminal.green("[READ ▶] ");
+            case "BASH" -> Terminal.yellow("[BASH ▶] ");
+            case "REST" -> Terminal.red("[REST ▶] ");
+            default -> Terminal.dim("[?] ");
+        };
+    }
+
     public String render() {
         StringBuilder sb = new StringBuilder();
+
+        // L-12: Permission mode indicator
+        sb.append(getPermissionIndicator());
+
+        // L-14: Queue indicator
+        if (queueMode && !commandQueue.isEmpty()) {
+            sb.append(Terminal.cyan("[" + commandQueue.size() + " queued] "));
+        }
+
         sb.append(prompt);
 
         String text = buffer.toString();
@@ -339,6 +367,38 @@ public class EnhancedInputField {
     public void setPrompt(String prompt) { this.prompt = prompt; }
     public void setVimMode(boolean enabled) { this.vimMode = enabled; }
     public void setMultilineMode(boolean enabled) { this.multilineMode = enabled; }
+
+    // L-12: Permission mode setter
+    public void setPermissionMode(String mode) { this.permissionMode = mode; }
+    public String getPermissionMode() { return permissionMode; }
+
+    // L-14: Command queue methods
+    public void queueCommand(String command) {
+        commandQueue.add(command);
+        queueMode = true;
+    }
+
+    public void queueCurrentInput() {
+        String input = buffer.toString();
+        if (!input.isEmpty()) {
+            queueCommand(input);
+            buffer.setLength(0);
+            cursorPosition = 0;
+        }
+    }
+
+    public String dequeueNext() {
+        if (commandQueue.isEmpty()) {
+            queueMode = false;
+            return null;
+        }
+        return commandQueue.remove(0);
+    }
+
+    public boolean isQueueMode() { return queueMode; }
+    public int getQueueSize() { return commandQueue.size(); }
+    public void clearQueue() { commandQueue.clear(); queueMode = false; }
+
     public void setTypeahead(TypeaheadEngine engine) {
         // Copy suggestions from engine
         List<TypeaheadEngine.CommandSuggestion> cmds = new ArrayList<>();
