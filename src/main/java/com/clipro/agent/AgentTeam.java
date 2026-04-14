@@ -5,17 +5,21 @@ import java.util.concurrent.*;
 
 /**
  * Agent Team for multi-agent coordination.
- * Enables parallel task execution and result aggregation.
+ * M-25: Proper teardown with interrupt and timeout handling.
  */
 public class AgentTeam {
+
+    private static final int TEARDOWN_TIMEOUT_SECONDS = 10;
 
     private final String id;
     private final List<SubAgent> agents = new ArrayList<>();
     private final Map<String, String> taskQueue = new ConcurrentHashMap<>();
     private volatile boolean running = false;
+    private final ExecutorService executor;
 
     public AgentTeam(String id) {
         this.id = id;
+        this.executor = Executors.newCachedThreadPool();
     }
 
     public void addAgent(SubAgent agent) {
@@ -66,7 +70,7 @@ public class AgentTeam {
 
             running = false;
             return results;
-        });
+        }, executor);
     }
 
     public String aggregateResults(Map<String, String> results) {
@@ -78,7 +82,76 @@ public class AgentTeam {
         return sb.toString();
     }
 
+    /**
+     * M-25: Proper teardown with interrupt and timeout handling.
+     * Cleans up all agent threads and resources.
+     */
+    public void teardown() {
+        teardown(TEARDOWN_TIMEOUT_SECONDS);
+    }
+
+    /**
+     * M-25: Teardown with custom timeout.
+     */
+    public void teardown(int timeoutSeconds) {
+        running = false;
+
+        // Interrupt all agent threads
+        for (SubAgent agent : agents) {
+            try {
+                agent.interrupt();
+            } catch (Exception e) {
+                // Log but continue
+            }
+        }
+
+        // Wait for completion with timeout
+        long deadline = System.currentTimeMillis() + (timeoutSeconds * 1000L);
+        for (SubAgent agent : agents) {
+            long remaining = deadline - System.currentTimeMillis();
+            if (remaining <= 0) {
+                // Force kill if timeout exceeded
+                agent.forceKill();
+                continue;
+            }
+
+            try {
+                agent.awaitCompletion(remaining, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                // Force kill on interrupt
+                agent.forceKill();
+                Thread.currentThread().interrupt();
+            } catch (TimeoutException e) {
+                // Timeout exceeded - force kill
+                agent.forceKill();
+            }
+        }
+
+        // Shutdown executor
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+
+        // Clear agent list
+        agents.clear();
+        taskQueue.clear();
+    }
+
+    /**
+     * M-25: Check if teardown is needed.
+     */
+    public boolean needsTeardown() {
+        return running || !agents.isEmpty();
+    }
+
     public List<SubAgent> getAgents() { return new ArrayList<>(agents); }
     public int getAgentCount() { return agents.size(); }
     public boolean isRunning() { return running; }
+    public String getId() { return id; }
 }

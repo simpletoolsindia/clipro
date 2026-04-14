@@ -1,12 +1,11 @@
 package com.clipro.tools;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Tool for managing tasks/to-dos.
- * Supports create, update, list, and complete operations.
+ * Tool for managing tasks/to-dos with nested support.
+ * M-23: Supports parent-child task relationships and tree rendering.
  */
 public class TaskTool implements Tool {
 
@@ -25,8 +24,8 @@ public class TaskTool implements Tool {
 
     @Override
     public String getDescription() {
-        return "Task management tool. Create, list, update, and complete tasks.\n" +
-               "Usage: /task create <title> | /task list | /task done <id> | /task delete <id>";
+        return "Task management with nested support. Create, list, update, complete tasks.\n" +
+               "Usage: /task create <title> [--parent <id>] | /task list | /task done <id>";
     }
 
     @Override
@@ -42,6 +41,10 @@ public class TaskTool implements Tool {
                 "title", Map.of(
                     "type", "string",
                     "description", "Task title for create"
+                ),
+                "parent", Map.of(
+                    "type", "integer",
+                    "description", "Parent task ID for nested tasks"
                 ),
                 "id", Map.of(
                     "type", "integer",
@@ -59,7 +62,10 @@ public class TaskTool implements Tool {
         switch (action) {
             case "create":
                 String title = (String) args.get("title");
-                return createTask(title);
+                Object parentObj = args.get("parent");
+                String parentId = parentObj instanceof Number ?
+                    String.valueOf(((Number) parentObj).intValue()) : null;
+                return createTask(title, parentId);
             case "list":
                 return listTasks();
             case "done":
@@ -74,38 +80,85 @@ public class TaskTool implements Tool {
                 return deleteTask(delTaskId);
             default:
                 return "Unknown action: " + action + "\n" +
-                       "Usage: /task create <title> | /task list | /task done <id>";
+                       "Usage: /task create <title> [--parent <id>] | /task list | /task done <id>";
         }
     }
 
-    private String createTask(String title) {
+    private String createTask(String title, String parentId) {
         if (title == null || title.isEmpty()) {
-            return "Usage: /task create <task title>";
+            return "Usage: /task create <task title> [--parent <parent-id>]";
         }
 
         int id = nextId++;
-        tasks.put(String.valueOf(id), new Task(id, title));
-        return "Task created: #" + id + " - " + title;
+        Task task = new Task(id, title);
+
+        // M-23: Set parent if specified
+        if (parentId != null && tasks.containsKey(parentId)) {
+            Task parent = tasks.get(parentId);
+            parent.children.add(String.valueOf(id));
+            task.parentId = parentId;
+            task.depth = parent.depth + 1;
+        }
+
+        tasks.put(String.valueOf(id), task);
+        String depthIndicator = task.depth > 0 ? " (child of #" + parentId + ")" : "";
+        return "Task created: #" + id + " - " + title + depthIndicator;
     }
 
     private String listTasks() {
         if (tasks.isEmpty()) {
-            return "Tasks: None\n\nUsage: /task create <title>";
+            return "Tasks: None\n\nUsage: /task create <title> [--parent <id>]";
         }
 
         StringBuilder sb = new StringBuilder();
         sb.append("Tasks (").append(tasks.size()).append("):\n");
+        sb.append("─────────────────────────────────────\n");
 
-        for (Task t : tasks.values()) {
-            String status = t.completed ? "[x]" : "[ ]";
-            sb.append("  ").append(status).append(" #").append(t.id)
-              .append(" - ").append(t.title);
-            if (t.completed) {
-                sb.append(" (done)");
-            }
-            sb.append("\n");
+        // M-23: Render as tree
+        List<Task> rootTasks = tasks.values().stream()
+            .filter(t -> t.parentId == null)
+            .sorted(Comparator.comparingInt(t -> t.id))
+            .collect(Collectors.toList());
+
+        for (Task task : rootTasks) {
+            renderTaskTree(sb, task, "");
         }
+
         return sb.toString();
+    }
+
+    /**
+     * M-23: Render task as tree with ├─ and └─ characters.
+     */
+    private void renderTaskTree(StringBuilder sb, Task task, String indent) {
+        String status = task.completed ? "[x]" : "[ ]";
+        String checkMark = task.completed ? "✓" : " ";
+
+        // Tree characters
+        String connector = indent.isEmpty() ? "" : "   ";
+        String prefix = task.children.isEmpty() ? "└── " : "├── ";
+
+        sb.append(connector).append(prefix)
+          .append(status).append(" #").append(task.id)
+          .append(" ").append(task.title);
+
+        if (task.completed) {
+            sb.append(" \033[90m(done)\033[0m");
+        }
+        sb.append("\n");
+
+        // Render children
+        List<Task> children = task.children.stream()
+            .map(tasks::get)
+            .filter(Objects::nonNull)
+            .sorted(Comparator.comparingInt(t -> t.id))
+            .collect(Collectors.toList());
+
+        for (int i = 0; i < children.size(); i++) {
+            boolean last = (i == children.size() - 1);
+            String childIndent = indent + (task.depth == 0 ? "    " : "│   ") + (last ? "    " : "│   ");
+            renderTaskTree(sb, children.get(i), childIndent);
+        }
     }
 
     private String completeTask(int id) {
@@ -118,10 +171,22 @@ public class TaskTool implements Tool {
     }
 
     private String deleteTask(int id) {
-        if (tasks.remove(String.valueOf(id)) != null) {
-            return "Task deleted: #" + id;
+        Task task = tasks.remove(String.valueOf(id));
+        if (task == null) {
+            return "Task not found: #" + id;
         }
-        return "Task not found: #" + id;
+        // M-23: Remove from parent's children list
+        if (task.parentId != null) {
+            Task parent = tasks.get(task.parentId);
+            if (parent != null) {
+                parent.children.remove(String.valueOf(id));
+            }
+        }
+        // M-23: Delete children recursively
+        for (String childId : task.children) {
+            deleteTask(Integer.parseInt(childId));
+        }
+        return "Task deleted: #" + id;
     }
 
     private int parseId(Object obj) {
@@ -135,17 +200,26 @@ public class TaskTool implements Tool {
         return -1;
     }
 
+    /**
+     * M-23: Task with nested support.
+     */
     public static class Task {
         public final int id;
         public final String title;
         public final long createdAt;
         public boolean completed;
+        public String parentId;  // M-23: Parent task ID
+        public List<String> children;  // M-23: Child task IDs
+        public int depth;  // M-23: Tree depth
 
         public Task(int id, String title) {
             this.id = id;
             this.title = title;
             this.createdAt = System.currentTimeMillis();
             this.completed = false;
+            this.parentId = null;
+            this.children = new ArrayList<>();
+            this.depth = 0;
         }
     }
 }
