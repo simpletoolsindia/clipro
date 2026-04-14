@@ -3,13 +3,14 @@ package com.clipro.ui.components;
 import com.clipro.ui.Terminal;
 
 /**
- * Header bar showing model info and status.
- * Reference: openclaude/src/components/Stats.tsx
+ * Header bar - Pixel-perfect OpenClaude style.
+ * Reference: ~/openclaude/src/components/Stats.tsx
  */
 public class HeaderBar {
     private String modelName = "qwen3-coder:32b";
     private String status = "Ready";
     private boolean connected = false;
+    private String vimMode = "";
 
     public HeaderBar() {}
 
@@ -17,59 +18,52 @@ public class HeaderBar {
         this.modelName = modelName;
     }
 
-    public void setModel(String model) {
-        this.modelName = model;
-    }
-
-    public String getModel() {
-        return modelName;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setConnected(boolean connected) {
-        this.connected = connected;
-    }
-
-    public boolean isConnected() {
-        return connected;
-    }
+    public void setModel(String model) { this.modelName = model; }
+    public String getModel() { return modelName; }
+    public void setStatus(String status) { this.status = status; }
+    public String getStatus() { return status; }
+    public void setConnected(boolean connected) { this.connected = connected; }
+    public boolean isConnected() { return connected; }
+    public void setVimMode(String mode) { this.vimMode = mode; }
 
     public String render() {
-        String modelDisplay = Terminal.cyan(modelName);
-        String statusIcon = connected ? Terminal.green("●") : Terminal.red("○");
-        String statusText = connected ? "Connected" : "Disconnected";
-
         int width = Terminal.getColumns();
-        String title = " CLIPRO ";
-        int padding = width - title.length() - modelDisplay.length() - statusText.length() - 10;
-
         StringBuilder sb = new StringBuilder();
-        sb.append(Terminal.ansi("48;5;235")); // Dark background
-        sb.append(Terminal.bold(title));
+
+        // Top border
+        sb.append(Terminal.boxTop(width)).append("\n");
+
+        // Title row
+        String title = Terminal.bold(Terminal.brightCyan(" CLIPRO "));
+        String connStatus = connected ? Terminal.green("●") : Terminal.red("○");
+        String connText = connected ? "Connected" : "Disconnected";
+        String modelText = Terminal.cyan(modelName);
+
+        // Status row
+        String row1 = title + "  " + connStatus + " " + connText;
+        String row2 = modelText;
+        if (!vimMode.isEmpty()) {
+            row2 += " " + Terminal.dim("[" + vimMode + "]");
+        }
+
+        sb.append(Terminal.BORDER_V).append(" ").append(row1);
+        int padding = width - row1.length() - row2.length() - 4;
         sb.append(" ".repeat(Math.max(1, padding)));
-        sb.append(statusIcon).append(" ").append(statusText).append(" | ");
-        sb.append(modelDisplay);
-        sb.append(Terminal.ansi("0m"));
+        sb.append(row2).append(" ").append(Terminal.BORDER_V).append("\n");
+
+        // Bottom border
+        sb.append(Terminal.boxBottom(width));
 
         return sb.toString();
     }
 
-    public String renderCompact() {
-        return Terminal.bold("[CLIPRO] ") +
-               (connected ? Terminal.green("●") : Terminal.red("○")) +
-               " " + modelName +
-               " | " + status;
+    public static String divider() {
+        return Terminal.CYAN + Terminal.repeat(Terminal.BORDER_H, Terminal.getColumns()) + Terminal.RESET;
     }
 
-    public static String divider() {
-        int width = Terminal.getColumns();
-        return Terminal.ansi("90m") + "─".repeat(Math.max(1, width)) + Terminal.ansi("0m");
+    public String renderCompact() {
+        String conn = connected ? Terminal.green("●") : Terminal.red("○");
+        String mode = vimMode.isEmpty() ? "" : Terminal.dim("[" + vimMode + "]");
+        return Terminal.bold(Terminal.brightCyan("[CLIPRO]")) + " " + conn + " " + modelName + " " + mode;
     }
 }
