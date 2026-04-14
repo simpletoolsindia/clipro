@@ -7,6 +7,13 @@ repositories {
 }
 
 dependencies {
+    // TamboUI - Terminal UI Framework (available on Maven Central)
+    implementation("dev.tamboui:tamboui-core:0.1.0")
+    implementation("dev.tamboui:tamboui-widgets:0.1.0")
+    implementation("dev.tamboui:tamboui-tui:0.1.0")
+    implementation("dev.tamboui:tamboui-jline3-backend:0.1.0")
+    implementation("dev.tamboui:tamboui-toolkit:0.1.0")
+
     // JSON
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
 
