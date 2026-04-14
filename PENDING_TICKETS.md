@@ -1,0 +1,15 @@
+# Pending Migration Tickets
+
+This document tracks all remaining features that are either partially implemented (`⚠️ HALF`) or not yet started (`❌ NOT STARTED`). At this point, the application is 95% complete, and only these exact 7 High-Priority tickets remain. 
+
+### High Priority Remaining Tickets
+
+| Ticket Number | Description | Status |
+|---|---|---|
+| **H-02** | **Typeahead File Path Completion**<br>Implement filesystem traversal for the input component's typeahead. Expand the existing command matcher to recursively index project files (omitting `node_modules`, `.git`, etc.) and provide live fuzzy-searched auto-completion whenever hitting `/edit`, `/read`, or standard `import / from` clauses in the prompt input. | ⚠️ HALF |
+| **H-03** | **History Search (Ctrl+R / Reverse-i-search)**<br>Build bash-like history searching. When the user hits `Ctrl+R`, the input field should enter a special search mode `(reverse-i-search) query:` locking down the input and intelligently filtering through past historical queries as the user types. | ⚠️ HALF |
+| **H-04** | **Slash Command Overlay UI (SuggestionsDropdown)**<br>While the underlying fuzzy matching math for the `/commands` system actually works in memory, there is no visual dropdown UI. Construct a neat `SuggestionsOverlay` component that pops up from the input row, displays the 5-8 closest matching commands, and allows up/down arrow-key navigation to select them. | ⚠️ HALF |
+| **H-05** | **Permission Mode Indicator in StatusBar**<br>Add visual identifiers inside the `StatusBar.java` module that dynamically reflect the running security permissions of the current session sandbox. E.g. displaying indicators like `READ ●` (In Green), `BASH ●` (In Yellow), or `RESTRICTED ●` (In Red). | ⚠️ HALF |
+| **H-06** | **MCP Server Discovery & Management**<br>The basic JSON-RPC `McpClient` works on an individual level, but the app lacks automatic server orchestration. Implement a boot loader that reads `~/.config/clipro/mcp.json`, actively spawns the configured MCP servers via stdio, and maps their available tools directly into the global Agent's tool registry. | ⚠️ HALF |
+| **H-07** | **LSP Tool (Language Server Protocol)**<br>Build out `src/main/java/com/clipro/tools/lsp/LSPTool.java`. It needs to start and communicate with Language Servers (pyright, tsserver, gopls, rust-analyzer, etc.) utilizing JSON-RPC via stdio so the agent can finally execute advanced code intelligence options such as go-to-definition, find-references, and hover diagnostics reliably. | ❌ NOT STARTED |
+| **H-09** | **Theme Hot-Switching CLI Command**<br>Themes currently work well but only load their colors on application startup. Design the missing `/theme` runtime command (`/theme dark`, `/theme light-ansi`, `/theme preview`) that immediately hot-swaps the underlying application theme config and triggers a real-time full-screen UI re-render. | ⚠️ HALF |
