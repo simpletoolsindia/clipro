@@ -12,6 +12,11 @@ public class VimMode {
     private String lastAction = "";
     private final Map<String, String> registers = new HashMap<>();
 
+    // Macro recording state
+    private Character recordingRegister = null;
+    private StringBuilder recordingBuffer = new StringBuilder();
+    private final Map<Character, String> macros = new HashMap<>();
+
     public VimMode() {}
 
     public VimState getState() {
@@ -88,5 +93,75 @@ public class VimMode {
             return "";
         }
         return " " + state.getDisplay() + " ";
+    }
+
+    // ===== Macro Support =====
+
+    /**
+     * Start recording a macro into the specified register.
+     */
+    public void startRecording(char register) {
+        this.recordingRegister = register;
+        this.recordingBuffer.setLength(0);
+    }
+
+    /**
+     * Stop recording the current macro and save it.
+     */
+    public void stopRecording() {
+        if (recordingRegister != null) {
+            macros.put(recordingRegister, recordingBuffer.toString());
+            recordingRegister = null;
+            recordingBuffer.setLength(0);
+        }
+    }
+
+    /**
+     * Check if currently recording a macro.
+     */
+    public boolean isRecording() {
+        return recordingRegister != null;
+    }
+
+    /**
+     * Get the register being recorded to.
+     */
+    public Character getRecordingRegister() {
+        return recordingRegister;
+    }
+
+    /**
+     * Add a keystroke to the current recording.
+     */
+    public void recordKeystroke(String key) {
+        if (isRecording()) {
+            recordingBuffer.append(key);
+        }
+    }
+
+    /**
+     * Get a macro from a register.
+     */
+    public String getMacro(char register) {
+        return macros.get(register);
+    }
+
+    /**
+     * Check if a macro exists for the given register.
+     */
+    public boolean hasMacro(char register) {
+        return macros.containsKey(register);
+    }
+
+    /**
+     * Play back a macro from the specified register.
+     * Returns the macro content or null if not found.
+     */
+    public String playbackMacro(char register) {
+        String macro = macros.get(register);
+        if (macro != null) {
+            setLastAction("@" + register);
+        }
+        return macro;
     }
 }

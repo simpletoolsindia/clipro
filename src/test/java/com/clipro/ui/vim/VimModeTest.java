@@ -83,4 +83,61 @@ class VimModeTest {
         vim.enterCommand();
         assertTrue(vim.getState().isCommand());
     }
+
+    @Test
+    void shouldRecordMacro() {
+        VimMode vim = new VimMode();
+
+        vim.startRecording('a');
+        assertTrue(vim.isRecording());
+        assertEquals(Character.valueOf('a'), vim.getRecordingRegister());
+
+        vim.recordKeystroke("hello");
+        vim.recordKeystroke("world");
+        vim.stopRecording();
+
+        assertFalse(vim.isRecording());
+        assertEquals("helloworld", vim.getMacro('a'));
+    }
+
+    @Test
+    void shouldPlaybackMacro() {
+        VimMode vim = new VimMode();
+
+        vim.startRecording('b');
+        vim.recordKeystroke("test");
+        vim.stopRecording();
+
+        String macro = vim.playbackMacro('b');
+        assertEquals("test", macro);
+    }
+
+    @Test
+    void shouldCheckMacroExists() {
+        VimMode vim = new VimMode();
+
+        assertFalse(vim.hasMacro('x'));
+
+        vim.startRecording('x');
+        vim.recordKeystroke("macro");
+        vim.stopRecording();
+
+        assertTrue(vim.hasMacro('x'));
+    }
+
+    @Test
+    void shouldHandleMultipleMacros() {
+        VimMode vim = new VimMode();
+
+        vim.startRecording('a');
+        vim.recordKeystroke("foo");
+        vim.stopRecording();
+
+        vim.startRecording('b');
+        vim.recordKeystroke("bar");
+        vim.stopRecording();
+
+        assertEquals("foo", vim.getMacro('a'));
+        assertEquals("bar", vim.getMacro('b'));
+    }
 }

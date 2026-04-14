@@ -23,6 +23,57 @@ public class VimKeyHandler {
         this.navigator = navigator;
     }
 
+    /**
+     * Handle a register key for macro recording/playback.
+     * Called after q or @ is pressed.
+     */
+    public boolean handleRegisterKey(char register) {
+        // Validate register is a-z
+        if (register >= 'a' && register <= 'z') {
+            if ("q".equals(lastSpecialKey)) {
+                // q<register> - start recording or stop recording
+                if (vimMode.isRecording()) {
+                    vimMode.stopRecording();
+                } else {
+                    vimMode.startRecording(register);
+                }
+                lastSpecialKey = null;
+                return true;
+            } else if ("@".equals(lastSpecialKey)) {
+                // @<register> - playback macro
+                String macro = vimMode.playbackMacro(register);
+                lastSpecialKey = null;
+                return macro != null;
+            }
+        }
+        lastSpecialKey = null;
+        return false;
+    }
+
+    /**
+     * Handle count prefix for commands like 3d2w or 3@x.
+     */
+    public void setCountPrefix(int count) {
+        this.countPrefix = count;
+    }
+
+    /**
+     * Get the current count prefix.
+     */
+    public int getCountPrefix() {
+        return countPrefix;
+    }
+
+    /**
+     * Clear the count prefix.
+     */
+    public void clearCountPrefix() {
+        this.countPrefix = 1;
+    }
+
+    private String lastSpecialKey = null;
+    private int countPrefix = 1;
+
     public boolean handleKey(String key) {
         switch (vimMode.getState()) {
             case NORMAL:
@@ -66,6 +117,17 @@ public class VimKeyHandler {
     }
 
     private boolean handleNormalKey(String key) {
+        // Check for macro recording mode (q followed by register a-z)
+        if ("q".equals(key) && !vimMode.isRecording()) {
+            // First q - wait for register
+            return false; // Let the input field handle this
+        }
+
+        // Check for macro playback (@ register)
+        if ("@".equals(key)) {
+            return false; // Wait for register input
+        }
+
         switch (key) {
             case "i":
                 vimMode.enterInsert();
@@ -198,11 +260,184 @@ public class VimKeyHandler {
     }
 
     private boolean handleCommandKey(String key) {
-        if ("Escape".equals(key) || "[".equals(key) || "q".equals(key) && vimMode.getState() == VimState.COMMAND) {
+        if ("Escape".equals(key) || "[".equals(key)) {
+            vimMode.enterNormal();
+            clearCommandBuffer();
+            return true;
+        }
+        if ("q".equals(key) && vimMode.getState() == VimState.COMMAND) {
+            vimMode.enterNormal();
+            clearCommandBuffer();
+            return true;
+        }
+
+        // Append key to command buffer
+        commandBuffer.append(key);
+
+        // Check for Enter to execute command
+        if ("Enter".equals(key)) {
+            String cmd = getCommandBuffer();
+            clearCommandBuffer();
+
+            // Handle :s substitute command
+            if (cmd.startsWith("s/") || cmd.startsWith("substitute/")) {
+                return executeSubstitute(cmd);
+            }
+
+            // Handle :w (write), :q (quit), :wq
+            if (cmd.equals("w")) {
+                // Write - handled by InputField callbacks
+                vimMode.enterNormal();
+                return true;
+            }
+            if (cmd.equals("q")) {
+                vimMode.enterNormal();
+                return true;
+            }
+            if (cmd.equals("wq") || cmd.equals("x")) {
+                vimMode.enterNormal();
+                return true;
+            }
+
             vimMode.enterNormal();
             return true;
         }
+
         return false;
+    }
+
+    // Command buffer for : command mode
+    private StringBuilder commandBuffer = new StringBuilder();
+
+    private String getCommandBuffer() {
+        String cmd = commandBuffer.toString();
+        // Remove leading colon if present
+        if (cmd.startsWith(":")) {
+            return cmd.substring(1);
+        }
+        return cmd;
+    }
+
+    private void clearCommandBuffer() {
+        commandBuffer.setLength(0);
+    }
+
+    /**
+     * Execute :s/pattern/replacement/flags command.
+     * Supports: :s/foo/bar/, :s/foo/bar/g, :s/foo/bar/c, :%s/foo/bar/g
+     */
+    private boolean executeSubstitute(String cmd) {
+        if (navigator == null) return false;
+
+        boolean global = false;
+        boolean confirm = false;
+        boolean wholeBuffer = false;
+
+        // Parse flags
+        String flags = "";
+        int lastSlash = cmd.lastIndexOf('/');
+        if (lastSlash > 0) {
+            int prevSlash = cmd.lastIndexOf('/', lastSlash - 1);
+            if (prevSlash > 0) {
+                flags = cmd.substring(lastSlash + 1);
+                if (flags.contains("g")) global = true;
+                if (flags.contains("c")) confirm = true;
+            }
+        }
+
+        // Parse :%s vs :s
+        String pattern;
+        String replacement;
+        if (cmd.startsWith("%")) {
+            wholeBuffer = true;
+            cmd = cmd.substring(1);
+        }
+
+        // Parse the substitute command
+        // Format: s/pattern/replacement/flags or substitute/pattern/replacement/flags
+        String substituteCmd;
+        if (cmd.startsWith("substitute")) {
+            substituteCmd = cmd.substring("substitute".length());
+        } else {
+            substituteCmd = cmd;
+        }
+
+        // Find the pattern and replacement between slashes
+        // s/pattern/replacement/flags
+        int firstSlash = substituteCmd.indexOf('/');
+        if (firstSlash < 0) return false;
+
+        pattern = substituteCmd.substring(1, firstSlash);
+        int secondSlash = substituteCmd.indexOf('/', firstSlash + 1);
+        if (secondSlash < 0) {
+            // No closing slash - pattern only
+            replacement = "";
+            secondSlash = substituteCmd.length();
+        } else {
+            replacement = substituteCmd.substring(firstSlash + 1, secondSlash);
+        }
+
+        // Get the text from navigator
+        String text = "";
+        if (navigator instanceof ExtendedTextNavigator) {
+            text = ((ExtendedTextNavigator) navigator).getText();
+        }
+
+        // Perform substitution
+        if (wholeBuffer) {
+            // Replace all occurrences in entire text
+            String newText = text.replaceAll(pattern, replacement);
+            if (!newText.equals(text)) {
+                if (navigator instanceof ExtendedTextNavigator) {
+                    ((ExtendedTextNavigator) navigator).setText(newText);
+                }
+                return true;
+            }
+        } else {
+            // Replace on current line only
+            int lineStart = findLineStartFromOffset(text, navigator.getOffset());
+            int lineEnd = findLineEndFromOffset(text, navigator.getOffset());
+
+            String line = text.substring(lineStart, lineEnd);
+            String newLine;
+
+            if (global) {
+                newLine = line.replaceAll(pattern, replacement);
+            } else {
+                newLine = line.replaceFirst(pattern, replacement);
+            }
+
+            if (!newLine.equals(line)) {
+                String newText = text.substring(0, lineStart) + newLine + text.substring(lineEnd);
+                if (navigator instanceof ExtendedTextNavigator) {
+                    ((ExtendedTextNavigator) navigator).setText(newText);
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private int findLineStartFromOffset(String text, int pos) {
+        while (pos > 0 && text.charAt(pos - 1) != '\n') {
+            pos--;
+        }
+        return pos;
+    }
+
+    private int findLineEndFromOffset(String text, int pos) {
+        int len = text.length();
+        while (pos < len && text.charAt(pos) != '\n') {
+            pos++;
+        }
+        return pos;
+    }
+
+    // Extended TextNavigator with setText method
+    public interface ExtendedTextNavigator extends TextNavigator {
+        void setText(String text);
+        String getText();
     }
 
     private void wordForward() {
