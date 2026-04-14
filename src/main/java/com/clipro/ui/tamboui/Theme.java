@@ -79,6 +79,9 @@ public class Theme {
     private final String promptBorder;
     private final String promptBorderShimmer;
 
+    // Tool result backgrounds
+    private final String toolResultBackground;
+
     // Special
     private final String fastMode;
     private final String fastModeShimmer;
@@ -147,6 +150,7 @@ public class Theme {
         this.promptBorder = b.promptBorder;
         this.promptBorderShimmer = b.promptBorderShimmer;
         this.fastMode = b.fastMode;
+        this.toolResultBackground = b.toolResultBackground;
         this.fastModeShimmer = b.fastModeShimmer;
         this.rateLimitFill = b.rateLimitFill;
         this.rateLimitEmpty = b.rateLimitEmpty;
@@ -213,6 +217,7 @@ public class Theme {
     public String getPromptBorder() { return promptBorder; }
     public String getPromptBorderShimmer() { return promptBorderShimmer; }
     public String getFastMode() { return fastMode; }
+    public String getToolResultBackground() { return toolResultBackground; }
     public String getFastModeShimmer() { return fastModeShimmer; }
     public String getRateLimitFill() { return rateLimitFill; }
     public String getRateLimitEmpty() { return rateLimitEmpty; }
@@ -274,6 +279,7 @@ public class Theme {
         private String messageActionsBackground = "\u001B[38;2;44;50;62m";
         private String selectionBg = "\u001B[38;2;38;79;120m";
         private String bashMessageBackgroundColor = "\u001B[38;2;65;60;65m";
+        private String toolResultBackground = "\u001B[48;2;25;25;35m";
         private String memoryBackgroundColor = "\u001B[38;2;55;65;70m";
         private String diffAdded = "\u001B[38;2;34;92;43m";
         private String diffRemoved = "\u001B[38;2;122;41;54m";
@@ -326,6 +332,7 @@ public class Theme {
         public Builder setBackground(String v) { this.background = v; return this; }
         public Builder setUserMessageBackground(String v) { this.userMessageBackground = v; return this; }
         public Builder setSuggestion(String v) { this.suggestion = v; return this; }
+        public Builder setToolResultBackground(String v) { this.toolResultBackground = v; return this; }
         public Theme build() { return new Theme(this); }
     }
 }

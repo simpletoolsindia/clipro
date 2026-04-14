@@ -288,10 +288,12 @@ public class MessageBox {
      */
     public static String renderTool(String content) {
         StringBuilder sb = new StringBuilder();
+        // Use dark background for tool results
+        String bgReset = "\033[0m";
+        String bgToolResult = "\033[48;2;25;25;35m";
         String wrapped = wordWrap(content, Terminal.getColumns() - 6);
         for (String line : wrapped.split("\n")) {
-            // Indigo tint for tool results: dark blue-grey background
-            sb.append(Terminal.dim("  │ " + line + "\n"));
+            sb.append(bgToolResult).append(Terminal.dim("  │ " + line)).append(bgReset).append("\n");
         }
         return sb.toString();
     }
