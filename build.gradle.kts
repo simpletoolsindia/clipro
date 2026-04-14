@@ -4,9 +4,20 @@ plugins {
 
 repositories {
     mavenCentral()
+    // TamboUI snapshots (not on Maven Central)
+    maven("https://central.sonatype.com/repository/maven-snapshots/")
 }
 
+val tamboVersion = "0.2.0-SNAPSHOT"
+
 dependencies {
+    // TamboUI TUI Framework (matches OpenClaude Ink/React pattern)
+    implementation("dev.tamboui:tamboui-core:$tamboVersion")
+    implementation("dev.tamboui:tamboui-toolkit:$tamboVersion")
+    implementation("dev.tamboui:tamboui-widgets:$tamboVersion")
+    implementation("dev.tamboui:tamboui-tui:$tamboVersion")
+    implementation("dev.tamboui:tamboui-jline3-backend:$tamboVersion")
+
     // JSON
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
 

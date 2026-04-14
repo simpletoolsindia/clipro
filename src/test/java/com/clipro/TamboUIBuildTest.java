@@ -6,29 +6,27 @@ import static org.junit.jupiter.api.Assertions.*;
 class TamboUIBuildTest {
 
     @Test
-    void should_not_have_tamboui_dependencies() {
-        // Given: We use custom Terminal.java instead of TamboUI
-        // When/Then: TamboUI classes should NOT be on classpath
-        assertThrows(ClassNotFoundException.class, () -> Class.forName("dev.tamboui.buffer.Cell"));
-        assertThrows(ClassNotFoundException.class, () -> Class.forName("dev.tamboui.buffer.Buffer"));
-        assertThrows(ClassNotFoundException.class, () -> Class.forName("dev.tamboui.Main"));
+    void should_have_tamboui_dependencies() {
+        // Given: We now use TamboUI for TUI
+        // When/Then: TamboUI classes should be on classpath
+        assertDoesNotThrow(() -> Class.forName("dev.tamboui.tui.TuiRunner"));
+        assertDoesNotThrow(() -> Class.forName("dev.tamboui.terminal.Frame"));
+        assertDoesNotThrow(() -> Class.forName("dev.tamboui.tui.event.KeyEvent"));
     }
 
     @Test
-    void should_not_have_jline3_tamboui_backend() {
-        // When/Then: TamboUI's jline3 backend should NOT be on classpath
-        assertThrows(ClassNotFoundException.class, () -> Class.forName("dev.tamboui.jline3.JLine3Backend"));
+    void should_have_tamboui_widgets() {
+        // When/Then: TamboUI widgets should be on classpath
+        assertDoesNotThrow(() -> Class.forName("dev.tamboui.widgets.paragraph.Paragraph"));
+        assertDoesNotThrow(() -> Class.forName("dev.tamboui.text.Text"));
+        assertDoesNotThrow(() -> Class.forName("dev.tamboui.layout.Rect"));
     }
 
     @Test
-    void should_use_custom_terminal() {
-        // When/Then: Our custom Terminal.java handles TUI
-        // This test passes if no TamboUI classes are found
-        try {
-            Class.forName("dev.tamboui.Main");
-            fail("Tamboui should not be on classpath");
-        } catch (ClassNotFoundException e) {
-            // Expected - we use custom Terminal.java
-        }
+    void should_use_tamboui_adapter() {
+        // When/Then: TamboUI adapter should exist and be loadable
+        assertDoesNotThrow(() -> Class.forName("com.clipro.ui.tamboui.TamboUIAdapter"));
+        assertDoesNotThrow(() -> Class.forName("com.clipro.ui.tamboui.TuiAdapter"));
+        assertDoesNotThrow(() -> Class.forName("com.clipro.ui.tamboui.OpenClaudeTheme"));
     }
 }

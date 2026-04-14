@@ -98,10 +98,10 @@
 │                                                                          │
 │  ┌─────────────────────────────────────────────────────────────────┐  │
 │  │                    TAMBUI LAYER (UI)                            │  │
-│  │  • React-like components                                         │  │
-│  │  • Virtual scrolling                                            │  │
-│  │  • Vim mode                                                     │  │
-│  │  • TCSS styling                                                 │  │
+│  │  • TamboUI Framework (0.2.0-SNAPSHOT)                          │  │
+│  │  • TuiAdapter abstraction layer                                │  │
+│  │  • OpenClaudeTheme (matching openclaude colors)                │  │
+│  │  • TamboUIAdapter implementation                             │  │
 │  └─────────────────────────────────────────────────────────────────┘  │
 │                              │                                          │
 │  ┌─────────────────────────────────────────────────────────────────┐  │
@@ -505,6 +505,7 @@ clipro/
 - [x] Input field with history
 - [x] Vim mode
 - [x] FullscreenLayout
+- [x] **TamboUI Migration (2026-04-14)** - Replaced raw ANSI with TamboUI
 
 ### Phase 3: LLM Bridge (1 week)
 - [x] Ollama client (priority)
@@ -543,4 +544,5 @@ clipro/
 
 **Project:** CLIPRO - Java AI CLI
 **Repository:** https://github.com/simpletoolsindia/clipro
-**Updated:** 2026-04-13
+**Updated:** 2026-04-14
+**TambuUI Migration:** COMPLETE
