@@ -15,7 +15,7 @@ public class McpClient {
     private final String address;
     private final Map<String, McpTool> tools = new ConcurrentHashMap<>();
     private volatile boolean connected = false;
-    private final ConnectionState state = new ConnectionState();
+    private volatile ConnectionState state = ConnectionState.disconnected();
 
     public McpClient(String serverName, String address) {
         this.serverName = serverName;
@@ -29,7 +29,7 @@ public class McpClient {
         return CompletableFuture.runAsync(() -> {
             try {
                 // Initialize connection
-                state.status = "connecting";
+                state = new ConnectionState("connecting", null);
 
                 // Send initialize request
                 Map<String, Object> response = sendRequest("initialize", Map.of(
@@ -43,15 +43,14 @@ public class McpClient {
                     )
                 ));
 
-                state.status = "connected";
+                state = new ConnectionState("connected", null);
                 connected = true;
 
                 // Discover tools
                 listTools();
 
             } catch (Exception e) {
-                state.status = "error";
-                state.error = e.getMessage();
+                state = new ConnectionState("error", e.getMessage());
                 throw new RuntimeException("Failed to connect to MCP server: " + serverName, e);
             }
         });
@@ -137,7 +136,7 @@ public class McpClient {
      */
     public void disconnect() {
         connected = false;
-        state.status = "disconnected";
+        state = ConnectionState.disconnected();
         tools.clear();
     }
 
@@ -177,10 +176,11 @@ public class McpClient {
     }
 
     /**
-     * Connection state class.
+     * Connection state record.
      */
-    public static class ConnectionState {
-        public volatile String status = "disconnected";
-        public volatile String error = null;
+    public record ConnectionState(String status, String error) {
+        public static ConnectionState disconnected() {
+            return new ConnectionState("disconnected", null);
+        }
     }
 }
