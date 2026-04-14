@@ -69,7 +69,7 @@ public class StreamingMessage extends Message {
     }
 
     public String getContentWithCursor() {
-        return buffer.toString() + " \033[7m \033[0m";
+        return buffer.toString() + Terminal.dim(" ▌");
     }
 
     public int getCharCount() {
