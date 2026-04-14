@@ -17,7 +17,7 @@ public class SubAgent {
     private String result = "";
     private final CompletableFuture<String> future = new CompletableFuture<>();
 
-    public enum AgentState { IDLE, RUNNING, COMPLETED, FAILED }
+    public enum AgentState { IDLE, RUNNING, THINKING, ACTING, COMPLETED, FAILED, ERROR }
 
     public SubAgent(String id, String name, String model) {
         this.id = id;
@@ -49,4 +49,31 @@ public class SubAgent {
     public String getCurrentTask() { return currentTask; }
     public String getResult() { return result; }
     public CompletableFuture<String> getFuture() { return future; }
+
+    public boolean isRunning() {
+        return state == AgentState.RUNNING;
+    }
+
+    public void interrupt() {
+        if (state == AgentState.RUNNING) {
+            future.cancel(true);
+            state = AgentState.FAILED;
+        }
+    }
+
+    public void forceKill() {
+        future.cancel(true);
+        state = AgentState.FAILED;
+    }
+
+    public boolean awaitCompletion(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        try {
+            future.get(timeout, unit);
+            return true;
+        } catch (TimeoutException e) {
+            throw e;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

@@ -31,7 +31,7 @@ public class WebSearchTool implements Tool {
 
         @Override
         public String search(String query, int limit) throws Exception {
-            String url = DEFAULT_URL + "?q=" + encode(query) +
+            String url = DEFAULT_URL + "?q=" + java.net.URLEncoder.encode(query, java.nio.charset.StandardCharsets.UTF_8) +
                         "&format=json&engines=wikipedia,github,hackernews&safe_search=1&limit=" + limit;
             HttpResponse<String> response = client.getAsync(url).get();
             return formatSearXNGResults(response.body());

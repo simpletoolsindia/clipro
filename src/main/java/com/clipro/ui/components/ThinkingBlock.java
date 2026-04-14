@@ -1,6 +1,7 @@
 package com.clipro.ui.components;
 
 import com.clipro.llm.ThinkingParser;
+import com.clipro.ui.Terminal;
 
 /**
  * Thinking block renderer with collapsible UI.

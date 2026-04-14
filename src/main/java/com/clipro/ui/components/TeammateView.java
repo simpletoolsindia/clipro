@@ -2,6 +2,7 @@ package com.clipro.ui.components;
 
 import com.clipro.ui.Terminal;
 import com.clipro.agent.SubAgent;
+import static com.clipro.agent.SubAgent.AgentState.*;
 import java.util.*;
 
 /**
