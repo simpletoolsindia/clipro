@@ -183,7 +183,7 @@ openclaude/src/
 |--------|------|------|-------|-------|
 | P1.1.1 | Create Gradle wrapper | ✅ `BuildTest` | `settings.gradle.kts` | PC |
 | P1.1.2 | Add Quarkus dependencies | ✅ `QuarkusBuildTest` | `build.gradle.kts` | PC |
-| P1.1.3 | Add TamboUI dependencies | 🔄 PC Agent | `build.gradle.kts` | PC |
+| P1.1.3 | Add TamboUI dependencies | ✅ `TamboUIBuildTest` | ~~PC~~ DONE |
 | P1.1.4 | Add Jackson, JGit | ✅ `DepsBuildTest` | `build.gradle.kts` | PC |
 | P1.1.5 | Configure GraalVM | 🔄 PC Agent | `native-image/` | PC |
 
