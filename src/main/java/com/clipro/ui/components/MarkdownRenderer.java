@@ -1,12 +1,20 @@
 package com.clipro.ui.components;
 
 import com.clipro.ui.Terminal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /**
  * Simple markdown renderer for terminal output with syntax highlighting.
  * Reference: openclaude/src/components/Markdown.tsx
+ *
+ * Features:
+ * - Syntax highlighting for 18+ languages
+ * - Code blocks with line numbers (M-10)
+ * - Markdown tables with box-drawing characters (M-09)
+ * - Inline code, bold, italic, links
  */
 public class MarkdownRenderer {
     private static final String RESET = Terminal.ansi("0");
@@ -16,6 +24,7 @@ public class MarkdownRenderer {
     private static final String LINK_COLOR = Terminal.ansi("34");
     private static final String DIM = Terminal.ansi("2");
     private static final String RESET_DIM = Terminal.ansi("22");
+    private static final String CYAN = Terminal.ansi("36");
 
     // Syntax highlighter instance
     private static final SyntaxHighlighter syntaxHighlighter = new SyntaxHighlighter();
@@ -26,9 +35,7 @@ public class MarkdownRenderer {
     private static final Pattern CODE_PATTERN = Pattern.compile("`([^`]+)`");
     private static final Pattern CODE_BLOCK_PATTERN = Pattern.compile("```(\\w*)\\n([\\s\\S]*?)```");
     private static final Pattern LINK_PATTERN = Pattern.compile("\\[([^\\]]+)\\]\\(([^)]+)\\)");
-    private static final Pattern TABLE_PATTERN = Pattern.compile("(?m)^\\|.*\\|$");
-    private static final Pattern TABLE_ROW_PATTERN = Pattern.compile("(?m)^\\|(.+)\\|$");
-    private static final Pattern TABLE_SEPARATOR_PATTERN = Pattern.compile("(?m)^\\|[-:\\s]+\\|[-:\\s]*\\|$");
+    private static final Pattern TABLE_FULL_PATTERN = Pattern.compile("(?m)((?:^\\|.*\\|$\\n?)+)");
 
     public static String render(String markdown) {
         if (markdown == null || markdown.isEmpty()) {
@@ -170,26 +177,166 @@ public class MarkdownRenderer {
     }
 
     /**
-     * Render markdown tables with box-drawing characters.
+     * Render markdown tables with box-drawing characters (M-09).
      * Supports: | col1 | col2 | with | --- | --- | separator.
      * Alignment: :--- (left), :---: (center), ---: (right).
      */
     private static String renderTables(String text) {
-        Matcher tableMatcher = TABLE_PATTERN.matcher(text);
         StringBuffer result = new StringBuffer();
+        Matcher tableMatcher = TABLE_FULL_PATTERN.matcher(text);
 
         while (tableMatcher.find()) {
-            String fullMatch = tableMatcher.group();
-            // Skip separator rows
-            if (TABLE_SEPARATOR_PATTERN.matcher(fullMatch).matches()) {
-                tableMatcher.appendReplacement(result, Matcher.quoteReplacement(fullMatch));
-                continue;
-            }
-            tableMatcher.appendReplacement(result, Matcher.quoteReplacement(""));
+            String tableBlock = tableMatcher.group(1);
+            String renderedTable = renderTableBlock(tableBlock);
+            tableMatcher.appendReplacement(result, Matcher.quoteReplacement(renderedTable));
         }
         tableMatcher.appendTail(result);
 
         return result.toString();
+    }
+
+    /**
+     * Render a single table block with proper alignment.
+     */
+    private static String renderTableBlock(String tableBlock) {
+        String[] lines = tableBlock.trim().split("\n");
+        if (lines.length < 2) return tableBlock;
+
+        List<String[]> rows = new ArrayList<>();
+        List<int[]> alignments = new ArrayList<>();
+
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (line.isEmpty()) continue;
+
+            // Skip separator line
+            if (line.matches("^\\|[-:\\s]+\\|.*$")) {
+                alignments.add(parseAlignments(line));
+                continue;
+            }
+
+            // Parse cells
+            String[] cells = line.split("\\|");
+            List<String> cellList = new ArrayList<>();
+            for (int j = 0; j < cells.length; j++) {
+                String cell = cells[j].trim();
+                if (j == 0 && cell.isEmpty()) continue; // Skip leading empty
+                if (j == cells.length - 1 && cell.isEmpty()) continue; // Skip trailing empty
+                cellList.add(cell);
+            }
+            if (!cellList.isEmpty()) {
+                rows.add(cellList.toArray(new String[0]));
+            }
+        }
+
+        if (rows.isEmpty()) return tableBlock;
+
+        // Determine column widths
+        int colCount = rows.get(0).length;
+        int[] colWidths = new int[colCount];
+        for (String[] row : rows) {
+            for (int i = 0; i < Math.min(row.length, colCount); i++) {
+                colWidths[i] = Math.max(colWidths[i], stripAnsi(row[i]).length());
+            }
+        }
+
+        // Default alignments
+        int[] colAligns = alignments.isEmpty() ? new int[colCount] : alignments.get(0);
+        for (int i = 0; i < colAligns.length; i++) {
+            if (colAligns[i] == 0) colAligns[i] = -1; // Default: left
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        // Top border
+        sb.append("┌");
+        for (int i = 0; i < colCount; i++) {
+            if (i > 0) sb.append("┬");
+            sb.append("─".repeat(colWidths[i] + 2));
+        }
+        sb.append("┐\n");
+
+        // Header row
+        sb.append("│");
+        for (int i = 0; i < colCount; i++) {
+            if (i > 0) sb.append("│");
+            String cell = rows.get(0)[i];
+            int width = colWidths[i];
+            sb.append(" ").append(formatCell(cell, width, colAligns[i])).append(" ");
+        }
+        sb.append("│\n");
+
+        // Header separator
+        sb.append("├");
+        for (int i = 0; i < colCount; i++) {
+            if (i > 0) sb.append("┼");
+            sb.append("─".repeat(colWidths[i] + 2));
+        }
+        sb.append("┤\n");
+
+        // Data rows
+        for (int r = 1; r < rows.size(); r++) {
+            sb.append("│");
+            for (int i = 0; i < colCount; i++) {
+                if (i > 0) sb.append("│");
+                String cell = i < rows.get(r).length ? rows.get(r)[i] : "";
+                int width = colWidths[i];
+                sb.append(" ").append(formatCell(cell, width, colAligns[i])).append(" ");
+            }
+            sb.append("│\n");
+        }
+
+        // Bottom border
+        sb.append("└");
+        for (int i = 0; i < colCount; i++) {
+            if (i > 0) sb.append("┴");
+            sb.append("─".repeat(colWidths[i] + 2));
+        }
+        sb.append("┘");
+
+        return sb.toString();
+    }
+
+    /**
+     * Parse alignment from separator row.
+     * -1 = left, 0 = center, 1 = right
+     */
+    private static int[] parseAlignments(String separator) {
+        String[] cells = separator.split("\\|");
+        int[] aligns = new int[cells.length];
+        for (int i = 0; i < cells.length; i++) {
+            String cell = cells[i].trim();
+            if (cell.startsWith(":") && cell.endsWith(":")) {
+                aligns[i] = 0; // center
+            } else if (cell.endsWith(":")) {
+                aligns[i] = 1; // right
+            } else {
+                aligns[i] = -1; // left (default)
+            }
+        }
+        return aligns;
+    }
+
+    /**
+     * Format cell content with alignment and padding.
+     */
+    private static String formatCell(String content, int width, int align) {
+        String stripped = stripAnsi(content);
+        int padding = width - stripped.length();
+        if (padding <= 0) {
+            return content;
+        }
+
+        switch (align) {
+            case 0: // center
+                int leftPad = padding / 2;
+                int rightPad = padding - leftPad;
+                return " ".repeat(leftPad) + content + " ".repeat(rightPad);
+            case 1: // right
+                return " ".repeat(padding) + content;
+            default: // left
+                return content + " ".repeat(padding);
+        }
     }
 
     /**
