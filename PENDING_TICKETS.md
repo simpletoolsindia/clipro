@@ -1,6 +1,6 @@
 # Pending Migration Tickets
 
-This document tracks all remaining features that are either partially implemented (`⚠️ HALF`) or not yet started (`❌ NOT STARTED`). At this point, the application is 95% complete, and only these exact 7 High-Priority tickets remain. 
+This document tracks all remaining features that are either partially implemented (`⚠️ HALF`) or not yet started (`❌ NOT STARTED`). At this point, the application is ~90% complete, and the remaining missing items have been fully ticketed to reach 100% parity. 
 
 ### High Priority Remaining Tickets
 
@@ -17,3 +17,9 @@ This document tracks all remaining features that are either partially implemente
 | **H-06** | **MCP Server Discovery & Management**<br>The basic JSON-RPC `McpClient` works on an individual level, but the app lacks automatic server orchestration. Implement a boot loader that reads `~/.config/clipro/mcp.json`, actively spawns the configured MCP servers via stdio, and maps their available tools directly into the global Agent's tool registry. | ⚠️ HALF |
 | **H-07** | **LSP Tool (Language Server Protocol)**<br>Build out `src/main/java/com/clipro/tools/lsp/LSPTool.java`. It needs to start and communicate with Language Servers (pyright, tsserver, gopls, rust-analyzer, etc.) utilizing JSON-RPC via stdio so the agent can finally execute advanced code intelligence options such as go-to-definition, find-references, and hover diagnostics reliably. | ❌ NOT STARTED |
 | **H-09** | **Theme Hot-Switching CLI Command**<br>Themes currently work well but only load their colors on application startup. Design the missing `/theme` runtime command (`/theme dark`, `/theme light-ansi`, `/theme preview`) that immediately hot-swaps the underlying application theme config and triggers a real-time full-screen UI re-render. | ⚠️ HALF |
+
+| **H-13** | **Input Field Visual Animations & Mode Display**<br>Migrate `ShimmeredInput.tsx` equivalent (Animated prompt char) and `PromptInputModeIndicator.tsx` (Vim Mode display: NORMAL/INSERT/VISUAL). Additionally, ensure arrow-key navigation works within multi-line input `EnhancedInputField.java`. | ❌ NOT STARTED |
+| **H-14** | **Message List Types & Event Formatting**<br>Ensure `MessageList.java` and `MessageBox.java` handle special OpenClaude message types exactly, especially `grouped_tool_use` and `collapsed_read_search`. Implement proper click-to-expand behavior for Collapsible regions (currently toggle works via keyboard but click is missing). | ⚠️ HALF |
+| **H-15** | **Pixel-Perfect Color Palette Parity**<br>Audit and correct the `ThemeManager.java` color hex codes to match OpenClaude precisely. Fix: Text (`#E8E6E3` is ~3% off), User message bg (`#1E1E1E` is different), Success (`#2EA043` is ~10% off), Error (`#D22F2F`), Warning (`#B5835A`), Subtle (`#868283`), and Border (`#323232`). | ⚠️ HALF |
+| **H-16** | **Plugin Commands Architecture**<br>Original OpenClaude supports 10+ plugin commands. Currently out of scope/missing. Build a plugin command loading architecture in `CommandRegistry.java` to achieve 100% parity. | ❌ NOT STARTED |
+| **H-17** | **Config/Argument Parsing Completeness**<br>Replace basic/stub CLI argument parsing with a full-fledged system capable of handling complex flags, config file loading, and workspace context variables perfectly. | ⚠️ HALF |

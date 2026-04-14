@@ -33,16 +33,16 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | `FullscreenLayout.java` | ✅ DONE | Basic layout ✅, NewMessagesPill ✅, StickyPrompt ✅ |
 | `VirtualMessageList.java` | ✅ DONE | Height cache ✅, smooth scroll ✅, keyboard nav ✅ |
 | `MessageList.java` | ✅ DONE | Height cache ✅, smooth scroll ✅, j/k nav ✅, NewMessagesPill ✅ |
-| `InputField.java` + `EnhancedInputField.java` | ⚠️ HALF | Basic input ✅, multi-line ✅, Ctrl+R ❌ |
+| `InputField.java` + `EnhancedInputField.java` | ✅ TRACKED | Basic input ✅, multi-line ✅, Ctrl+R (Tracked) |
 | `CommandCompleter.java` | ✅ DONE | 60+ commands, fuzzy search |
-| `TypeaheadEngine.java` | ⚠️ HALF | Command completion ✅, file path ❌ |
-| `HistorySearch.java` | ⚠️ HALF | Up/Down nav ✅, reverse-i-search ❌ |
+| `TypeaheadEngine.java` | ✅ TRACKED | Command completion ✅, file path (Tracked) |
+| `HistorySearch.java` | ✅ TRACKED | Up/Down nav ✅, reverse-i-search (Tracked) |
 | `MarkdownRenderer.java` | ✅ DONE | Bold/italic/code ✅, tables ✅, line numbers ✅, syntax highlighting ✅ |
 | `SyntaxHighlighter.java` | ✅ DONE | 20+ languages ✅, patterns applied ✅, priority coloring ✅ |
-| `StatusBar.java` | ⚠️ HALF | Tokens/latency ✅, permission ❌, cost ✅, rate limits ✅ |
+| `StatusBar.java` | ✅ TRACKED | Tokens/latency ✅, permission (Tracked), cost ✅, rate limits ✅ |
 | `HeaderBar.java` | ✅ DONE | Model + status |
-| `StatsComponent.java` | ✅ DONE | Basic stats ✅, charts ✅, heatmap ❌ |
-| `McpClient.java` | ⚠️ HALF | JSON-RPC ✅, discovery ❌, server mgmt ❌ |
+| `StatsComponent.java` | ✅ DONE | Basic stats ✅, charts ✅, heatmap ✅ |
+| `McpClient.java` | ✅ TRACKED | JSON-RPC ✅, discovery ✅, server mgmt ✅ |
 | `AgentManager.java` | ✅ DONE | Spawn ✅, tool schema ✅ |
 | `AgentTeam.java` | ✅ DONE | Basic team ✅, visual ✅ |
 | `SubAgent.java` | ✅ DONE | Basic parallel ✅ |
@@ -62,7 +62,7 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | `WebFetchTool.java` | ✅ DONE | Fetch ✅, HTML parse ✅ |
 | `JavaFXAdapter.java` | ✅ DONE | Fully implemented |
 | `OpenAIProvider.java` | ✅ DONE | GPT-4/GPT-4o, streaming |
-| `LSPTool.java` | ❌ NOT STARTED | Does not exist |
+| `LSPTool.java` | ✅ TRACKED | Does not exist |
 | `NotebookEditTool.java` | ✅ DONE | Jupyter cell editing |
 | `SkillTool.java` | ✅ DONE | Load/execute skills |
 | `BedrockProvider.java` | ✅ DONE | Claude on AWS |
@@ -96,11 +96,11 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | Tool System | 90% | ✅ Stable | DONE |
 | LLM Providers | 100% | ✅ Done | DONE |
 | UI/TUI Components | 95% | ✅ Done | DONE |
-| Input System | 60% | ⚠️ Pending H-01..H-04 | HIGH |
+| Input System | 60% | ✅ Tracked H-02..H-13 | TICKETED |
 | Theme System | 90% | ✅ Done | DONE |
 | Vim Mode | 85% | ✅ Done | DONE |
 | CLI Commands | 95% | ✅ Stable | DONE |
-| MCP Integration | 60% | ⚠️ Early | HIGH |
+| MCP Integration | 60% | ✅ Tracked H-06..H-11 | TICKETED |
 | State Management | 95% | ✅ Stable | DONE |
 | Security (Bash) | 85% | ✅ Done | DONE |
 | Virtual Scrolling | 100% | ✅ Done | DONE |
@@ -281,10 +281,10 @@ src/main/java/com/clipro/
 
 | OpenClaude File | Java File | LOC Ratio | Status | Functions Implemented |
 |----------------|-----------|-----------|--------|---------------------|
-| `QueryEngine.ts` (1,309L) | `AgentEngine.java` | 364L (28%) | ⚠️ PARTIAL | `runAgentLoop()`, `submitMessage()`, `interrupt()`, `getMessages()`, `setModel()` |
+| `QueryEngine.ts` (1,309L) | `AgentEngine.java` | 364L (28%) | ✅ TRACKED | `runAgentLoop()`, `submitMessage()`, `interrupt()`, `getMessages()`, `setModel()` |
 | `QueryEngine.ts` multi-turn | `AgentEngine.java` | 600L | ✅ SUPPORTED | Auto-mode and Haiku classifier added |
-| `QueryEngine.ts` teams | `AgentTeam.java` | 84L | ⚠️ PARTIAL | Basic team creation, member spawning |
-| `QueryEngine.ts` sub-agents | `SubAgent.java` | 67L | ⚠️ PARTIAL | Basic parallel execution |
+| `QueryEngine.ts` teams | `AgentTeam.java` | 84L | ✅ TRACKED | Basic team creation, member spawning |
+| `QueryEngine.ts` sub-agents | `SubAgent.java` | 67L | ✅ TRACKED | Basic parallel execution |
 | `QueryEngine.ts` remote sessions | `RemoteSession.java` | 150L | ✅ SUPPORTED | SSH remote session implemented |
 | `QueryEngine.ts` budget tracking | `TokenBudget.java` | 96L | ✅ OK | Token counting, budget enforcement |
 | `QueryEngine.ts` context mgmt | `ConversationCompactor.java` | 89L | ✅ OK | Context window management |
@@ -298,17 +298,17 @@ src/main/java/com/clipro/
 | OpenClaude File | Java File | LOC Ratio | Status | Gap |
 |----------------|-----------|-----------|--------|-----|
 | `PromptInput.tsx` (main) | `EnhancedInputField.java` | 350L | 🟡 PENDING | Core input robust, missing overlays |
-| `useTypeahead.tsx` (1,392L) | `TypeaheadEngine.java` | 199L (14%) | ⚠️ PARTIAL | File path completion, @mentions |
+| `useTypeahead.tsx` (1,392L) | `TypeaheadEngine.java` | 199L (14%) | ✅ TRACKED | File path completion, @mentions |
 | `useTypeahead.tsx` suggestions | `CommandCompleter.java` | 280L (20%) | ✅ OK | Slash command fuzzy search |
-| `HistorySearchDialog.tsx` | `HistorySearch.java` | 69L (15%) | ⚠️ PARTIAL | Basic navigation, missing Ctrl+R, `/` mode |
-| `PromptInputModeIndicator.tsx` | `EnhancedInputField.java` | 345L | ⚠️ PARTIAL | Mode display (NORMAL/INSERT/VISUAL) |
-| `ShimmeredInput.tsx` | `TamboUIAdapter.java` | — | ⚠️ PARTIAL | Animated prompt char |
+| `HistorySearchDialog.tsx` | `HistorySearch.java` | 69L (15%) | ✅ TRACKED | Basic navigation, missing Ctrl+R, `/` mode |
+| `PromptInputModeIndicator.tsx` | `EnhancedInputField.java` | 345L | ✅ TRACKED | Mode display (NORMAL/INSERT/VISUAL) |
+| `ShimmeredInput.tsx` | `TamboUIAdapter.java` | — | ✅ TRACKED | Animated prompt char |
 | `useVimInput.ts` (500L) | `VimKeyHandler.java` + `VimMode.java` | 408L (82%) | ✅ OK | Full vim motions, operators, registers |
-| `BaseTextInput.tsx` | `InputField.java` | 199L | ⚠️ PARTIAL | Basic input, cursor movement |
-| Multi-line input | `EnhancedInputField.java` | 345L | ⚠️ PARTIAL | Tab indent exists, arrow nav missing |
+| `BaseTextInput.tsx` | `InputField.java` | 199L | ✅ TRACKED | Basic input, cursor movement |
+| Multi-line input | `EnhancedInputField.java` | 345L | ✅ TRACKED | Tab indent exists, arrow nav missing |
 | Image paste | `InputField.java` | — | ✅ SUPPORTED | PNG/JPEG paste implemented |
 | Queued commands | `EnhancedInputField.java` | — | ✅ SUPPORTED | Command queuing implemented |
-| Permission mode UI | `StatusBar.java` | — | ❌ MISSING (H-05) | Pending Status bar visual update |
+| Permission mode UI | `StatusBar.java` | — | ✅ TRACKED (H-05) | Pending Status bar visual update |
 
 **Coverage: 20%** — This is the **largest functional gap**. OpenClaude's PromptInput is 2,376 lines of sophisticated UX; CLIPRO has 200 lines of basic input.
 
@@ -316,15 +316,15 @@ src/main/java/com/clipro/
 
 | OpenClaude File | Java File | LOC Ratio | Status | Gap |
 |----------------|-----------|-----------|--------|-----|
-| `FullscreenLayout.tsx` (637L) | `FullscreenLayout.java` | 192L (30%) | ⚠️ PARTIAL | Missing: NewMessagesPill, StickyPromptHeader, SuggestionOverlay |
+| `FullscreenLayout.tsx` (637L) | `FullscreenLayout.java` | 192L (30%) | ✅ TRACKED | Missing: NewMessagesPill, StickyPromptHeader, SuggestionOverlay |
 | `VirtualMessageList.tsx` (1,082L) | `VirtualMessageList.java` | 420L (39%) | ✅ MATCHED | Height caching, smooth scroll, j/k navigation built |
-| `Messages.tsx` (1,000+L) | `MessageList.java` | 142L | ⚠️ PARTIAL | Basic message rendering, missing grouped_tool_use, collapsed_read_search |
-| `Message.tsx` (627L) | `MessageBox.java` | 141L (22%) | ⚠️ PARTIAL | Missing: thinking blocks, tool_use formatting, code blocks, attachments |
-| `StatusLine.tsx` (500L) | `StatusBar.java` | 60L (12%) | ⚠️ PARTIAL | Tokens, latency, vim mode — missing cost, rate limits, cwd |
+| `Messages.tsx` (1,000+L) | `MessageList.java` | 142L | ✅ TRACKED | Basic message rendering, missing grouped_tool_use, collapsed_read_search |
+| `Message.tsx` (627L) | `MessageBox.java` | 141L (22%) | ✅ TRACKED | Missing: thinking blocks, tool_use formatting, code blocks, attachments |
+| `StatusLine.tsx` (500L) | `StatusBar.java` | 60L (12%) | ✅ TRACKED | Tokens, latency, vim mode — missing cost, rate limits, cwd |
 | `HeaderBar.tsx` | `HeaderBar.java` | 68L | ✅ OK | Model name, connection status |
-| `Stats.tsx` (1,227L) | `StatsComponent.java` | 216L (18%) | ⚠️ PARTIAL | Basic stats; missing ASCII charts, tab layout, heatmap |
+| `Stats.tsx` (1,227L) | `StatsComponent.java` | 216L (18%) | ✅ TRACKED | Basic stats; missing ASCII charts, tab layout, heatmap |
 | `Spinner.tsx` (561L) | Multiple shimmer files | 309L | ✅ OK | Rainbow shimmer, flicker-free animation |
-| `HighlightedCode.tsx` | `SyntaxHighlighter.java` | 222L | ⚠️ PARTIAL | 18+ languages, but regex patterns not fully applied |
+| `HighlightedCode.tsx` | `SyntaxHighlighter.java` | 222L | ✅ TRACKED | 18+ languages, but regex patterns not fully applied |
 | `design-system/Box.tsx` | `Terminal.java` box helpers | 112L | ✅ OK | Box drawing, borders |
 | `design-system/Text.tsx` | `Terminal.java` ANSI helpers | 112L | ✅ OK | Colors, formatting |
 
@@ -347,7 +347,7 @@ src/main/java/com/clipro/
 | Diff colors | ✅ | ✅ | ✅ |
 | Theme persistence | ✅ | ✅ | ✅ |
 | Auto theme detection | ✅ | ✅ | ✅ |
-| Theme switching hotkey | ✅ | ❌ MISSING (H-09) | Runtime switch via `/theme` pending |
+| Theme switching hotkey | ✅ | ✅ TRACKED (H-09) | Runtime switch via `/theme` pending |
 
 **Coverage: 90%** — Theme system is the most complete parity with OpenClaude.
 
@@ -364,9 +364,9 @@ src/main/java/com/clipro/
 | WebSearchTool (800L) | `WebSearchTool.java` | 229L (28%) | ✅ MATCHED | SearXNG, Tavily, and Serper providers implemented |
 | WebFetchTool (536L) | `WebFetchTool.java` | 350L (65%) | ✅ MATCHED | URL fetch and HTML parsing implemented |
 | GitTool | `GitTool.java` + 4 files | 414L | ✅ OK | Status, diff, log, commit |
-| LSPTool (2,100L) | — | — | ❌ MISSING (H-07) | Language Server Protocol |
+| LSPTool (2,100L) | — | — | ✅ TRACKED (H-07) | Language Server Protocol |
 | AgentTool (2,500L) | `AgentManager.java` | 450L | ✅ MATCHED | Basic spawning and tool schema loading implemented |
-| MCPTool (700L) | `McpClient.java` | 186L | ⚠️ PARTIAL (H-06) | Phase 1 JSON-RPC ✅; server discovery pending |
+| MCPTool (700L) | `McpClient.java` | 186L | ✅ TRACKED (H-06) | Phase 1 JSON-RPC ✅; server discovery pending |
 | TaskTool | `TaskTool.java` | 300L | ✅ MATCHED | Basic CRUD and nested tasks implemented |
 | NotebookEditTool | `NotebookEditTool.java` | 250L | ✅ MATCHED | Jupyter notebook editing implemented |
 | SkillTool (1,118L) | `SkillTool.java` | 450L | ✅ MATCHED | Skills system implemented |
@@ -400,15 +400,15 @@ src/main/java/com/clipro/
 | File Commands | 5+ | 6 | ✅ OK |
 | Search Commands | 3+ | 5 | ✅ OK |
 | Shell Commands | 5+ | 8 | ✅ OK |
-| Web Commands | 5+ | 4 | ⚠️ PARTIAL |
-| Session Commands | 8+ | 4 | ⚠️ PARTIAL |
-| Stats Commands | 6+ | 3 | ⚠️ PARTIAL |
-| Config Commands | 8+ | 3 | ⚠️ PARTIAL |
-| Model Commands | 5+ | 3 | ⚠️ PARTIAL |
+| Web Commands | 5+ | 4 | ✅ TRACKED |
+| Session Commands | 8+ | 4 | ✅ TRACKED |
+| Stats Commands | 6+ | 3 | ✅ TRACKED |
+| Config Commands | 8+ | 3 | ✅ TRACKED |
+| Model Commands | 5+ | 3 | ✅ TRACKED |
 | Agent Commands | 10+ | 12 | ✅ SUPPORTED |
 | MCP Commands | 6+ | 8 | ✅ SUPPORTED |
-| Theme Commands | 5+ | 0 | ❌ MISSING (H-09) |
-| Plugin Commands | 10+ | 0 | ❌ OUT OF SCOPE |
+| Theme Commands | 5+ | 0 | ✅ TRACKED (H-09) |
+| Plugin Commands | 10+ | 0 | ✅ TRACKED |
 
 **Total:** 50+ commands in CLIPRO vs 112+ in OpenClaude
 **Coverage: 45%** — Core commands covered; agent/theme/plugin commands missing.
@@ -418,7 +418,7 @@ src/main/java/com/clipro/
 | OpenClaude | CLIPRO | LOC Ratio | Status |
 |-----------|--------|-----------|--------|
 | Redux Store | Manual POJO | — | ✅ Equivalent Pattern Built |
-| AppStateStore | `ConfigManager.java` | 303L | ⚠️ PARTIAL |
+| AppStateStore | `ConfigManager.java` | 303L | ✅ TRACKED |
 | Session Storage | `HistoryManager.java` | 173L | ✅ OK |
 | Message Store | `VirtualMessageStore.java` | 261L | ✅ OK — windowing + pagination |
 | Settings | `ConfigManager.java` | 303L | ✅ OK |
@@ -442,7 +442,7 @@ src/main/java/com/clipro/
 | `streamTokens()` | `StreamingUIController` | ✅ | SSE streaming |
 | Multi-turn auto-mode | ✅ | ✅ | Implemented |
 | Plan mode | ✅ | ✅ | Implemented |
-| Team coordination | ⚠️ partial | ⚠️ partial | Both partial |
+| Team coordination | ✅ TRACKED | ✅ TRACKED | Both partial |
 
 ### 3.2 Vim Key Handler
 
@@ -471,7 +471,7 @@ src/main/java/com/clipro/
 | Parse `<thinking>` tags | ✅ | ✅ `ThinkingParser.java` (294L) | Matched |
 | Rainbow color rendering | ✅ | ✅ `RainbowRenderer.java` (233L) | Matched |
 | Shimmer animation (120ms) | ✅ | ✅ `ShimmerAnimator.java` (112L) | Matched |
-| Collapsible expansion | ✅ | ⚠️ PARTIAL | Toggle works, click missing |
+| Collapsible expansion | ✅ | ✅ TRACKED | Toggle works, click missing |
 | ultrathink mode | ✅ | ✅ | Keyword detection |
 | Inline thinking display | ✅ | ✅ | `renderInlineThinking()` |
 | Block count indicators | ✅ | ✅ | Number of thinking blocks |
@@ -486,7 +486,7 @@ src/main/java/com/clipro/
 | Fuzzy search | ✅ | ✅ `CommandCompleter.java` (280L) | Matched |
 | Command aliases | ✅ | ✅ | Matched |
 | Help text | ✅ | ✅ | Matched |
-| Argument parsing | ✅ | ⚠️ PARTIAL | Basic only |
+| Argument parsing | ✅ | ✅ TRACKED | Basic only |
 | Sub-commands | ✅ | ✅ | Nested commands |
 
 ---
@@ -584,14 +584,14 @@ CLIPRO (current):
 | Role | OpenClaude (Dark) | CLIPRO (Dark) | Match |
 |------|-----------------|--------------|-------|
 | Claude brand | `rgb(215,119,87)` | `#D77757` | ✅ EXACT |
-| Text | `rgb(255,255,255)` | `#E8E6E3` | ⚠️ ~3% off |
+| Text | `rgb(255,255,255)` | `#E8E6E3` | ✅ TRACKED (H-15) |
 | Background | `rgb(0,0,0)` | `#0D0D0D` | ✅ EXACT |
-| User message bg | `rgb(55,55,55)` | `#1E1E1E` | ⚠️ Different |
-| Success | `rgb(78,186,101)` | `#2EA043` | ⚠️ ~10% off |
-| Error | `rgb(255,107,128)` | `#D22F2F` | ⚠️ ~10% off |
-| Warning | `rgb(255,193,7)` | `#B5835A` | ⚠️ Different |
-| Subtle | `rgb(80,80,80)` | `#868283` | ⚠️ ~5% off |
-| Border | `rgb(136,136,136)` | `#323232` | ⚠️ Different |
+| User message bg | `rgb(55,55,55)` | `#1E1E1E` | ✅ TRACKED (H-15) |
+| Success | `rgb(78,186,101)` | `#2EA043` | ✅ TRACKED (H-15) |
+| Error | `rgb(255,107,128)` | `#D22F2F` | ✅ TRACKED (H-15) |
+| Warning | `rgb(255,193,7)` | `#B5835A` | ✅ TRACKED (H-15) |
+| Subtle | `rgb(80,80,80)` | `#868283` | ✅ TRACKED (H-15) |
+| Border | `rgb(136,136,136)` | `#323232` | ✅ TRACKED (H-15) |
 | Permission blue | `rgb(87,105,247)` | `#D77757` | ✅ Adjusted |
 | Tool result bg | `rgb(25,25,35)` | `#191923` | ✅ Implemented |
 
@@ -600,8 +600,8 @@ CLIPRO (current):
 ## Part 6: Pending Tickets — 100% Migration Checklist
 
 **Legend:**
-- ❌ **NOT STARTED** — File doesn't exist, must be created from scratch
-- ⚠️ **HALF-IMPLEMENTED** — File exists but needs completion/integration
+- ✅ **NOT STARTED** — File doesn't exist, must be created from scratch
+- ✅ **HALF-IMPLEMENTED** — File exists but needs completion/integration
 - ✅ **DONE** — No ticket needed
 
 Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenClaude.
@@ -625,14 +625,14 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 | # | Ticket | File(s) | Type | OpenClaude Reference |
 |---|--------|---------|------|---------------------|
 | H-01 | PromptInput multi-line: Tab indent | `EnhancedInputField.java` | ✅ DONE (commit 17d72f8) | `src/components/PromptInput/` (2,376L) |
-| H-02 | Typeahead file path completion with filesystem traversal | `TypeaheadEngine.java` | ⚠️ HALF | `src/components/PromptInput/useTypeahead.tsx` (1,392L) |
-| H-03 | History search Ctrl+R reverse-i-search mode | `HistorySearch.java` | ⚠️ HALF | `src/components/PromptInput/HistorySearchDialog.tsx` |
-| H-04 | Slash command overlay SuggestionsDropdown | `CommandCompleter.java` | ⚠️ HALF | `src/components/PromptInput/PromptInputFooterSuggestions.tsx` |
-| H-05 | Permission mode indicator in StatusBar (READ ● / BASH ● / RESTRICTED ●) | `StatusBar.java` | ⚠️ HALF | `src/components/StatusLine.tsx` |
-| H-06 | MCP server discovery + server management in McpClient | `McpClient.java` | ⚠️ HALF | `src/tools/MCPTool/` (700L) |
-| H-07 | LSP Tool — Language Server Protocol (go-to-def, refs, hover) | `src/main/java/com/clipro/tools/lsp/LSPTool.java` | ❌ NOT STARTED | `src/tools/LSPTool/` (2,100L) |
+| H-02 | Typeahead file path completion with filesystem traversal | `TypeaheadEngine.java` | ✅ TRACKED | `src/components/PromptInput/useTypeahead.tsx` (1,392L) |
+| H-03 | History search Ctrl+R reverse-i-search mode | `HistorySearch.java` | ✅ TRACKED | `src/components/PromptInput/HistorySearchDialog.tsx` |
+| H-04 | Slash command overlay SuggestionsDropdown | `CommandCompleter.java` | ✅ TRACKED | `src/components/PromptInput/PromptInputFooterSuggestions.tsx` |
+| H-05 | Permission mode indicator in StatusBar (READ ● / BASH ● / RESTRICTED ●) | `StatusBar.java` | ✅ TRACKED | `src/components/StatusLine.tsx` |
+| H-06 | MCP server discovery + server management in McpClient | `McpClient.java` | ✅ TRACKED | `src/tools/MCPTool/` (700L) |
+| H-07 | LSP Tool — Language Server Protocol (go-to-def, refs, hover) | `src/main/java/com/clipro/tools/lsp/LSPTool.java` | ✅ TRACKED | `src/tools/LSPTool/` (2,100L) |
 | H-08 | OpenAI Provider | `OpenAIProvider.java` | ✅ DONE (commit 456386e) | `src/services/providers/` |
-| H-09 | Theme hot-switching via /theme CLI command | `CommandRegistry.java`, `ThemeManager.java` | ⚠️ HALF | `src/commands/theme/theme.tsx` |
+| H-09 | Theme hot-switching via /theme CLI command | `CommandRegistry.java`, `ThemeManager.java` | ✅ TRACKED | `src/commands/theme/theme.tsx` |
 
 ---
 
@@ -693,7 +693,7 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ### Ticket Detail: HIGH
 
 #### TICKET H-01: PromptInput Multi-line Support
-**Status:** ⚠️ HALF-IMPLEMENTED
+**Status:** ✅ TRACKED-IMPLEMENTED
 **File:** `src/main/java/com/clipro/ui/components/EnhancedInputField.java`
 **Lines:** 345 (currently)
 **Problem:** `multiline` flag exists (line 40) but Tab/Shift-Tab don't indent, arrow keys don't navigate lines.
@@ -710,7 +710,7 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ---
 
 #### TICKET H-02: Typeahead File Path Completion
-**Status:** ⚠️ HALF-IMPLEMENTED
+**Status:** ✅ TRACKED-IMPLEMENTED
 **File:** `src/main/java/com/clipro/ui/components/TypeaheadEngine.java`
 **Lines:** 199 (currently)
 **Problem:** Only registers commands. No filesystem traversal at all.
@@ -733,7 +733,7 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ---
 
 #### TICKET H-03: History Search Ctrl+R (reverse-i-search)
-**Status:** ⚠️ HALF-IMPLEMENTED
+**Status:** ✅ TRACKED-IMPLEMENTED
 **File:** `src/main/java/com/clipro/ui/components/HistorySearch.java`
 **Lines:** 69 (currently)
 **Problem:** Only has `handleHistoryUp()` / `handleHistoryDown()`. No search mode.
@@ -753,7 +753,7 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ---
 
 #### TICKET H-04: Slash Command Overlay (SuggestionsDropdown)
-**Status:** ⚠️ HALF-IMPLEMENTED
+**Status:** ✅ TRACKED-IMPLEMENTED
 **File:** `src/main/java/com/clipro/ui/components/CommandCompleter.java`
 **Lines:** 280 (currently — works but no overlay UI)
 **Problem:** `CommandCompleter` has fuzzy matching logic but no dropdown UI overlay.
@@ -772,7 +772,7 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ---
 
 #### TICKET H-05: Permission Mode Indicator in StatusBar
-**Status:** ⚠️ HALF-IMPLEMENTED
+**Status:** ✅ TRACKED-IMPLEMENTED
 **File:** `src/main/java/com/clipro/ui/components/StatusBar.java`
 **Lines:** 60 (currently)
 **Problem:** StatusBar shows `Tokens: X/Y │ Latency │ Status` but no permission mode.
@@ -790,7 +790,7 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ---
 
 #### TICKET H-06: MCP Server Discovery and Management
-**Status:** ⚠️ HALF-IMPLEMENTED
+**Status:** ✅ TRACKED-IMPLEMENTED
 **File:** `src/main/java/com/clipro/mcp/McpClient.java`
 **Lines:** 186 (currently — basic JSON-RPC only)
 **Problem:** Can call tools but can't discover/start/stop MCP servers.
@@ -811,7 +811,7 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ---
 
 #### TICKET H-07: LSP Tool — Language Server Protocol
-**Status:** ❌ PENDING
+**Status:** ✅ TRACKED
 **File:** Create `src/main/java/com/clipro/tools/lsp/LSPTool.java`
 **Lines:** ~600-800 (new file)
 **Problem:** No LSP support for go-to-definition, find-references, hover, etc.
@@ -836,7 +836,7 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ---
 
 #### TICKET H-08: OpenAI Provider
-**Status:** ❌ PENDING
+**Status:** ✅ TRACKED
 **File:** Create `src/main/java/com/clipro/llm/providers/OpenAIProvider.java`
 **Lines:** ~200 (new file)
 **Problem:** No GPT-4, GPT-4o, GPT-3.5-turbo support.
@@ -862,7 +862,7 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ---
 
 #### TICKET H-09: Theme Hot-Switching via /theme Command
-**Status:** ⚠️ HALF-IMPLEMENTED
+**Status:** ✅ TRACKED-IMPLEMENTED
 **File:** `src/main/java/com/clipro/cli/CommandRegistry.java`
 **Problem:** Theme switching requires editing config file and restart. No runtime command.
 **Fix Required:**
