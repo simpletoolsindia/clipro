@@ -3,7 +3,7 @@ package com.clipro.ui.components;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Renders a message with timestamp.
+ * Renders a message with timestamp - Pixel-perfect OpenClaude style.
  * Reference: openclaude/src/components/Message.tsx
  */
 public class MessageRow {
@@ -11,13 +11,13 @@ public class MessageRow {
 
     public static String render(Message message) {
         String time = message.getTimestamp().format(TIME_FORMAT);
-        String timePrefix = "\033[90m" + time + " " + "\033[0m";
+        String timePrefix = Terminal.dim(time + " ");
 
         return timePrefix + MessageBox.render(message);
     }
 
     public static String renderWithIndex(int index, Message message) {
-        String indexPrefix = "\033[90m[" + index + "] " + "\033[0m";
+        String indexPrefix = Terminal.dim("[" + index + "] ");
         return indexPrefix + MessageBox.render(message);
     }
 }

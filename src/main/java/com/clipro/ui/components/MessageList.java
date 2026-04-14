@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Scrollable message list with virtualization support.
+ * Scrollable message list with virtualization and OpenClaude-style scroll indicators.
  * Reference: openclaude/src/components/VirtualMessageList.tsx
  */
 public class MessageList {
@@ -13,7 +13,7 @@ public class MessageList {
     private final int maxVisible;
 
     public MessageList() {
-        this(100); // Default max visible lines
+        this(100);
     }
 
     public MessageList(int maxVisible) {
@@ -76,6 +76,15 @@ public class MessageList {
         return scrollOffset;
     }
 
+    public boolean hasMoreAbove() {
+        int start = Math.max(0, messages.size() - maxVisible - scrollOffset);
+        return start > 0;
+    }
+
+    public boolean hasMoreBelow() {
+        return scrollOffset > 0;
+    }
+
     public List<Message> getVisibleMessages() {
         int start = Math.max(0, messages.size() - maxVisible - scrollOffset);
         int end = messages.size() - scrollOffset;
@@ -87,8 +96,13 @@ public class MessageList {
 
     public String render() {
         StringBuilder sb = new StringBuilder();
-        List<Message> visible = getVisibleMessages();
 
+        // Scroll indicator at top if more above
+        if (hasMoreAbove()) {
+            sb.append(Terminal.dim("  ↑ " + getScrollIndicatorCount() + " more ↑\n"));
+        }
+
+        List<Message> visible = getVisibleMessages();
         for (int i = 0; i < visible.size(); i++) {
             Message msg = visible.get(i);
             int index = messages.indexOf(msg);
@@ -98,7 +112,17 @@ public class MessageList {
             }
         }
 
+        // Scroll indicator at bottom if more below
+        if (hasMoreBelow()) {
+            sb.append("\n").append(Terminal.dim("  ↓ scroll up to see more ↓"));
+        }
+
         return sb.toString();
+    }
+
+    private int getScrollIndicatorCount() {
+        int start = Math.max(0, messages.size() - maxVisible - scrollOffset);
+        return start;
     }
 
     public String renderAll() {
