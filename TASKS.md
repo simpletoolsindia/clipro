@@ -226,7 +226,8 @@ openclaude/src/
 |--------|------|------|-----------|-------|
 | P2.4.1 | `HeaderBar` with model | ✅ `HeaderBarTest` | `src/components/Stats.tsx` | PC |
 | P2.4.2 | `StatusBar` with tokens | ✅ `StatusBarTest` | `src/components/Stats.tsx` | PC |
-| P2.4.3 | `FullscreenLayout` | ✅ `FullscreenLayoutTest` | `src/components/FullscreenLayout.tsx` | ~~PC~~ DONE |
+| P2.4.3 | `FullscreenLayout` | ✅ `FullscreenLayoutTest` | `src/components/FullscreenLayout.tsx` | ✅ PC DONE |
+| P2.4.4 | `App.java` integration | ✅ `AppTuiTest` | - | ✅ PC DONE |
 
 ---
 
