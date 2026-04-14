@@ -185,7 +185,7 @@ openclaude/src/
 | P1.1.2 | Add Quarkus dependencies | ✅ `QuarkusBuildTest` | `build.gradle.kts` | PC |
 | P1.1.3 | Add TamboUI dependencies | ✅ `TamboUIBuildTest` | ~~PC~~ DONE |
 | P1.1.4 | Add Jackson, JGit | ✅ `DepsBuildTest` | `build.gradle.kts` | PC |
-| P1.1.5 | Configure GraalVM | 🔄 PC Agent | `native-image/` | PC |
+| P1.1.5 | Configure GraalVM | ✅ `GraalVMConfigTest` | ~~PC~~ DONE |
 
 ### P1.2: Base Structure
 | Ticket | Task | Test | Reference | Agent |
