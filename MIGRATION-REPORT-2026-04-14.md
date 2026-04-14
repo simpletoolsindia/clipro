@@ -26,18 +26,18 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | `ThemeManager.java` + `Theme.java` | ✅ DONE | 6 themes, shimmer, daltonized |
 | `CommandRegistry.java` | ⚠️ HALF | 55 commands ✅, fuzzy ✅, agent commands ❌ |
 | `ThinkingParser.java` | ✅ DONE | Full parsing implemented |
-| `ThinkingBlock.java` | ✅ DONE | Rainbow + shimmer ✅, NOT integrated into MessageBox ❌ |
+| `ThinkingBlock.java` | ✅ DONE | Rainbow + shimmer ✅, integrated into MessageBox ✅ |
 | `RainbowRenderer.java` | ✅ DONE | Full rainbow + shimmer |
 | `ShimmerAnimator.java` | ✅ DONE | 120ms frame rate |
-| `MessageBox.java` | ⚠️ HALF | Basic boxes ✅, thinking ❌, tool formatting ❌ |
+| `MessageBox.java` | ✅ DONE | Basic boxes ✅, thinking blocks ✅, tool formatting ✅ |
 | `FullscreenLayout.java` | ⚠️ HALF | Basic layout ✅, NewMessagesPill ❌, StickyPrompt ❌ |
 | `VirtualMessageList.java` | ⚠️ HALF | Basic offset ✅, height cache ❌, smooth scroll ❌ |
 | `InputField.java` + `EnhancedInputField.java` | ⚠️ HALF | Basic input ✅, multi-line ❌, Ctrl+R ❌ |
 | `CommandCompleter.java` | ✅ DONE | 60+ commands, fuzzy search |
 | `TypeaheadEngine.java` | ⚠️ HALF | Command completion ✅, file path ❌ |
 | `HistorySearch.java` | ⚠️ HALF | Up/Down nav ✅, reverse-i-search ❌ |
-| `MarkdownRenderer.java` | ⚠️ HALF | Bold/italic/code ✅, tables ❌, line numbers ❌ |
-| `SyntaxHighlighter.java` | ⚠️ HALF | 18+ languages ✅, patterns defined ❌ applied ❌ |
+| `MarkdownRenderer.java` | ✅ DONE | Bold/italic/code ✅, tables ✅, line numbers ✅, syntax highlighting ✅ |
+| `SyntaxHighlighter.java` | ✅ DONE | 20+ languages ✅, patterns applied ✅, priority coloring ✅ |
 | `StatusBar.java` | ⚠️ HALF | Tokens/latency ✅, permission ❌, cost ❌, rate limits ❌ |
 | `HeaderBar.java` | ✅ DONE | Model + status |
 | `StatsComponent.java` | ⚠️ HALF | Basic stats ✅, charts ❌, heatmap ❌ |
@@ -77,11 +77,11 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | **CLI Commands** | 55+ registered |
 | **LLM Providers** | 3 (Ollama, OpenRouter, Anthropic) |
 | **Theme Count** | 6 (dark, light, 2 ANSI, 2 daltonized) |
-| **Migration Score** | **~65%** overall |
-| **UI Parity Score** | **~40%** |
+| **Migration Score** | **~70%** overall |
+| **UI Parity Score** | **~50%** |
 | **Code Size vs Original** | ~9% of OpenClaude LOC |
-| **Pending Tickets** | **40 total** |
-| — CRITICAL tickets | 5 |
+| **Pending Tickets** | **38 remaining** (2 done: C-01, C-05) |
+| — CRITICAL tickets | 3 remaining |
 | — HIGH priority | 9 |
 | — MEDIUM priority | 17 |
 | — LOW priority | 15 |
@@ -102,8 +102,8 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | State Management | 60% | ✅ Stable | MEDIUM |
 | Security (Bash) | 85% | ✅ Done | DONE |
 | Virtual Scrolling | 25% | ⚠️ Basic | HIGH |
-| Syntax Highlighting | 30% | ⚠️ Basic | MEDIUM |
-| Thinking Block Render | 50% | ⚠️ Partial | HIGH |
+| Syntax Highlighting | 100% | ✅ Done | DONE |
+| Thinking Block Render | 100% | ✅ Done | DONE |
 
 ---
 
@@ -1113,11 +1113,11 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 
 | # | Ticket | File(s) | Type | OpenClaude Reference |
 |---|--------|---------|------|---------------------|
-| C-01 | Integrate ThinkingBlock into MessageBox rendering | `MessageBox.java` | ⚠️ HALF | `src/components/Message.tsx` |
+| C-01 | Integrate ThinkingBlock into MessageBox rendering | `MessageBox.java` | ✅ DONE | `src/components/Message.tsx` |
 | C-02 | Virtual scrolling with height caching + smooth scroll | `VirtualMessageList.java` | ⚠️ HALF | `src/components/VirtualMessageList.tsx` (1,082L) |
 | C-03 | NewMessagesPill — "↓ N new messages" overlay | `FullscreenLayout.java` | ⚠️ HALF | `src/components/FullscreenLayout.tsx` |
 | C-04 | StickyPromptHeader — context row when scrolled | `FullscreenLayout.java` | ⚠️ HALF | `src/components/FullscreenLayout.tsx` |
-| C-05 | Syntax highlighting in MarkdownRenderer code blocks | `MarkdownRenderer.java`, `SyntaxHighlighter.java` | ⚠️ HALF | `src/components/HighlightedCode.tsx` |
+| C-05 | Syntax highlighting in MarkdownRenderer code blocks | `MarkdownRenderer.java`, `SyntaxHighlighter.java` | ✅ DONE | `src/components/HighlightedCode.tsx` |
 
 ---
 
@@ -1194,18 +1194,16 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ### Ticket Detail: CRITICAL
 
 #### TICKET C-01: Integrate ThinkingBlock into MessageBox Rendering
-**Status:** ⚠️ HALF-IMPLEMENTED
+**Status:** ✅ DONE (commit bc98587)
 **File:** `src/main/java/com/clipro/ui/components/MessageBox.java`
-**Lines:** ~141 (currently)
-**Problem:** `ThinkingBlock.java` (309L) and `ThinkingParser.java` (294L) exist and work correctly, but `MessageBox.renderAssistant()` never calls them. Assistant messages render `<thinking>` tags as raw text.
-**Fix Required:**
-1. In `MessageBox.renderAssistant(String content)`:
-   - Add `ThinkingParser parser = new ThinkingParser();`
-   - Call `parser.parse(content)` to extract thinking blocks and text blocks
-   - For each thinking block: call `ThinkingBlock.renderStreaming(content)` with rainbow colors
-   - For each text block: call `MarkdownRenderer.render(content)`
-2. `ThinkingBlock.java` line 309 has `render()` method ready to use
-3. Reference: OpenClaude `src/components/Message.tsx` lines ~100-300 (`switch (contentBlock.type)`)
+**Lines:** ~353 (now)
+**What was done:**
+- Parse `<thinking>` blocks with `ThinkingParser.parseBlocks()`
+- Render rainbow-colored thinking blocks (7-color cycle)
+- Collapsible UI with `[click to expand]` hint
+- Block count indicator in header: `[💭 N thinking block(s)]`
+- Ultrathink support with `[ultrathink]` label
+- Proper ANSI escape handling (no word-wrap on colored content)
 
 ---
 
@@ -1266,20 +1264,14 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ---
 
 #### TICKET C-05: Syntax Highlighting in MarkdownRenderer Code Blocks
-**Status:** ⚠️ HALF-IMPLEMENTED
+**Status:** ✅ DONE (commit bc98587)
 **Files:** `src/main/java/com/clipro/ui/components/MarkdownRenderer.java`, `src/main/java/com/clipro/ui/components/SyntaxHighlighter.java`
-**Problem:** `MarkdownRenderer.renderCodeBlock()` renders code as plain text. `SyntaxHighlighter.java` exists with 18+ languages but `highlightWithDef()` (line 184) returns basic styling — regex patterns are defined but not applied.
-**Fix Required:**
-1. In `MarkdownRenderer.renderCodeBlock(String code, String lang)`:
-   - Detect language from fence: `python`, `java`, `javascript`, etc.
-   - Call `SyntaxHighlighter.highlight(code, language)` instead of plain text
-2. In `SyntaxHighlighter.highlightWithDef()` (line 184):
-   - Apply the regex patterns defined in the language maps
-   - Return ANSI-colored tokens instead of basic `[KEYWORD]` tags
-3. Add line numbers via `renderLineNumbers(int lineCount)`:
-   - Use `Terminal.DIM` for line number color
-   - Right-align: `  1`, `  2`, ` 10`, `100`
-4. Reference: OpenClaude `src/components/HighlightedCode.tsx`
+**What was done:**
+- Full rewrite of `SyntaxHighlighter` with 20+ language support
+- Priority-based token coloring: comment > string > number > function > keyword > operator
+- `MarkdownRenderer` integrates `SyntaxHighlighter` into code blocks
+- Line numbers with gutter, language header
+- 20 languages: JS, TS, Python, Java, Go, Rust, C/C++, JSON, YAML, SQL, Bash, Markdown, PHP, Ruby, Kotlin, Swift, Scala, C#, XML, CSS
 
 ---
 
