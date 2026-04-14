@@ -1142,31 +1142,31 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 
 | # | Ticket | File(s) | Type | OpenClaude Reference |
 |---|--------|---------|------|---------------------|
-| M-01 | StatsComponent ASCII charts with token/cost graphs | `StatsComponent.java` | ⚠️ HALF | `src/components/Stats.tsx` (1,227L) |
-| M-02 | Conversation compaction UI notification | `ConversationCompactor.java`, `MessageRole.java` | ⚠️ HALF | `src/utils/messages.ts` |
-| M-03 | Agent CLI commands: /spawn, /kill, /list | `CommandRegistry.java` | ❌ NOT STARTED | `src/commands/agent/` |
-| M-04 | MCP CLI commands: /mcp list, /mcp add, /mcp remove | `CommandRegistry.java` | ❌ NOT STARTED | `src/commands/mcp/` |
-| M-05 | Theme CLI commands: /theme dark, /theme light, /theme preview | `CommandRegistry.java` | ❌ NOT STARTED | `src/commands/theme/theme.tsx` |
-| M-06 | Tool result background tint (indigo #191923) | `MessageBox.java`, `Theme.java` | ⚠️ HALF | `src/components/Message.tsx` |
-| M-07 | Cost tracking in StatusBar (OpenRouter usage data) | `StatusBar.java` | ❌ NOT STARTED | `src/components/StatusLine.tsx` |
-| M-08 | Rate limit display in StatusBar (5h/7d windows) | `StatusBar.java` | ❌ NOT STARTED | `src/components/StatusLine.tsx` |
-| M-09 | Markdown table rendering with alignment | `MarkdownRenderer.java` | ⚠️ HALF | `src/components/Markdown.tsx` |
-| M-10 | Code block line numbers in SyntaxHighlighter | `SyntaxHighlighter.java`, `MarkdownRenderer.java` | ❌ NOT STARTED | `src/components/HighlightedCode.tsx` |
-| M-11 | Image attachment rendering [Image: path] | `MessageBox.java` | ❌ NOT STARTED | `src/components/Message.tsx` |
-| M-12 | User message background color (#373737) | `MessageBox.java`, `Theme.java` | ⚠️ HALF | `src/components/Message.tsx` |
-| M-13 | grouped_tool_use message type rendering | `MessageList.java`, `MessageBox.java` | ❌ NOT STARTED | `src/components/Messages.tsx` |
-| M-14 | collapsed_read_search message type rendering | `MessageList.java` | ❌ NOT STARTED | `src/components/Messages.tsx` |
-| M-15 | BashTool AST parsing (tree-sitter or regex) for command validation | `BashTool.java` | ⚠️ HALF | `src/tools/BashTool/` (10,987L) |
-| M-16 | BashTool Haiku classifier for auto-permission | `BashTool.java` | ❌ NOT STARTED | `src/tools/BashTool/haiku.ts` |
-| M-17 | BashTool sed command validation | `BashTool.java` | ❌ NOT STARTED | `src/tools/BashTool/` |
-| M-18 | BashTool permission persistence across sessions | `BashTool.java`, `ConfigManager.java` | ❌ NOT STARTED | `src/tools/BashTool/` |
-| M-19 | FileReadTool image processing (PNG/JPEG dimension extraction) | `FileReadTool.java` | ❌ NOT STARTED | `src/tools/FileReadTool/` (1,400L) |
-| M-20 | FileEditTool inline diff display with color | `FileEditTool.java` | ⚠️ HALF | `src/tools/FileEditTool/` (1,527L) |
-| M-21 | WebSearchTool multi-provider support (SearXNG, Tavily, Serper) | `WebSearchTool.java` | ⚠️ HALF | `src/tools/WebSearchTool/` (800L) |
-| M-22 | WebFetchTool HTML parsing and content extraction | `WebFetchTool.java` | ⚠️ HALF | `src/tools/WebFetchTool/` (536L) |
-| M-23 | TaskTool nested task support (parent/child relationships) | `TaskTool.java` | ⚠️ HALF | `src/tools/TaskTool/` |
-| M-24 | AgentManager tool schema loading from agent config | `AgentManager.java` | ⚠️ HALF | `src/tools/AgentTool/` (2,500L) |
-| M-25 | AgentTeam teardown and member cleanup | `AgentTeam.java` | ⚠️ HALAL | `src/tools/TeamCreateTool/` |
+| M-01 | StatsComponent ASCII charts with token/cost graphs | `StatsComponent.java` | ✅ DONE (commit fc77406) | `src/components/Stats.tsx` (1,227L) |
+| M-02 | Conversation compaction UI notification | `ConversationCompactor.java`, `MessageRole.java` | ✅ DONE (commit fc77406) | `src/utils/messages.ts` |
+| M-03 | Agent CLI commands: /spawn, /kill, /list | `CommandRegistry.java` | ✅ DONE (commit fc77406) | `src/commands/agent/` |
+| M-04 | MCP CLI commands: /mcp list, /mcp add, /mcp remove | `CommandRegistry.java` | ✅ DONE (commit fc77406) | `src/commands/mcp/` |
+| M-05 | Theme CLI commands: /theme dark, /theme light, /theme preview | `CommandRegistry.java` | ✅ DONE (commit fc77406) | `src/commands/theme/theme.tsx` |
+| M-06 | Tool result background tint (indigo #191923) | `MessageBox.java`, `Theme.java` | ✅ DONE (commit e51223d) | `src/components/Message.tsx` |
+| M-07 | Cost tracking in StatusBar (OpenRouter usage data) | `StatusBar.java` | ✅ DONE (commit d853aae) | `src/components/StatusLine.tsx` |
+| M-08 | Rate limit display in StatusBar (5h/7d windows) | `StatusBar.java` | ✅ DONE (commit d853aae) | `src/components/StatusLine.tsx` |
+| M-09 | Markdown table rendering with alignment | `MarkdownRenderer.java` | ✅ DONE (commit e22ab32) | `src/components/Markdown.tsx` |
+| M-10 | Code block line numbers in SyntaxHighlighter | `SyntaxHighlighter.java`, `MarkdownRenderer.java` | ✅ DONE (commit e22ab32) | `src/components/HighlightedCode.tsx` |
+| M-11 | Image attachment rendering [Image: path] | `MessageBox.java` | ✅ DONE (commit 0ba4399) | `src/components/Message.tsx` |
+| M-12 | User message background color (#373737) | `MessageBox.java`, `Theme.java` | ✅ DONE (commit 3555a17) | `src/components/Message.tsx` |
+| M-13 | grouped_tool_use message type rendering | `MessageList.java`, `MessageBox.java` | ✅ DONE (commit 0ba4399) | `src/components/Messages.tsx` |
+| M-14 | collapsed_read_search message type rendering | `MessageList.java` | ✅ DONE (commit 0ba4399) | `src/components/Messages.tsx` |
+| M-15 | BashTool AST parsing (tree-sitter or regex) for command validation | `BashTool.java` | ✅ DONE (commit 31f56a9) | `src/tools/BashTool/` (10,987L) |
+| M-16 | BashTool Haiku classifier for auto-permission | `BashTool.java` | ✅ DONE (commit 31f56a9) | `src/tools/BashTool/haiku.ts` |
+| M-17 | BashTool sed command validation | `BashTool.java` | ✅ DONE (commit 31f56a9) | `src/tools/BashTool/` |
+| M-18 | BashTool permission persistence across sessions | `BashTool.java`, `ConfigManager.java` | ✅ DONE (commit 31f56a9) | `src/tools/BashTool/` |
+| M-19 | FileReadTool image processing (PNG/JPEG dimension extraction) | `FileReadTool.java` | ✅ DONE (commit 31f56a9) | `src/tools/FileReadTool/` (1,400L) |
+| M-20 | FileEditTool inline diff display with color | `FileEditTool.java` | ✅ DONE (commit 3d699d8) | `src/tools/FileEditTool/` (1,527L) |
+| M-21 | WebSearchTool multi-provider support (SearXNG, Tavily, Serper) | `WebSearchTool.java` | ✅ DONE | `src/tools/WebSearchTool/` (800L) |
+| M-22 | WebFetchTool HTML parsing and content extraction | `WebFetchTool.java` | ✅ DONE (commit 3d699d8) | `src/tools/WebFetchTool/` (536L) |
+| M-23 | TaskTool nested task support (parent/child relationships) | `TaskTool.java` | ✅ DONE (commit 3d699d8) | `src/tools/TaskTool/` |
+| M-24 | AgentManager tool schema loading from agent config | `AgentManager.java` | ✅ DONE (commit 3d699d8) | `src/tools/AgentTool/` (2,500L) |
+| M-25 | AgentTeam teardown and member cleanup | `AgentTeam.java` | ✅ DONE (commit 3d699d8) | `src/tools/TeamCreateTool/` |
 
 ---
 
