@@ -17,6 +17,9 @@ public class InputField {
     private String prompt = "▶ ";
     private boolean masked = false;
     private String vimMode = "";
+    private final CommandCompleter completer = new CommandCompleter();
+    private List<String> suggestions = new ArrayList<>();
+    private int suggestionIndex = -1;
 
     public InputField() {}
 
@@ -128,5 +131,70 @@ public class InputField {
 
     public void insertLineAbove() {
         // For multi-line input
+    }
+
+    // Autocomplete support
+    public void updateSuggestions() {
+        String text = buffer.toString();
+        if (completer.isPartialCommand(text)) {
+            suggestions = completer.complete(text);
+            suggestionIndex = 0;
+        } else {
+            suggestions.clear();
+            suggestionIndex = -1;
+        }
+    }
+
+    public List<String> getSuggestions() {
+        return suggestions;
+    }
+
+    public String acceptSuggestion() {
+        if (suggestions.isEmpty() || suggestionIndex < 0) {
+            return null;
+        }
+        String suggestion = suggestions.get(suggestionIndex);
+        buffer.setLength(0);
+        buffer.append(suggestion);
+        cursorPosition = buffer.length();
+        suggestions.clear();
+        suggestionIndex = -1;
+        return suggestion;
+    }
+
+    public void suggestionUp() {
+        if (!suggestions.isEmpty()) {
+            suggestionIndex = (suggestionIndex - 1 + suggestions.size()) % suggestions.size();
+        }
+    }
+
+    public void suggestionDown() {
+        if (!suggestions.isEmpty()) {
+            suggestionIndex = (suggestionIndex + 1) % suggestions.size();
+        }
+    }
+
+    public String getCurrentSuggestion() {
+        if (suggestions.isEmpty() || suggestionIndex < 0) {
+            return null;
+        }
+        return suggestions.get(suggestionIndex);
+    }
+
+    public CommandCompleter getCompleter() {
+        return completer;
+    }
+
+    /**
+     * Render with autocomplete suggestion preview.
+     */
+    public String renderWithSuggestion() {
+        String base = render();
+        if (!suggestions.isEmpty() && suggestionIndex >= 0) {
+            String suggestion = suggestions.get(suggestionIndex);
+            String preview = Terminal.dim(" → " + suggestion);
+            return base + preview;
+        }
+        return base;
     }
 }

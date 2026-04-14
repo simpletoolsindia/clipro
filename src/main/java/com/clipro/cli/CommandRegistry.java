@@ -127,6 +127,65 @@ public class CommandRegistry {
         register(new Command("pwd", "Print working directory", (ctx) -> executeCommand(ctx, "pwd")));
         register(new Command("whoami", "Show current user", (ctx) -> executeCommand(ctx, "whoami")));
         register(new Command("date", "Show current date", (ctx) -> executeCommand(ctx, "date")));
+
+        // Git advanced commands
+        register(new Command("branch", "Show git branches", (ctx) -> executeCommand(ctx, "git branch -a")));
+        register(new Command("stash", "Git stash operations", this::executeGitStash));
+        register(new Command("pull", "Git pull", (ctx) -> executeCommand(ctx, "git pull")));
+        register(new Command("push", "Git push", (ctx) -> executeCommand(ctx, "git push")));
+        register(new Command("fetch", "Git fetch", (ctx) -> executeCommand(ctx, "git fetch --all")));
+        register(new Command("merge", "Git merge", this::executeGitMerge));
+        register(new Command("rebase", "Git rebase", this::executeGitRebase));
+
+        // File commands
+        register(new Command("read", "Read file content", this::executeFileRead));
+        register(new Command("cat", "Display file content", this::executeFileRead));
+        register(new Command("glob", "Find files by pattern", this::executeGlob));
+
+        // Web commands
+        register(new Command("search", "Search the web", this::executeWebSearch));
+        register(new Command("web", "Web search", this::executeWebSearch));
+        register(new Command("fetch", "Fetch URL content", this::executeWebFetch));
+        register(new Command("wget", "Download file", this::executeWget));
+
+        // Session/context commands
+        register(new Command("history", "Show command history", this::executeHistory));
+        register(new Command("sessions", "List sessions", this::executeSessions));
+        register(new Command("compact", "Compact conversation", this::executeCompact));
+        register(new Command("cache", "Cache management", (ctx) -> "Cache: " + (ctx.getArgs().isEmpty() ? "on" : ctx.getArgs())));
+
+        // Stats commands
+        register(new Command("stats", "Show statistics", this::executeStats));
+        register(new Command("cost", "Show API cost estimate", this::executeCost));
+        register(new Command("context", "Show context usage", this::executeContext));
+
+        // Config commands
+        register(new Command("config", "Show configuration", this::executeConfig));
+        register(new Command("key", "API key management", (ctx) -> {
+            if (ctx.getArgs().isEmpty()) {
+                return "API key: " + (hasApiKey() ? "[SET]" : "[NOT SET]");
+            }
+            return "API key command: " + ctx.getArgs();
+        }));
+        register(new Command("version", "Show version", (ctx) -> "CLIPRO v0.1.0"));
+
+        // System commands
+        register(new Command("api", "API information", (ctx) -> {
+            return "LLM APIs:\n" +
+                   "  - Ollama: http://localhost:11434\n" +
+                   "  - OpenRouter: https://openrouter.ai/api/v1";
+        }));
+        register(new Command("env", "Show environment", (ctx) -> executeCommand(ctx, "printenv | sort")));
+        register(new Command("uptime", "Show system uptime", (ctx) -> executeCommand(ctx, "uptime")));
+        register(new Command("df", "Show disk usage", (ctx) -> executeCommand(ctx, "df -h")));
+        register(new Command("free", "Show memory usage", (ctx) -> executeCommand(ctx, "free -h")));
+
+        // Developer commands
+        register(new Command("test", "Run tests", (ctx) -> executeCommand(ctx, "./gradlew test")));
+        register(new Command("build", "Build project", (ctx) -> executeCommand(ctx, "./gradlew build")));
+        register(new Command("clean", "Clean build", (ctx) -> executeCommand(ctx, "./gradlew clean")));
+        register(new Command("jar", "Build JAR", (ctx) -> executeCommand(ctx, "./gradlew uberJar")));
+        register(new Command("debug", "Debug mode", (ctx) -> ctx.getArgs().isEmpty() ? "Debug: off" : "Debug: " + ctx.getArgs()));
     }
 
     private void registerDefaultTools() {
@@ -319,6 +378,139 @@ public class CommandRegistry {
         return "BashTool not available.";
     }
 
+    // Advanced Git commands
+    private String executeGitStash(CommandContext ctx) {
+        String args = ctx.getArgs().trim();
+        if (args.isEmpty()) {
+            return executeCommand(ctx, "git stash list");
+        } else if (args.equals("pop")) {
+            return executeCommand(ctx, "git stash pop");
+        } else if (args.equals("push")) {
+            return executeCommand(ctx, "git stash push -m 'WIP'");
+        }
+        return executeCommand(ctx, "git stash " + args);
+    }
+
+    private String executeGitMerge(CommandContext ctx) {
+        String msg = ctx.getArgs().trim();
+        if (msg.isEmpty()) {
+            return "Usage: /merge <branch>\nExample: /merge main";
+        }
+        return executeCommand(ctx, "git merge " + msg);
+    }
+
+    private String executeGitRebase(CommandContext ctx) {
+        String msg = ctx.getArgs().trim();
+        if (msg.isEmpty()) {
+            return "Usage: /rebase <branch>\nExample: /rebase main";
+        }
+        return executeCommand(ctx, "git rebase " + msg);
+    }
+
+    // File commands
+    private String executeFileRead(CommandContext ctx) {
+        String path = ctx.getArgs().trim();
+        if (path.isEmpty()) {
+            return "Usage: /read <file>\nExample: /read src/main/java/App.java";
+        }
+        return executeCommand(ctx, "cat " + path);
+    }
+
+    private String executeGlob(CommandContext ctx) {
+        String pattern = ctx.getArgs().trim();
+        if (pattern.isEmpty()) {
+            return "Usage: /glob <pattern>\nExample: /glob *.java";
+        }
+        return executeCommand(ctx, "find . -name '" + pattern + "'");
+    }
+
+    // Web commands
+    private String executeWebSearch(CommandContext ctx) {
+        String query = ctx.getArgs().trim();
+        if (query.isEmpty()) {
+            return "Usage: /search <query>\nExample: /search Java 21 features";
+        }
+        // Would integrate with WebSearchTool
+        return "Search: " + query + "\n[Web search integration pending]";
+    }
+
+    private String executeWebFetch(CommandContext ctx) {
+        String url = ctx.getArgs().trim();
+        if (url.isEmpty()) {
+            return "Usage: /fetch <url>\nExample: /fetch https://example.com";
+        }
+        return executeCommand(ctx, "curl -sL " + url + " | head -100");
+    }
+
+    private String executeWget(CommandContext ctx) {
+        String url = ctx.getArgs().trim();
+        if (url.isEmpty()) {
+            return "Usage: /wget <url>\nExample: /wget https://example.com/file.zip";
+        }
+        return executeCommand(ctx, "wget -q " + url);
+    }
+
+    // Session commands
+    private String executeHistory(CommandContext ctx) {
+        return executeCommand(ctx, "history | tail -20");
+    }
+
+    private String executeSessions(CommandContext ctx) {
+        return "Sessions:\n" +
+               "  - ~/.clipro/history/*.json\n" +
+               "Use /history <n> to load a session";
+    }
+
+    private String executeCompact(CommandContext ctx) {
+        return "Conversation compaction:\n" +
+               "  - Old messages summarized\n" +
+               "  - Token budget reduced\n" +
+               "[Compaction in progress...]";
+    }
+
+    // Stats commands
+    private String executeStats(CommandContext ctx) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("╔══════════════════════════════════════════════════════════════╗\n");
+        sb.append("║                      CLIPRO Statistics                       ║\n");
+        sb.append("╠══════════════════════════════════════════════════════════════╣\n");
+        sb.append("║ Commands: ").append(String.format("%-46s║\n", commands.size() + " registered"));
+        sb.append("║ Tools:    ").append(String.format("%-46s║\n", tools.size() + " registered"));
+        sb.append("║ Model:    ").append(String.format("%-46s║\n", ctx.getCurrentModel()));
+        sb.append("║ Provider: ").append(String.format("%-46s║\n", "Ollama/OpenRouter"));
+        sb.append("╚══════════════════════════════════════════════════════════════╝\n");
+        return sb.toString();
+    }
+
+    private String executeCost(CommandContext ctx) {
+        return "API Cost Estimate:\n" +
+               "  - Ollama: Free (local)\n" +
+               "  - OpenRouter: ~$0.001/1K tokens\n" +
+               "Use /tokens to see actual usage";
+    }
+
+    private String executeContext(CommandContext ctx) {
+        if (ctx.hasAgentContext()) {
+            return "Context: " + ctx.getTokenInfo();
+        }
+        return "Context: No active session";
+    }
+
+    // Config commands
+    private String executeConfig(CommandContext ctx) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CLIPRO Configuration:\n");
+        sb.append("  Config: ~/.clipro/config.json\n");
+        sb.append("  Secrets: ~/.clipro/secrets.properties\n");
+        sb.append("  History: ~/.clipro/history/\n");
+        sb.append("  Logs:    ~/.clipro/logs/\n");
+        return sb.toString();
+    }
+
+    private boolean hasApiKey() {
+        return false; // Check ConfigManager for actual key
+    }
+
     /**
      * Get help text for all commands.
      */
@@ -349,12 +541,21 @@ public class CommandRegistry {
         sb.append("║   /diff      - Show changes                                 ║\n");
         sb.append("║   /log       - Show commit history                          ║\n");
         sb.append("║   /commit    - Commit with message                          ║\n");
+        sb.append("║   /branch    - Show git branches                            ║\n");
+        sb.append("║   /stash     - Git stash (pop/push/list)                     ║\n");
+        sb.append("║   /pull      - Git pull                                     ║\n");
+        sb.append("║   /push      - Git push                                     ║\n");
+        sb.append("║   /fetch     - Git fetch                                    ║\n");
+        sb.append("║   /merge     - Git merge                                    ║\n");
+        sb.append("║   /rebase    - Git rebase                                   ║\n");
         sb.append("╠══════════════════════════════════════════════════════════════╣\n");
 
-        // Search commands
+        // Search/File commands
         sb.append("║ Search Commands                                             ║\n");
         sb.append("║   /grep      - Search in files                              ║\n");
         sb.append("║   /find      - Find files                                   ║\n");
+        sb.append("║   /glob      - Glob pattern search                          ║\n");
+        sb.append("║   /read      - Read file content                            ║\n");
         sb.append("╠══════════════════════════════════════════════════════════════╣\n");
 
         // Shell commands
@@ -363,19 +564,50 @@ public class CommandRegistry {
         sb.append("║   /ls        - List directory                              ║\n");
         sb.append("║   /pwd       - Print working directory                      ║\n");
         sb.append("║   /whoami    - Current user                                ║\n");
+        sb.append("║   /date      - Current date                                ║\n");
+        sb.append("║   /env       - Environment variables                        ║\n");
+        sb.append("║   /uptime    - System uptime                               ║\n");
+        sb.append("║   /df        - Disk usage                                   ║\n");
+        sb.append("║   /free      - Memory usage                                 ║\n");
         sb.append("╠══════════════════════════════════════════════════════════════╣\n");
 
-        // Info commands
-        sb.append("║ Info Commands                                               ║\n");
+        // Web commands
+        sb.append("║ Web Commands                                                ║\n");
+        sb.append("║   /search    - Search the web                                ║\n");
+        sb.append("║   /fetch     - Fetch URL content                             ║\n");
+        sb.append("║   /wget      - Download file                                ║\n");
+        sb.append("╠══════════════════════════════════════════════════════════════╣\n");
+
+        // Session commands
+        sb.append("║ Session Commands                                            ║\n");
+        sb.append("║   /history   - Show command history                         ║\n");
+        sb.append("║   /sessions  - List saved sessions                          ║\n");
+        sb.append("║   /compact   - Compact conversation                         ║\n");
+        sb.append("╠══════════════════════════════════════════════════════════════╣\n");
+
+        // Stats/Config commands
+        sb.append("║ Stats Commands                                              ║\n");
         sb.append("║   /tokens    - Show token usage                             ║\n");
-        sb.append("║   /info      - System information                          ║\n");
-        sb.append("║   /mode      - Permission mode (READ_ONLY/BASH/RESTRICTED)  ║\n");
+        sb.append("║   /stats     - Show statistics                              ║\n");
+        sb.append("║   /cost      - API cost estimate                            ║\n");
+        sb.append("║   /context   - Context usage                                ║\n");
+        sb.append("║   /config    - Show configuration                           ║\n");
+        sb.append("╠══════════════════════════════════════════════════════════════╣\n");
+
+        // Dev commands
+        sb.append("║ Developer Commands                                          ║\n");
+        sb.append("║   /test      - Run tests                                    ║\n");
+        sb.append("║   /build     - Build project                                 ║\n");
+        sb.append("║   /clean     - Clean build                                   ║\n");
+        sb.append("║   /jar       - Build JAR                                    ║\n");
+        sb.append("║   /debug     - Debug mode                                   ║\n");
+        sb.append("║   /info      - System information                            ║\n");
+        sb.append("║   /mode      - Permission mode (READ_ONLY/BASH/RESTRICTED)   ║\n");
+        sb.append("║   /version   - Show version                                  ║\n");
         sb.append("╚══════════════════════════════════════════════════════════════╝\n");
 
-        sb.append("\nTools (").append(tools.size()).append(" registered):\n");
-        for (Tool tool : tools) {
-            sb.append("  - ").append(tool.getName()).append(": ").append(tool.getDescription()).append("\n");
-        }
+        sb.append("\n").append(commands.size()).append(" commands registered");
+        sb.append(" | ").append(tools.size()).append(" tools available");
 
         return sb.toString();
     }

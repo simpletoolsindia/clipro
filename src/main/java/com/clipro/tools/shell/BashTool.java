@@ -55,6 +55,7 @@ public class BashTool implements Tool {
     private final Path workingDirectory;
     private final Map<String, String> environment;
     private PermissionMode permissionMode = PermissionMode.BASH;
+    private Path sandboxDirectory = null;
 
     public BashTool() {
         this.workingDirectory = Path.of(System.getProperty("user.dir"));
@@ -64,6 +65,40 @@ public class BashTool implements Tool {
     public BashTool(String workingDir) {
         this.workingDirectory = Path.of(workingDir);
         this.environment = new HashMap<>();
+    }
+
+    /**
+     * Set a sandbox directory for command execution.
+     * Commands can only access files within this directory.
+     */
+    public void setSandboxDirectory(Path path) {
+        this.sandboxDirectory = path.toAbsolutePath();
+    }
+
+    /**
+     * Set a sandbox directory from string.
+     */
+    public void setSandboxDirectory(String path) {
+        this.sandboxDirectory = Paths.get(path).toAbsolutePath();
+    }
+
+    public Path getSandboxDirectory() {
+        return sandboxDirectory;
+    }
+
+    /**
+     * Check if a path is within the sandbox.
+     */
+    public boolean isPathInSandbox(String path) {
+        if (sandboxDirectory == null) {
+            return true; // No sandbox set
+        }
+        try {
+            Path targetPath = Paths.get(path).toAbsolutePath();
+            return targetPath.startsWith(sandboxDirectory);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -152,8 +187,23 @@ public class BashTool implements Tool {
         String primaryCmd = extractCommand(normalized);
 
         // Path traversal prevention
-        if (command.contains("..") && !isPathTraversalAllowed(command)) {
-            return new SecurityCheck(false, "Path traversal not allowed in this mode");
+        if (command.contains("..")) {
+            if (!isPathTraversalAllowed(command)) {
+                return new SecurityCheck(false, "Path traversal not allowed in this mode");
+            }
+            // Check if path is in sandbox
+            if (sandboxDirectory != null) {
+                if (!isSandboxCompliant(command)) {
+                    return new SecurityCheck(false, "Path outside sandbox directory: " + sandboxDirectory);
+                }
+            }
+        }
+
+        // Sandbox enforcement (even without traversal)
+        if (sandboxDirectory != null && containsFilePath(command)) {
+            if (!isSandboxCompliant(command)) {
+                return new SecurityCheck(false, "Access outside sandbox: " + sandboxDirectory);
+            }
         }
 
         switch (mode) {
@@ -210,8 +260,49 @@ public class BashTool implements Tool {
     }
 
     private boolean isPathTraversalAllowed(String command) {
-        // Allow in BASH mode only
-        return permissionMode == PermissionMode.BASH;
+        // Allow in BASH mode only, and only within sandbox
+        if (permissionMode == PermissionMode.BASH) {
+            return sandboxDirectory == null || isSandboxCompliant(command);
+        }
+        return false;
+    }
+
+    /**
+     * Check if command path references are within sandbox.
+     */
+    private boolean isSandboxCompliant(String command) {
+        if (sandboxDirectory == null) return true;
+
+        // Extract potential file paths from command
+        String[] parts = command.split("\\s+");
+        for (String part : parts) {
+            // Skip options and flags
+            if (part.startsWith("-") || part.startsWith("$")) continue;
+
+            // Check for path-like strings
+            if (part.contains("/") || part.startsWith(".")) {
+                try {
+                    Path path = Paths.get(part).toAbsolutePath();
+                    if (!path.startsWith(sandboxDirectory)) {
+                        return false;
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if command contains file path references.
+     */
+    private boolean containsFilePath(String command) {
+        String[] parts = command.split("\\s+");
+        for (String part : parts) {
+            if (part.contains("/") || part.startsWith(".")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String extractCommand(String command) {
