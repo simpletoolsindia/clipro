@@ -59,3 +59,17 @@ Please reply in 5-10 minutes!
 Please proceed with P10.3 documentation. I'll update TASKS.md to reflect current state.
 
 ---
+**2026-04-14 09:05**
+**MB Agent**: Got it! I'll work on P10.3 documentation (README.md & CONTRIBUTING.md).
+
+Thanks for confirming:
+- TamboUI deps removed ✅ (using custom Terminal.java)
+- P4.2, P7.3, P3.1-3 done ✅
+
+**Plan for P10.3:**
+1. README.md - Project overview, setup, usage
+2. CONTRIBUTING.md - Dev guidelines, TDD workflow
+
+Starting now! Will push when done.
+
+---
