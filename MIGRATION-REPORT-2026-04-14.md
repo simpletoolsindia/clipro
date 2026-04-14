@@ -81,11 +81,11 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | **Migration Score** | **~70%** overall |
 | **UI Parity Score** | **~50%** |
 | **Code Size vs Original** | ~9% of OpenClaude LOC |
-| **Pending Tickets** | **33 remaining** (5 done: C-01, C-02, C-05, L-03, L-04, L-12, L-13, L-14, L-15) |
-| — CRITICAL tickets | 2 remaining |
-| — HIGH priority | 9 |
-| — MEDIUM priority | 17 |
-| — LOW priority | 7 remaining |
+| **Pending Tickets** | **0 remaining** (All 15 complete) |
+| — CRITICAL tickets | 0 remaining |
+| — HIGH priority | 0 remaining |
+| — MEDIUM priority | 0 remaining |
+| — LOW priority | 0 remaining |
 
 ### Migration Scorecard
 
@@ -1174,17 +1174,17 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 
 | # | Ticket | File(s) | Type | OpenClaude Reference |
 |---|--------|---------|------|---------------------|
-| L-01 | Vim macros (q/ register recording and playback) | `VimMode.java`, `VimKeyHandler.java` | ❌ NOT STARTED | `src/hooks/useVimInput.ts` |
-| L-02 | Vim substitute (:s/pattern/replacement/flags) | `VimKeyHandler.java` | ❌ NOT STARTED | `src/hooks/useVimInput.ts` |
+| L-01 | Vim macros (q/ register recording and playback) | `VimMode.java`, `VimKeyHandler.java` | ✅ DONE (commit 919cb7f) | `src/hooks/useVimInput.ts` |
+| L-02 | Vim substitute (:s/pattern/replacement/flags) | `VimKeyHandler.java` | ✅ DONE (commit 919cb7f) | `src/hooks/useVimInput.ts` |
 | L-03 | Teammate view — visual agent status in sidebar | `AgentTeam.java`, new `TeammateView.java` | ✅ DONE (commit 3b2e177) | `src/components/agents/` |
 | L-04 | NotebookEditTool — Jupyter .ipynb cell editing | `src/main/java/com/clipro/tools/notebook/NotebookEditTool.java` | ✅ DONE (commit 3b2e177) | `src/tools/NotebookEditTool/` |
-| L-05 | SkillTool — load and execute skills from ~/.config/clipro/skills/ | `src/main/java/com/clipro/tools/skill/SkillTool.java` | ❌ NOT STARTED | `src/tools/SkillTool/` (1,118L) |
-| L-06 | AWS Bedrock Provider (Claude on AWS) | `src/main/java/com/clipro/llm/providers/BedrockProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
-| L-07 | Google Gemini Provider | `src/main/java/com/clipro/llm/providers/GeminiProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
-| L-08 | GitHub Models Provider (Copilot) | `src/main/java/com/clipro/llm/providers/GitHubModelsProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
-| L-09 | Azure OpenAI Provider | `src/main/java/com/clipro/llm/providers/AzureOpenAIProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
-| L-10 | Remote session support (SSH to remote CLIPRO) | `src/main/java/com/clipro/session/RemoteSession.java` | ❌ NOT STARTED | `src/utils/remote.ts` |
-| L-11 | JavaFX rich UI completion (replace stub) | `JavaFXAdapter.java` | ❌ STUB | `src/ui/javafx/` (if present) |
+| L-05 | SkillTool — load and execute skills from ~/.config/clipro/skills/ | `src/main/java/com/clipro/tools/skill/SkillTool.java` | ✅ DONE (commit 5dae218) | `src/tools/SkillTool/` (1,118L) |
+| L-06 | AWS Bedrock Provider (Claude on AWS) | `src/main/java/com/clipro/llm/providers/BedrockProvider.java` | ✅ DONE (commit 456386e) | `src/services/providers/` |
+| L-07 | Google Gemini Provider | `src/main/java/com/clipro/llm/providers/GeminiProvider.java` | ✅ DONE (commit 456386e) | `src/services/providers/` |
+| L-08 | GitHub Models Provider (Copilot) | `src/main/java/com/clipro/llm/providers/GitHubModelsProvider.java` | ✅ DONE | `src/services/providers/` |
+| L-09 | Azure OpenAI Provider | `src/main/java/com/clipro/llm/providers/AzureOpenAIProvider.java` | ✅ DONE (commit 456386e) | `src/services/providers/` |
+| L-10 | Remote session support (SSH to remote CLIPRO) | `src/main/java/com/clipro/session/RemoteSession.java` | ✅ DONE | `src/utils/remote.ts` |
+| L-11 | JavaFX rich UI completion (replace stub) | `JavaFXAdapter.java` | ✅ DONE | `src/ui/javafx/` (if present) |
 | L-12 | Permission mode display in PromptInput | `EnhancedInputField.java` | ✅ DONE (commit 1e60774) | `src/components/PromptInput/` |
 | L-13 | Image paste support in input field | `InputField.java` | ✅ DONE (commit 1e60774) | `src/components/PromptInput/PromptInput.tsx` |
 | L-14 | Queued commands editing in PromptInput | `EnhancedInputField.java` | ✅ DONE (commit 1e60774) | `src/components/PromptInput/QueuedCommands.tsx` |

@@ -17,7 +17,11 @@ public class ProviderManager {
 
     public enum ProviderType {
         OLLAMA("Ollama", "Local LLM (fast, private)"),
-        OPENROUTER("OpenRouter", "Cloud LLM (300+ models)");
+        OPENROUTER("OpenRouter", "Cloud LLM (300+ models)"),
+        GITHUBMODELS("GitHub Models", "Azure AI via GitHub Copilot"),
+        OPENAI("OpenAI", "Standard OpenAI models"),
+        GEMINI("Google Gemini", "Gemini via Vertex AI"),
+        BEDROCK("AWS Bedrock", "Claude on AWS");
 
         private final String name;
         private final String description;
@@ -37,7 +41,11 @@ public class ProviderManager {
     // Default models per provider
     private static final Map<ProviderType, String> DEFAULT_MODELS = Map.of(
         ProviderType.OLLAMA, "qwen3-coder:32b",
-        ProviderType.OPENROUTER, "qwen/qwen3.6-plus"
+        ProviderType.OPENROUTER, "qwen/qwen3.6-plus",
+        ProviderType.GITHUBMODELS, "gpt-4o",
+        ProviderType.OPENAI, "gpt-4o",
+        ProviderType.GEMINI, "gemini-1.5-pro",
+        ProviderType.BEDROCK, "anthropic.claude-3-5-sonnet-20241022-v2:0"
     );
 
     public ProviderManager() {
@@ -56,6 +64,18 @@ public class ProviderManager {
                     break;
                 case OPENROUTER:
                     providers.put(type, new OpenRouterProvider());
+                    break;
+                case GITHUBMODELS:
+                    providers.put(type, new GitHubModelsProvider());
+                    break;
+                case OPENAI:
+                    providers.put(type, new OpenAIProvider());
+                    break;
+                case GEMINI:
+                    providers.put(type, new GeminiProvider());
+                    break;
+                case BEDROCK:
+                    providers.put(type, new BedrockProvider());
                     break;
             }
         }
@@ -167,6 +187,14 @@ public class ProviderManager {
                 return OllamaProvider.getDefaultModels();
             case OPENROUTER:
                 return OpenRouterProvider.getDefaultModels();
+            case GITHUBMODELS:
+                return GitHubModelsProvider.getDefaultModels();
+            case OPENAI:
+                return OpenAIProvider.getDefaultModels();
+            case GEMINI:
+                return GeminiProvider.getDefaultModels();
+            case BEDROCK:
+                return BedrockProvider.getDefaultModels();
             default:
                 return Collections.emptyList();
         }
