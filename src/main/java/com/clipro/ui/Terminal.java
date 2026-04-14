@@ -72,7 +72,10 @@ public class Terminal {
     public static String assistant(String t) { return CLAUDE_COLOR + t + RESET; }
 
     public static void clear() { System.out.print("\u001B[2J\u001B[H"); }
+    public static void clearLine() { System.out.print("\u001B[2K"); }
     public static void cursorHome() { System.out.print("\u001B[H"); }
+    public static void cursorUp(int n) { System.out.print("\u001B[" + n + "A"); }
+    public static void cursorDown(int n) { System.out.print("\u001B[" + n + "B"); }
     public static void hideCursor() { System.out.print("\u001B[?25l"); }
     public static void showCursor() { System.out.print("\u001B[?25h"); }
     public static void enterAltScreen() { System.out.print("\u001B[?1049h"); }
