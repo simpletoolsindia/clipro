@@ -85,6 +85,10 @@ public class TokenBudget {
         return Math.max(0, available);
     }
 
+    public int getMaxTokens() {
+        return maxTokens;
+    }
+
     @Override
     public String toString() {
         return String.format("TokenBudget[p=%d, c=%d, total=%d, remaining=%d]",
