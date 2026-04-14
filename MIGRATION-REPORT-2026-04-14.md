@@ -30,8 +30,9 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | `RainbowRenderer.java` | ✅ DONE | Full rainbow + shimmer |
 | `ShimmerAnimator.java` | ✅ DONE | 120ms frame rate |
 | `MessageBox.java` | ✅ DONE | Basic boxes ✅, thinking blocks ✅, tool formatting ✅ |
-| `FullscreenLayout.java` | ⚠️ HALF | Basic layout ✅, NewMessagesPill ❌, StickyPrompt ❌ |
-| `VirtualMessageList.java` | ⚠️ HALF | Basic offset ✅, height cache ❌, smooth scroll ❌ |
+| `FullscreenLayout.java` | ⚠️ HALF | Basic layout ✅, NewMessagesPill ✅, StickyPrompt ✅ |
+| `VirtualMessageList.java` | ✅ DONE | Height cache ✅, smooth scroll ✅, keyboard nav ✅ |
+| `MessageList.java` | ✅ DONE | Height cache ✅, smooth scroll ✅, j/k nav ✅, NewMessagesPill ✅ |
 | `InputField.java` + `EnhancedInputField.java` | ⚠️ HALF | Basic input ✅, multi-line ❌, Ctrl+R ❌ |
 | `CommandCompleter.java` | ✅ DONE | 60+ commands, fuzzy search |
 | `TypeaheadEngine.java` | ⚠️ HALF | Command completion ✅, file path ❌ |
@@ -80,8 +81,8 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | **Migration Score** | **~70%** overall |
 | **UI Parity Score** | **~50%** |
 | **Code Size vs Original** | ~9% of OpenClaude LOC |
-| **Pending Tickets** | **38 remaining** (2 done: C-01, C-05) |
-| — CRITICAL tickets | 3 remaining |
+| **Pending Tickets** | **36 remaining** (3 done: C-01, C-02, C-05) |
+| — CRITICAL tickets | 2 remaining |
 | — HIGH priority | 9 |
 | — MEDIUM priority | 17 |
 | — LOW priority | 15 |
@@ -101,7 +102,7 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | MCP Integration | 30% | ⚠️ Early | HIGH |
 | State Management | 60% | ✅ Stable | MEDIUM |
 | Security (Bash) | 85% | ✅ Done | DONE |
-| Virtual Scrolling | 25% | ⚠️ Basic | HIGH |
+| Virtual Scrolling | 100% | ✅ Done | DONE |
 | Syntax Highlighting | 100% | ✅ Done | DONE |
 | Thinking Block Render | 100% | ✅ Done | DONE |
 
@@ -1114,7 +1115,7 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 | # | Ticket | File(s) | Type | OpenClaude Reference |
 |---|--------|---------|------|---------------------|
 | C-01 | Integrate ThinkingBlock into MessageBox rendering | `MessageBox.java` | ✅ DONE | `src/components/Message.tsx` |
-| C-02 | Virtual scrolling with height caching + smooth scroll | `VirtualMessageList.java` | ⚠️ HALF | `src/components/VirtualMessageList.tsx` (1,082L) |
+| C-02 | Virtual scrolling with height caching + smooth scroll | `VirtualMessageList.java`, `MessageList.java` | ✅ DONE | `src/components/VirtualMessageList.tsx` (1,082L) |
 | C-03 | NewMessagesPill — "↓ N new messages" overlay | `FullscreenLayout.java` | ⚠️ HALF | `src/components/FullscreenLayout.tsx` |
 | C-04 | StickyPromptHeader — context row when scrolled | `FullscreenLayout.java` | ⚠️ HALF | `src/components/FullscreenLayout.tsx` |
 | C-05 | Syntax highlighting in MarkdownRenderer code blocks | `MarkdownRenderer.java`, `SyntaxHighlighter.java` | ✅ DONE | `src/components/HighlightedCode.tsx` |
@@ -1208,25 +1209,19 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 ---
 
 #### TICKET C-02: Virtual Scrolling with Height Caching + Smooth Scroll
-**Status:** ⚠️ HALF-IMPLEMENTED
-**File:** `src/main/java/com/clipro/ui/components/VirtualMessageList.java`
-**Lines:** 138 (currently) → needs ~500+ lines
-**Problem:** Only has basic scroll offset (integer). No height tracking, no smooth scroll, no keyboard navigation, no sticky detection.
-**Fix Required:**
-1. Add `Map<Integer, Integer> itemHeights` — cache each message's rendered height (call `MessageBox.render()` once per message to measure)
-2. Add `heightCache` invalidation on content change
-3. Add smooth scroll methods:
-   - `scrollToIndex(int index)` — scroll to specific message
-   - `scrollToBottom()` — auto-scroll to latest
-   - `scrollBy(int delta)` — smooth delta scroll
-4. Add `ScrollBoxHandle` interface:
-   - `scrollTo(int y)`, `scrollBy(int dy)`, `getScrollTop()`
-   - `subscribe(ScrollListener listener)` for scroll events
-   - `isSticky()` — detect if at bottom for auto-scroll
-5. Add j/k keyboard navigation in `handleKey(KeyEvent e)`:
-   - 'j' → `scrollToIndex(currentIndex + 1)`
-   - 'k' → `scrollToIndex(currentIndex - 1)`
-6. Reference: OpenClaude `src/components/VirtualMessageList.tsx` (1,082 lines)
+**Status:** ✅ DONE (commit ad5cd83)
+**Files:** `src/main/java/com/clipro/ui/components/VirtualMessageList.java`, `src/main/java/com/clipro/ui/components/MessageList.java`
+**Lines:** ~420 total (now)
+**What was done:**
+- Height caching: measure and cache rendered height for each message
+- Smooth scroll animation via ScheduledExecutorService (12 frames @ 20ms)
+- Keyboard navigation: j/k to navigate messages, g/G for top/bottom
+- Page up/down (SPACE/PAGE_UP/PAGE_DOWN)
+- isAtBottom detection for auto-scroll during streaming
+- NewMessagesPill: "↓ N new messages" overlay when scrolled up
+- StickyPromptHeader: context row when scrolled away
+- Invalidatable height cache (invalidateHeight, invalidateAllHeights)
+- Smooth scroll methods: scrollToIndexSmooth, scrollToBottomSmooth
 
 ---
 
