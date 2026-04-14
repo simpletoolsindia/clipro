@@ -3,6 +3,10 @@ package com.clipro.session;
 import com.clipro.llm.models.Message;
 import java.util.*;
 
+/**
+ * Conversation compactor with UI notification support (M-02).
+ * Reference: openclaude/src/utils/messages.ts compaction events
+ */
 public class ConversationCompactor {
     private final int maxMessages;
     private final int preserveSystemMessages;
@@ -19,7 +23,7 @@ public class ConversationCompactor {
     public boolean needsCompaction(List<Message> messages) { return messages.size() > maxMessages; }
 
     public CompactionResult compact(List<Message> messages) {
-        if (!needsCompaction(messages)) return new CompactionResult(messages, 0, false);
+        if (!needsCompaction(messages)) return new CompactionResult(messages, 0, false, "");
 
         List<Message> preserved = new ArrayList<>();
         List<Message> toCompact = new ArrayList<>();
@@ -39,10 +43,13 @@ public class ConversationCompactor {
         }
 
         String summary = createSummary(toCompact);
-        Message summaryMsg = new Message("system", "[Previous: " + summary + "]");
+        // M-02: Create a detailed summary message
+        Message summaryMsg = new Message("system",
+            "Context compacted — " + toCompact.size() + " messages removed to stay within token budget.\n" +
+            "[Previous conversation: " + summary + "]");
         summaryMsg.setName("compacted-" + System.currentTimeMillis());
         preserved.add(0, summaryMsg);
-        return new CompactionResult(preserved, toCompact.size(), true);
+        return new CompactionResult(preserved, toCompact.size(), true, summary);
     }
 
     private String createSummary(List<Message> old) {
@@ -57,5 +64,15 @@ public class ConversationCompactor {
         return u + " user msgs, " + a + " assistant, " + t + " tools";
     }
 
-    public record CompactionResult(List<Message> compactedMessages, int messagesRemoved, boolean wasCompacted) {}
+    /**
+     * Generate a collapsible summary for UI display (M-02).
+     */
+    public String generateCollapsibleSummary(List<Message> compacted) {
+        int msgCount = compacted.size();
+        return "┌─ [COMPACTED] " + msgCount + " messages hidden ──────────────┐\n" +
+               "│ Click to expand and review compacted messages        │\n" +
+               "└────────────────────────────────────────────────────┘";
+    }
+
+    public record CompactionResult(List<Message> compactedMessages, int messagesRemoved, boolean wasCompacted, String summary) {}
 }

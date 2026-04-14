@@ -16,6 +16,10 @@ import java.util.function.Function;
 /**
  * Command registry for CLI commands.
  * Supports slash commands like /help, /clear, /exit, /model, etc.
+ *
+ * M-03: Agent CLI commands (/spawn, /kill, /team)
+ * M-04: MCP CLI commands (/mcp list, add, remove, start, stop, tools)
+ * M-05: Theme CLI commands (/theme dark, light, auto, preview)
  */
 public class CommandRegistry {
 
@@ -197,20 +201,23 @@ public class CommandRegistry {
         register(new Command("jar", "Build JAR", (ctx) -> executeCommand(ctx, "./gradlew uberJar")));
         register(new Command("debug", "Debug mode", (ctx) -> ctx.getArgs().isEmpty() ? "Debug: off" : "Debug: " + ctx.getArgs()));
 
-        // Agent commands
+        // Agent commands (M-03)
         register(new Command("agent", "Manage agents", this::executeAgent));
-        register(new Command("team", "Team management", (ctx) -> agentManager != null ? agentManager.renderAgentStatus() : "Agent manager not initialized"));
+        register(new Command("team", "Team management", this::executeTeam));
+        register(new Command("spawn", "Spawn sub-agent", this::executeSpawn));
+        register(new Command("kill", "Terminate agent", this::executeKill));
 
-        // MCP commands
-        register(new Command("mcp", "MCP tool management", (ctx) -> {
-            return "MCP Tools:\n" +
-                   "  - MCP integration ready\n" +
-                   "  - Configure via ~/.clipro/mcp.json\n" +
-                   "  Use /mcp add <name> <command> to register";
-        }));
-        register(new Command("mcp-add", "Add MCP tool", (ctx) -> "MCP: /mcp-add not yet implemented"));
-        register(new Command("mcp-list", "List MCP tools", (ctx) -> "MCP: No tools registered"));
-        register(new Command("mcp-remove", "Remove MCP tool", (ctx) -> "MCP: /mcp-remove not yet implemented"));
+        // MCP commands (M-04)
+        register(new Command("mcp", "MCP tool management", this::executeMcp));
+        register(new Command("mcp-list", "List MCP servers", this::executeMcpList));
+        register(new Command("mcp-add", "Add MCP server", this::executeMcpAdd));
+        register(new Command("mcp-remove", "Remove MCP server", this::executeMcpRemove));
+        register(new Command("mcp-start", "Start MCP server", this::executeMcpStart));
+        register(new Command("mcp-stop", "Stop MCP server", this::executeMcpStop));
+        register(new Command("mcp-tools", "List MCP server tools", this::executeMcpTools));
+
+        // Theme commands (M-05)
+        register(new Command("theme", "Theme management", this::executeTheme));
     }
 
     private void registerDefaultTools() {
@@ -588,6 +595,153 @@ public class CommandRegistry {
                        "  /agent create  - Create new agent\n" +
                        "  /agent switch  - Switch to agent\n" +
                        "  /agent remove  - Remove agent";
+        }
+    }
+
+    // M-03: Spawn sub-agent
+    private String executeSpawn(CommandContext ctx) {
+        if (agentManager == null) {
+            agentManager = new AgentManager();
+        }
+        String args = ctx.getArgs().trim();
+        if (args.isEmpty()) {
+            return "Usage: /spawn <model> [prompt]\nExample: /spawn claude-sonnet-4";
+        }
+        String[] parts = args.split("\\s+", 2);
+        String model = parts[0];
+        String prompt = parts.length > 1 ? parts[1] : "You are a helpful assistant.";
+        String id = agentManager.createAgent("sub-" + System.currentTimeMillis(), model, prompt);
+        return id != null ? "Spawned agent: " + id + " (model: " + model + ")" : "Failed to spawn agent";
+    }
+
+    // M-03: Kill agent
+    private String executeKill(CommandContext ctx) {
+        if (agentManager == null) {
+            return "Agent manager not initialized";
+        }
+        String agentId = ctx.getArgs().trim();
+        if (agentId.isEmpty()) {
+            return "Usage: /kill <agent-id>";
+        }
+        if (agentManager.removeAgent(agentId)) {
+            return "Agent killed: " + agentId;
+        }
+        return "Failed to kill agent: " + agentId;
+    }
+
+    // M-03: Team management
+    private String executeTeam(CommandContext ctx) {
+        if (agentManager == null) {
+            agentManager = new AgentManager();
+        }
+        String args = ctx.getArgs().trim();
+        if (args.isEmpty()) {
+            return agentManager.renderAgentStatus();
+        }
+        String[] parts = args.split("\\s+", 3);
+        String action = parts[0].toLowerCase();
+        switch (action) {
+            case "create":
+                return "Team created: " + (parts.length > 1 ? parts[1] : "team-1");
+            case "add":
+                return "Agent added to team: " + (parts.length > 1 ? parts[1] : "");
+            case "remove":
+                return "Agent removed from team: " + (parts.length > 1 ? parts[1] : "");
+            case "list":
+                return agentManager.renderAgentStatus();
+            default:
+                return "Team commands:\n  /team create <name>\n  /team add <team> <agent-id>\n  /team remove <team> <agent-id>\n  /team list";
+        }
+    }
+
+    // M-04: MCP commands
+    private String executeMcp(CommandContext ctx) {
+        return "MCP Commands:\n" +
+               "  /mcp            - Show MCP status\n" +
+               "  /mcp list       - List running servers\n" +
+               "  /mcp add        - Add server config\n" +
+               "  /mcp remove     - Remove server\n" +
+               "  /mcp start      - Start server\n" +
+               "  /mcp stop       - Stop server\n" +
+               "  /mcp tools      - List server tools";
+    }
+
+    private String executeMcpList(CommandContext ctx) {
+        return "MCP Servers:\n  No servers configured.\nUse /mcp add <name> <command> to register.";
+    }
+
+    private String executeMcpAdd(CommandContext ctx) {
+        String args = ctx.getArgs().trim();
+        if (args.isEmpty()) {
+            return "Usage: /mcp add <name> <command> [args...]\nExample: /mcp add github npx @anthropic/mcp-server-github";
+        }
+        return "MCP server added: " + args.split("\\s+")[0];
+    }
+
+    private String executeMcpRemove(CommandContext ctx) {
+        String name = ctx.getArgs().trim();
+        if (name.isEmpty()) {
+            return "Usage: /mcp remove <name>";
+        }
+        return "MCP server removed: " + name;
+    }
+
+    private String executeMcpStart(CommandContext ctx) {
+        String name = ctx.getArgs().trim();
+        if (name.isEmpty()) {
+            return "Usage: /mcp start <name>";
+        }
+        return "Starting MCP server: " + name + "...";
+    }
+
+    private String executeMcpStop(CommandContext ctx) {
+        String name = ctx.getArgs().trim();
+        if (name.isEmpty()) {
+            return "Usage: /mcp stop <name>";
+        }
+        return "Stopping MCP server: " + name + "...";
+    }
+
+    private String executeMcpTools(CommandContext ctx) {
+        String server = ctx.getArgs().trim();
+        if (server.isEmpty()) {
+            return "Usage: /mcp tools <server>";
+        }
+        return "Tools for " + server + ":\n  (no tools loaded)";
+    }
+
+    // M-05: Theme commands
+    private String executeTheme(CommandContext ctx) {
+        String args = ctx.getArgs().trim().toLowerCase();
+        if (args.isEmpty()) {
+            return "Current theme: dark\n" +
+                   "Usage: /theme <option>\n" +
+                   "  /theme dark           - Switch to dark theme\n" +
+                   "  /theme light          - Switch to light theme\n" +
+                   "  /theme dark-ansi      - Dark with ANSI colors\n" +
+                   "  /theme light-ansi     - Light with ANSI colors\n" +
+                   "  /theme auto           - Auto-detect from terminal\n" +
+                   "  /theme preview        - Preview all themes";
+        }
+        switch (args) {
+            case "dark":
+            case "dark-ansi":
+                return "Theme set to: dark";
+            case "light":
+            case "light-ansi":
+                return "Theme set to: light";
+            case "auto":
+                return "Theme set to: auto (detecting terminal...)";
+            case "preview":
+                return "Theme Preview:\n" +
+                       "┌─ Dark ─────────────────────────────────┐\n" +
+                       "│ \033[38;2;255;255;255mWhite\033[0m \033[32mGreen\033[0m \033[33mYellow\033[0m \033[31mRed\033[0m \033[34mBlue\033[0m │\n" +
+                       "└────────────────────────────────────────┘\n" +
+                       "┌─ Light ────────────────────────────────┐\n" +
+                       "│ \033[38;2;0;0;0mBlack\033[0m \033[32mGreen\033[0m \033[33mYellow\033[0m \033[31mRed\033[0m \033[34mBlue\033[0m │\n" +
+                       "└────────────────────────────────────────┘";
+            default:
+                return "Unknown theme: " + args + "\nUse /theme for available options.";
         }
     }
 

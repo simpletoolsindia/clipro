@@ -4,7 +4,10 @@ public enum MessageRole {
     USER("user"),
     ASSISTANT("assistant"),
     SYSTEM("system"),
-    TOOL("tool");
+    TOOL("tool"),
+    COMPACT("compact"),         // M-02: Compaction notification
+    GROUPED_TOOL_USE("grouped_tool_use"),  // M-13: Grouped tool calls
+    COLLAPSED_SEARCH("collapsed_search");   // M-14: Collapsed search results
 
     private final String value;
 
