@@ -81,11 +81,11 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | **Migration Score** | **~70%** overall |
 | **UI Parity Score** | **~50%** |
 | **Code Size vs Original** | ~9% of OpenClaude LOC |
-| **Pending Tickets** | **36 remaining** (3 done: C-01, C-02, C-05) |
+| **Pending Tickets** | **33 remaining** (5 done: C-01, C-02, C-05, L-03, L-04, L-12, L-13, L-14, L-15) |
 | — CRITICAL tickets | 2 remaining |
 | — HIGH priority | 9 |
 | — MEDIUM priority | 17 |
-| — LOW priority | 15 |
+| — LOW priority | 7 remaining |
 
 ### Migration Scorecard
 
@@ -1176,8 +1176,8 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 |---|--------|---------|------|---------------------|
 | L-01 | Vim macros (q/ register recording and playback) | `VimMode.java`, `VimKeyHandler.java` | ❌ NOT STARTED | `src/hooks/useVimInput.ts` |
 | L-02 | Vim substitute (:s/pattern/replacement/flags) | `VimKeyHandler.java` | ❌ NOT STARTED | `src/hooks/useVimInput.ts` |
-| L-03 | Teammate view — visual agent status in sidebar | `AgentTeam.java`, new `TeammateView.java` | ❌ NOT STARTED | `src/components/agents/` |
-| L-04 | NotebookEditTool — Jupyter .ipynb cell editing | `src/main/java/com/clipro/tools/notebook/NotebookEditTool.java` | ❌ NOT STARTED | `src/tools/NotebookEditTool/` |
+| L-03 | Teammate view — visual agent status in sidebar | `AgentTeam.java`, new `TeammateView.java` | ✅ DONE (commit 3b2e177) | `src/components/agents/` |
+| L-04 | NotebookEditTool — Jupyter .ipynb cell editing | `src/main/java/com/clipro/tools/notebook/NotebookEditTool.java` | ✅ DONE (commit 3b2e177) | `src/tools/NotebookEditTool/` |
 | L-05 | SkillTool — load and execute skills from ~/.config/clipro/skills/ | `src/main/java/com/clipro/tools/skill/SkillTool.java` | ❌ NOT STARTED | `src/tools/SkillTool/` (1,118L) |
 | L-06 | AWS Bedrock Provider (Claude on AWS) | `src/main/java/com/clipro/llm/providers/BedrockProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
 | L-07 | Google Gemini Provider | `src/main/java/com/clipro/llm/providers/GeminiProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
@@ -1185,10 +1185,10 @@ Once all tickets below are closed, CLIPRO will be **100% migrated** from OpenCla
 | L-09 | Azure OpenAI Provider | `src/main/java/com/clipro/llm/providers/AzureOpenAIProvider.java` | ❌ NOT STARTED | `src/services/providers/` |
 | L-10 | Remote session support (SSH to remote CLIPRO) | `src/main/java/com/clipro/session/RemoteSession.java` | ❌ NOT STARTED | `src/utils/remote.ts` |
 | L-11 | JavaFX rich UI completion (replace stub) | `JavaFXAdapter.java` | ❌ STUB | `src/ui/javafx/` (if present) |
-| L-12 | Permission mode display in PromptInput | `EnhancedInputField.java` | ❌ NOT STARTED | `src/components/PromptInput/` |
-| L-13 | Image paste support in input field | `InputField.java` | ❌ NOT STARTED | `src/components/PromptInput/PromptInput.tsx` |
-| L-14 | Queued commands editing in PromptInput | `EnhancedInputField.java` | ❌ NOT STARTED | `src/components/PromptInput/QueuedCommands.tsx` |
-| L-15 | Block count indicators for thinking blocks | `ThinkingBlock.java`, `MessageBox.java` | ❌ NOT STARTED | `src/components/Message.tsx` |
+| L-12 | Permission mode display in PromptInput | `EnhancedInputField.java` | ✅ DONE (commit 1e60774) | `src/components/PromptInput/` |
+| L-13 | Image paste support in input field | `InputField.java` | ✅ DONE (commit 1e60774) | `src/components/PromptInput/PromptInput.tsx` |
+| L-14 | Queued commands editing in PromptInput | `EnhancedInputField.java` | ✅ DONE (commit 1e60774) | `src/components/PromptInput/QueuedCommands.tsx` |
+| L-15 | Block count indicators for thinking blocks | `ThinkingBlock.java`, `MessageBox.java` | ✅ DONE (commit 1e60774) | `src/components/Message.tsx` |
 
 ---
 
@@ -1952,46 +1952,33 @@ Add these commands in `CommandRegistry.java`:
 ---
 
 #### TICKET L-03: Teammate View
-**Status:** ❌ NOT STARTED
-**Files:** `src/main/java/com/clipro/agent/AgentTeam.java`, new `src/main/java/com/clipro/ui/components/TeammateView.java`
-**Problem:** No visual display of team members.
-**Fix Required:**
-1. Create `TeammateView.java` component
-2. Render team members in status area or sidebar:
-   ```
-   Team: code-review
-   ├─ alice (thinking...)  ██████░░ 60%
-   ├─ bob (idle)
-   └─ charlie (acting)  [====>    ] 40%
-   ```
-3. Show agent status: thinking / acting / idle / error
-4. Show progress bar for long operations
-5. Reference: OpenClaude `src/components/agents/TeammateView.tsx`
+**Status:** ✅ DONE (commit 3b2e177)
+**Files:** `src/main/java/com/clipro/agent/AgentTeam.java`, `src/main/java/com/clipro/ui/components/TeammateView.java`
+**Lines:** ~200 (new file)
+**What was done:**
+- Created `TeammateView.java` component for visual agent display
+- Renders team members in status area with tree structure
+- Shows agent status: thinking / acting / idle / error
+- Progress indicators for long operations
+- Compact team summary format for sidebar/header
+- Reference: OpenClaude `src/components/agents/TeammateView.tsx`
 
 ---
 
 #### TICKET L-04: NotebookEditTool
-**Status:** ❌ NOT STARTED
-**File:** Create `src/main/java/com/clipro/tools/notebook/NotebookEditTool.java`
-**Lines:** ~300 (new file)
-**Problem:** No Jupyter notebook editing support.
-**Fix Required:**
-1. Parse `.ipynb` JSON format
-2. Implement cell operations:
-   - `addCell(String code, String type)` — type: code or markdown
-   - `deleteCell(int index)`
-   - `updateCell(int index, String content)`
-   - `moveCell(int from, int to)`
-3. Render notebook in TUI:
-   ```
-   ┌─ [1] Python ─────────────────────────────────┐
-   │  import pandas as pd                          │
-   └───────────────────────────────────────────────┘
-   ┌─ [2] Markdown ───────────────────────────────┐
-   │  # Data Analysis Results                      │
-   └───────────────────────────────────────────────┘
-   ```
-4. Reference: OpenClaude `src/tools/NotebookEditTool/`
+**Status:** ✅ DONE (commit 3b2e177)
+**File:** `src/main/java/com/clipro/tools/notebook/NotebookEditTool.java`
+**Lines:** ~300
+**What was done:**
+- Created `NotebookEditTool.java` for Jupyter .ipynb cell editing
+- Parse `.ipynb` JSON format with cell operations:
+  - `addCell(String code, String type)` — code or markdown
+  - `deleteCell(int index)`
+  - `updateCell(int index, String content)`
+  - `moveCell(int from, int to)`
+- TUI rendering of notebooks with cell borders
+- Support for notebook list, read, edit operations
+- Reference: OpenClaude `src/tools/NotebookEditTool/`
 
 ---
 
@@ -2065,51 +2052,50 @@ Use `AnthropicProvider.java` as template for all.
 ---
 
 #### TICKET L-12: Permission Mode in PromptInput
-**Status:** ❌ NOT STARTED
+**Status:** ✅ DONE (commit 1e60774)
 **File:** `src/main/java/com/clipro/ui/components/EnhancedInputField.java`
-**Problem:** Permission mode not shown in input area.
-**Fix Required:**
-1. Add permission indicator in input prefix: `READ ▶` / `BASH ▶` / `REST ▶`
-2. Color-coded: green READ, yellow BASH, red RESTRICTED
-3. Show below input or in input prefix
+**What was done:**
+- Added permission indicator in input prefix: `READ ▶` / `BASH ▶` / `REST ▶`
+- Color-coded: green READ, yellow BASH, red RESTRICTED
+- Integrated with BashTool permission modes
+- Reference: OpenClaude `src/components/PromptInput/`
 
 ---
 
 #### TICKET L-13: Image Paste in Input
-**Status:** ❌ NOT STARTED
+**Status:** ✅ DONE (commit 1e60774)
 **File:** `src/main/java/com/clipro/ui/components/InputField.java`
-**Problem:** No paste handler for images.
-**Fix Required:**
-1. Detect paste event (Ctrl+V / Cmd+V)
-2. Check clipboard for image data
-3. Encode as base64: `data:image/png;base64,<base64>`
-4. Insert as `[Image: /tmp/clipro-paste-1.png]` reference
-5. Save to temp file
+**What was done:**
+- Added paste handler for images (PNG/JPEG)
+- Detects clipboard image data on paste (Ctrl+V / Cmd+V)
+- Encodes as base64 or saves to temp file
+- Inserts as `[Image: /tmp/clipro-paste-1.png]` reference
+- Reference: OpenClaude `src/components/PromptInput/PromptInput.tsx`
 
 ---
 
 #### TICKET L-14: Queued Commands
-**Status:** ❌ NOT STARTED
+**Status:** ✅ DONE (commit 1e60774)
 **File:** `src/main/java/com/clipro/ui/components/EnhancedInputField.java`
-**Problem:** No command queue editing.
-**Fix Required:**
-1. Queue multiple commands before execution
-2. Edit queued commands with arrow keys
-3. `/` prefix → queue command
-4. Show queue indicator: `[2 queued]`
-5. Reference: OpenClaude `src/components/PromptInput/PromptInputQueuedCommands.tsx`
+**What was done:**
+- Added command queue editing support
+- Queue multiple commands before execution
+- Edit queued commands with arrow keys
+- `/` prefix → queue command
+- Show queue indicator: `[2 queued]`
+- Reference: OpenClaude `src/components/PromptInput/PromptInputQueuedCommands.tsx`
 
 ---
 
 #### TICKET L-15: Thinking Block Count Indicators
-**Status:** ❌ NOT STARTED
+**Status:** ✅ DONE (commit 1e60774)
 **Files:** `src/main/java/com/clipro/ui/components/ThinkingBlock.java`, `src/main/java/com/clipro/ui/components/MessageBox.java`
-**Problem:** No indicator showing number of thinking blocks.
-**Fix Required:**
-1. Count thinking blocks in message: `int blockCount = countThinkingBlocks(content)`
-2. Show: `[thinking: 2 blocks]` or `💭 2`
-3. Position: top-right of assistant message box
-4. Click → expand all thinking blocks
+**What was done:**
+- Added block count indicator in message header
+- Shows: `[💭 N thinking block(s)]` or `[thinking: 2 blocks]`
+- Click → expand all thinking blocks
+- Integrated into thinking block rendering
+- Reference: OpenClaude `src/components/Message.tsx`
 
 ---
 
