@@ -35,13 +35,17 @@
 | Ticket | Task | Status | Notes |
 |--------|------|--------|-------|
 | P11.1 | BashTool permission/security | ✅ Done | PermissionMode, sandbox, destructive cmd block |
-| P11.2 | CommandRegistry expansion | ✅ Done | 50+ commands, type-safe getTool |
+| P11.2 | CommandRegistry expansion | ✅ Done | 55+ commands, type-safe getTool |
 | P11.3 | Message virtualization | ✅ Done | VirtualMessageStore with windowing |
 | P11.4 | ProviderManager UI | ✅ Done | Visual provider switch, LlmProvider interface |
 | P11.5 | CommandCompleter fuzzy | ✅ Done | Fuzzy autocomplete, suggestion preview |
 | P11.6 | InputField autocomplete | ✅ Done | Suggestion navigation, CommandCompleter |
-| P11.7 | Vim mode improvements | 🔲 Pending | Improved motions, command mode |
-| P11.8 | Agent spawning | 🔲 Pending | Sub-agent support |
+| P11.7 | Agent spawning | ✅ Done | AgentManager, /agent commands |
+| P11.8 | MCP integration | ✅ Done | MCPTool, MCP commands |
+| P11.9 | Stats display | ✅ Done | StatsComponent with heatmap |
+| P11.10 | Conversation compaction | ✅ Done | ConversationCompactor |
+| P11.11 | Anthropic provider | ✅ Done | AnthropicProvider for Claude |
+| P11.12 | New tools | ✅ Done | TaskTool, AskUserQuestionTool, ScheduleCronTool |
 
 ---
 

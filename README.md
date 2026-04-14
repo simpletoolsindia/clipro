@@ -5,15 +5,17 @@ Built with TDD (Test-Driven Development) workflow.
 
 ## Features
 
-- **14 Native Tools** - No external MCP dependencies
+- **Native Tools** - No external MCP dependencies
   - Web Search (SearXNG), Web Fetch, File Operations, Git, Bash, Grep
-- **Ollama Integration** - Local LLM with OpenAI-compatible API
-  - Supports qwen3-coder:32b, qwen2.5-coder:14b, llama3.3:70b
+  - MCP Tool, Task Tool, AskUserQuestion Tool, ScheduleCron Tool
+- **Multi-Provider LLM** - Ollama, OpenRouter, Anthropic
+  - Supports qwen3-coder:32b, qwen3.6-plus, Claude models
 - **Tool Calling** - Full ReAct loop implementation
 - **Vim Mode** - Modal editing (NORMAL, INSERT, VISUAL, COMMAND)
-- **Session Management** - Conversation history with search
+- **Session Management** - Conversation history with compaction
+- **Agent System** - Multi-agent support with /agent commands
 - **Configuration** - Secure API key storage
-- **TDD Workflow** - 34 test files, all passing
+- **TDD Workflow** - 40+ test files, all passing
 
 ## Quick Start
 
@@ -44,24 +46,24 @@ java -jar build/libs/clipro-0.1.0-uber.jar
 
 ```
 src/main/java/com/clipro/
-├── agent/          # AgentEngine, TokenBudget (ReAct loop)
-├── cli/           # CommandRegistry (/help, /clear, etc.)
-├── llm/           # OllamaProvider, models, SSE parser
-│   └── providers/ # OllamaProvider, OpenRouterProvider
+├── agent/          # AgentEngine, AgentManager, TokenBudget
+├── cli/           # CommandRegistry (55+ commands)
+├── llm/           # OllamaProvider, AnthropicProvider, SSE parser
+│   └── providers/ # LlmProvider, ProviderManager
 ├── logging/       # Logger with levels
-├── session/       # HistoryManager, ConfigManager
-├── tools/         # 14 native tools
-│   ├── file/      # FileRead, FileWrite, FileEdit, Glob, Grep
+├── session/      # HistoryManager, ConfigManager, VirtualMessageStore
+├── tools/         # 10+ native tools
+│   ├── file/     # FileRead, FileWrite, FileEdit, Glob, Grep
 │   ├── git/       # GitStatus, GitDiff, GitLog, GitCommit
-│   ├── shell/     # BashTool
+│   ├── shell/     # BashTool with security sandbox
 │   └── web/       # WebSearch, WebFetch, QuickFetch
 ├── ui/            # Terminal, Input, Messages, Vim mode
-│   ├── components/ # HeaderBar, MessageBox, StatusBar, FullscreenLayout
+│   ├── components/ # HeaderBar, MessageBox, StatsComponent, CommandCompleter
 │   └── vim/       # VimState, VimMode, VimKeyHandler
 └── tools/registry/ # ToolRegistry, ToolExecutor
 ```
 
-## Commands
+## Commands (55+)
 
 | Command | Description |
 |---------|-------------|
@@ -71,9 +73,11 @@ src/main/java/com/clipro/
 | `/model [name]` | Show or set model |
 | `/models` | List available models |
 | `/commit` | Git commit (with AI message) |
-| `/review` | Code review |
 | `/diff` | Show git diff |
 | `/status` | Show git status |
+| `/agent` | Multi-agent management |
+| `/stats` | Session statistics |
+| `/compact` | Compact conversation |
 
 ## Configuration
 
@@ -109,8 +113,9 @@ src/main/java/com/clipro/
 | P9: Session | ✅ Complete |
 | P10.1: Integration Tests | ✅ Complete |
 | P10.2: Performance Tests | ✅ Complete |
+| P11: Migration Audit Fixes | ✅ Complete |
 
-**Total: 37 test files, 88 source files, all tests passing**
+**Total: 45 test files, 100+ source files, all tests passing**
 
 **Note:** P10.2 tests measure startup, memory, UI render, and IO performance. Run with `CLIPRO_PERF_TEST=true` for full measurements.
 
