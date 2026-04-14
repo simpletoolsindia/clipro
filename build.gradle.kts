@@ -4,31 +4,21 @@ plugins {
 
 repositories {
     mavenCentral()
-    // TamboUI snapshots (not on Maven Central)
     maven("https://central.sonatype.com/repository/maven-snapshots/")
 }
 
 val tamboVersion = "0.2.0-SNAPSHOT"
 
 dependencies {
-    // TamboUI TUI Framework (matches OpenClaude Ink/React pattern)
     implementation("dev.tamboui:tamboui-core:$tamboVersion")
     implementation("dev.tamboui:tamboui-toolkit:$tamboVersion")
     implementation("dev.tamboui:tamboui-widgets:$tamboVersion")
     implementation("dev.tamboui:tamboui-tui:$tamboVersion")
     implementation("dev.tamboui:tamboui-jline3-backend:$tamboVersion")
-
-    // JSON
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
-
-    // Git
     implementation("org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r")
-
-    // Logging
     implementation("org.slf4j:slf4j-api:2.0.16")
     runtimeOnly("ch.qos.logback:logback-classic:1.5.12")
-
-    // Testing
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
 }
@@ -42,7 +32,7 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-// Create a runnable JAR
+// Build uberJar
 tasks.register<Jar>("uberJar") {
     archiveBaseName.set("clipro")
     archiveVersion.set("0.1.0")
@@ -54,19 +44,33 @@ tasks.register<Jar>("uberJar") {
     }
     dependsOn(configurations.runtimeClasspath)
     from({
-        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+        configurations.runtimeClasspath.get()
+            .filter { it.name.endsWith("jar") }
+            .map { zipTree(it) }
     })
 }
 
-// GraalVM Native Image configuration
-tasks.register("nativeCompile") {
-    group = "build"
-    description = "Compile native image (requires GraalVM)"
-    doLast {
-        println("GraalVM native image compilation requires GraalVM SDK to be installed.")
-        println("Set GRAALVM_HOME environment variable and run 'native-image' command.")
-        println("")
-        println("Expected command after GraalVM install:")
-        println("  native-image -jar build/libs/clipro-0.1.0-uber.jar")
-    }
+// Fix uberJar by removing signature files
+tasks.register<Exec>("fixJar") {
+    dependsOn("uberJar")
+    workingDir = projectDir
+    commandLine = listOf("/bin/bash", "-c", """
+        cd build/libs && \
+        rm -rf /tmp/clipro-fix && \
+        mkdir -p /tmp/clipro-fix && \
+        cd /tmp/clipro-fix && \
+        unzip -q /Users/sridhar/clipro/build/libs/clipro-0.1.0.jar && \
+        find . -name "*.SF" -delete && \
+        find . -name "*.RSA" -delete && \
+        find . -name "*.DSA" -delete && \
+        rm -f /Users/sridhar/clipro/build/libs/clipro-0.1.0.jar && \
+        jar cfm /Users/sridhar/clipro/build/libs/clipro-0.1.0.jar META-INF/MANIFEST.MF . && \
+        rm -rf /tmp/clipro-fix && \
+        echo "Fixed: signature files removed"
+    """.trimIndent())
+}
+
+// Default build
+tasks.build {
+    dependsOn("fixJar")
 }
