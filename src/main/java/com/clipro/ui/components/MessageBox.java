@@ -31,11 +31,16 @@ public class MessageBox {
     }
 
     /**
-     * Render user message with dark grey background.
+     * Render user message with dark grey background (M-12).
      * Reference: openclaude/src/components/Message.tsx (UserTextMessage)
      */
     public static String renderUser(String content, boolean streaming) {
         StringBuilder sb = new StringBuilder();
+
+        // Dark grey background for user messages
+        String bgReset = "\033[0m";
+        String bgUserMsg = "\033[48;2;55;55;55m";
+
         sb.append(Terminal.boxTop(Terminal.getColumns()));
         sb.append("\n");
         sb.append(Terminal.boxRow(Terminal.user("USER") + " " + Terminal.dim("[message]"), Terminal.getColumns()));
@@ -43,10 +48,12 @@ public class MessageBox {
         sb.append(Terminal.boxRow("", Terminal.getColumns()));
         sb.append("\n");
 
-        // Content with word wrap (safe for plain text)
+        // Content with word wrap and background color
         String wrapped = wordWrap(content, Terminal.getColumns() - 4);
         for (String line : wrapped.split("\n")) {
-            sb.append(Terminal.BORDER_V + " " + line + padRight("", Terminal.getColumns() - line.length() - 3) + Terminal.BORDER_V + "\n");
+            String padded = padRight("", Terminal.getColumns() - line.length() - 3);
+            sb.append(bgUserMsg).append(Terminal.BORDER_V + " " + line + padded).append(bgReset);
+            sb.append(Terminal.BORDER_V + "\n");
         }
 
         sb.append(Terminal.boxRow("", Terminal.getColumns()));
