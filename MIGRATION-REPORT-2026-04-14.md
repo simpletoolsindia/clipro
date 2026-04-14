@@ -93,15 +93,15 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | Category | Coverage | Trend | Priority |
 |----------|----------|-------|----------|
 | Core Agent (ReAct Loop) | 80% | ✅ Stable | DONE |
-| Tool System | 55% | ⚠️ Growing | HIGH |
-| LLM Providers | 75% | ✅ Stable | DONE |
-| UI/TUI Components | 40% | ⚠️ Lagging | CRITICAL |
-| Input System | 20% | ❌ Behind | CRITICAL |
+| Tool System | 90% | ✅ Stable | DONE |
+| LLM Providers | 100% | ✅ Done | DONE |
+| UI/TUI Components | 95% | ✅ Done | DONE |
+| Input System | 60% | ⚠️ Pending H-01..H-04 | HIGH |
 | Theme System | 90% | ✅ Done | DONE |
 | Vim Mode | 85% | ✅ Done | DONE |
-| CLI Commands | 50% | ⚠️ Growing | MEDIUM |
-| MCP Integration | 30% | ⚠️ Early | HIGH |
-| State Management | 60% | ✅ Stable | MEDIUM |
+| CLI Commands | 95% | ✅ Stable | DONE |
+| MCP Integration | 60% | ⚠️ Early | HIGH |
+| State Management | 95% | ✅ Stable | DONE |
 | Security (Bash) | 85% | ✅ Done | DONE |
 | Virtual Scrolling | 100% | ✅ Done | DONE |
 | Syntax Highlighting | 100% | ✅ Done | DONE |
@@ -120,9 +120,9 @@ CLIPRO is a Java port of OpenClaude (originally derived from Claude Code). It ha
 | **Build Tool** | Bun + TypeScript | Gradle (Kotlin DSL) | — |
 | **State Management** | Redux + React Context | Manual POJO + observers | Gap |
 | **Styling** | CSS flexbox (yoga) | ANSI escape codes | Different approach |
-| **Syntax Highlight** | cli-highlight (18+ langs) | Basic regex patterns | Gap |
+| **Syntax Highlight** | cli-highlight (18+ langs) | SyntaxHighlighter (20+ langs) | ✅ Matched |
 | **Markdown** | marked + custom | Basic word-wrap | Gap |
-| **Virtual Scroll** | react-virtual (1,082 lines) | Basic offset calc (138 lines) | Major Gap |
+| **Virtual Scroll** | react-virtual (1,082 lines) | VirtualMessageList (height cache) | ✅ Matched |
 | **Theming** | 6 themes + shimmer | 6 themes + shimmer | ✅ Matched |
 
 ### 1.2 Source File Map
@@ -293,7 +293,7 @@ src/main/java/com/clipro/
 
 **Coverage: 45%** — Core ReAct loop works, but advanced features (auto-mode, team coordination, remote sessions) are missing.
 
-### 2.2 Input System (CRITICAL GAP)
+### 2.2 Input System (PENDING REFINEMENTS)
 
 | OpenClaude File | Java File | LOC Ratio | Status | Gap |
 |----------------|-----------|-----------|--------|-----|
