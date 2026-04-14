@@ -67,15 +67,15 @@ public class MarkdownRenderer {
     }
 
     public static String renderCodeBlock(String code) {
-        return "\n┌─\n" +
-               "│ " + CODE_BG + code.replace("\n", "\n│ ") + RESET + "\n" +
-               "└─\n";
+        return "\n" + Terminal.BORDER_TL + Terminal.BORDER_H + Terminal.BORDER_H + "\n" +
+               Terminal.BORDER_V + " " + CODE_BG + code.replace("\n", "\n" + Terminal.BORDER_V + " ") + RESET + "\n" +
+               Terminal.BORDER_BL + Terminal.BORDER_H + Terminal.BORDER_H + "\n";
     }
 
     public static String renderCodeBlock(String code, String language) {
-        return "┌─ " + language + "\n" +
-               "│ " + CODE_BG + code.replace("\n", "\n│ ") + RESET + "\n" +
-               "└─\n";
+        return Terminal.BORDER_TL + Terminal.BORDER_H + " " + language + "\n" +
+               Terminal.BORDER_V + " " + CODE_BG + code.replace("\n", "\n" + Terminal.BORDER_V + " ") + RESET + "\n" +
+               Terminal.BORDER_BL + Terminal.repeat(Terminal.BORDER_H, 1) + "\n";
     }
 
     public static String wrapInBox(String content, String title) {
@@ -86,24 +86,24 @@ public class MarkdownRenderer {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("┌");
+        sb.append(Terminal.BORDER_TL);
         if (title != null) {
-            sb.append("─ ").append(title).append(" ");
-            for (int i = title.length() + 2; i < maxLen; i++) sb.append("─");
+            sb.append(Terminal.BORDER_H).append(" ").append(title).append(" ");
+            for (int i = title.length() + 2; i < maxLen; i++) sb.append(Terminal.BORDER_H);
         } else {
-            for (int i = 0; i < maxLen + 2; i++) sb.append("─");
+            for (int i = 0; i < maxLen + 2; i++) sb.append(Terminal.BORDER_H);
         }
-        sb.append("┐\n");
+        sb.append(Terminal.BORDER_TR).append("\n");
 
         for (String line : lines) {
-            sb.append("│ ").append(line);
+            sb.append(Terminal.BORDER_V).append(" ").append(line);
             for (int i = line.length(); i < maxLen; i++) sb.append(" ");
-            sb.append(" │\n");
+            sb.append(" ").append(Terminal.BORDER_V).append("\n");
         }
 
-        sb.append("└");
-        for (int i = 0; i < maxLen + 2; i++) sb.append("─");
-        sb.append("┘");
+        sb.append(Terminal.BORDER_BL);
+        for (int i = 0; i < maxLen + 2; i++) sb.append(Terminal.BORDER_H);
+        sb.append(Terminal.BORDER_BR);
 
         return sb.toString();
     }
