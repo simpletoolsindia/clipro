@@ -3,64 +3,107 @@ package com.clipro.ui.components;
 import com.clipro.ui.Terminal;
 
 /**
- * Renders a message box in the terminal.
- * Reference: openclaude/src/components/Message.tsx
+ * Renders a message box in the terminal - Pixel-perfect OpenClaude style.
+ * Reference: ~/openclaude/src/components/Message.tsx
  */
 public class MessageBox {
-    private static final String USER_COLOR = "\033[36m";    // Cyan
-    private static final String ASSISTANT_COLOR = "\033[32m"; // Green
-    private static final String SYSTEM_COLOR = "\033[33m";   // Yellow
-    private static final String RESET = "\033[0m";
 
     public static String render(Message message) {
-        String roleLabel = getRoleLabel(message.getRole());
-        String color = getColor(message.getRole());
-        String rolePrefix = color + roleLabel + RESET + " ";
+        return switch (message.getRole()) {
+            case USER -> renderUser(message.getContent(), message.isStreaming());
+            case ASSISTANT -> renderAssistant(message.getContent(), message.isStreaming());
+            case SYSTEM -> renderSystem(message.getContent());
+            case TOOL -> renderTool(message.getContent());
+        };
+    }
 
+    public static String renderUser(String content, boolean streaming) {
         StringBuilder sb = new StringBuilder();
-        sb.append(rolePrefix);
+        sb.append(Terminal.boxTop(Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow(Terminal.user("USER") + " " + Terminal.dim("[message]"), Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
 
-        if (message.isStreaming()) {
-            sb.append(renderStreamingContent(message.getContent()));
-        } else {
-            sb.append(message.getContent());
+        // Content with word wrap
+        String wrapped = wordWrap(content, Terminal.getColumns() - 4);
+        for (String line : wrapped.split("\n")) {
+            sb.append(Terminal.BORDER_V + " " + line + Terminal.padRight("", Terminal.getColumns() - line.length() - 3) + Terminal.BORDER_V + "\n");
         }
 
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxBottom(Terminal.getColumns()));
+        if (streaming) sb.append(Terminal.brightCyan(" ▌")); // Streaming cursor
         return sb.toString();
     }
 
-    public static String renderUser(String content) {
-        return render(new Message(MessageRole.USER, content));
-    }
+    public static String renderAssistant(String content, boolean streaming) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Terminal.boxTop(Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow(Terminal.assistant("CLAUDE") + " " + Terminal.dim("[assistant]"), Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
 
-    public static String renderAssistant(String content) {
-        return render(new Message(MessageRole.ASSISTANT, content));
+        String wrapped = wordWrap(content, Terminal.getColumns() - 4);
+        for (String line : wrapped.split("\n")) {
+            sb.append(Terminal.BORDER_V + " " + line + Terminal.padRight("", Terminal.getColumns() - line.length() - 3) + Terminal.BORDER_V + "\n");
+        }
+
+        sb.append(Terminal.boxRow("", Terminal.getColumns()));
+        sb.append("\n");
+        sb.append(Terminal.boxBottom(Terminal.getColumns()));
+        if (streaming) sb.append(Terminal.brightCyan(" ▌"));
+        return sb.toString();
     }
 
     public static String renderSystem(String content) {
-        return render(new Message(MessageRole.SYSTEM, content));
+        StringBuilder sb = new StringBuilder();
+        sb.append(Terminal.dim("[SYSTEM] " + content));
+        return sb.toString();
     }
 
-    private static String getRoleLabel(MessageRole role) {
-        return switch (role) {
-            case USER -> "[USER]";
-            case ASSISTANT -> "[ASSISTANT]";
-            case SYSTEM -> "[SYSTEM]";
-            case TOOL -> "[TOOL]";
+    public static String renderTool(String content) {
+        StringBuilder sb = new StringBuilder();
+        String wrapped = wordWrap(content, Terminal.getColumns() - 6);
+        for (String line : wrapped.split("\n")) {
+            sb.append(Terminal.dim("  │ " + line + "\n"));
+        }
+        return sb.toString();
+    }
+
+    public static String renderSimple(String content, MessageRole role) {
+        String prefix = switch (role) {
+            case USER -> Terminal.user("▶ ");
+            case ASSISTANT -> Terminal.assistant("◀ ");
+            case TOOL -> Terminal.dim("└─ ");
+            default -> "";
         };
+        return prefix + content;
     }
 
-    private static String getColor(MessageRole role) {
-        return switch (role) {
-            case USER -> USER_COLOR;
-            case ASSISTANT -> ASSISTANT_COLOR;
-            case SYSTEM -> SYSTEM_COLOR;
-            case TOOL -> ASSISTANT_COLOR;
-        };
-    }
+    private static String wordWrap(String text, int maxWidth) {
+        if (text == null || text.isEmpty()) return "";
+        StringBuilder result = new StringBuilder();
+        String[] words = text.split(" ");
+        StringBuilder current = new StringBuilder();
 
-    private static String renderStreamingContent(String content) {
-        // Add cursor indicator for streaming
-        return content + " \033[7m \033[0m";
+        for (String word : words) {
+            if (current.length() + word.length() + 1 > maxWidth) {
+                if (current.length() > 0) {
+                    result.append(current.toString().trim());
+                    result.append("\n");
+                    current = new StringBuilder();
+                }
+            }
+            current.append(word).append(" ");
+        }
+        if (current.length() > 0) {
+            result.append(current.toString().trim());
+        }
+        return result.toString();
     }
 }
