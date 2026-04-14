@@ -26,31 +26,37 @@ CLIPRO has achieved **~55-60% functional coverage** of OpenClaude's core feature
 | **State Management** | Redux/store | Manual state | 40% | PARTIAL |
 | **Bash Security** | Advanced AST | Basic sandbox | 30% | PARTIAL |
 
-### Overall Migration Score: **~78%**
+### Overall Migration Score: **~82%**
 
 ---
 
 ## Implementation Progress
 
 ### Wave 1B: Thinking Block Renderer ✅ COMPLETE
-**Date:** 2026-04-14 | **Commit:** `3435aac`
-- RainbowRenderer, ShimmerAnimator, ThinkingBlock, ThinkingParser
+**Commit:** `3435aac` | RainbowRenderer, ShimmerAnimator, ThinkingBlock, ThinkingParser
 
-### Wave 1D: Theme System ✅ PHASE 1 COMPLETE
-**Date:** 2026-04-14 | **Commit:** `449acb9`
-- ThemeName enum, Theme (80+ colors), ThemeManager, DiffColorizer
+### Wave 1D: Theme System ✅ COMPLETE
+**Commit:** `449acb9` | ThemeName enum, Theme (80+ colors), ThemeManager, DiffColorizer
 
-### Pending Waves
+### Wave 1A: Enhanced Input System ✅ COMPLETE
+**Commit:** `bd180c9` | TypeaheadEngine, EnhancedInputField, HistorySearch
 
-| Wave | Feature | Status |
-|------|---------|--------|
-| 1A | Enhanced Input System ✅ COMPLETE | |
-| 1C | MCP Integration (Quarkus) ⏳ NEXT | |
-| 2A | Syntax Highlighting ✅ COMPLETE | |
-| 2B | Multi-line Input + Vim ✅ COMPLETE | |
-| 2C | Sub-agents / Team | PENDING |
-| 2D | Advanced Vim Mode ✅ COMPLETE | |
-| 2E | JavaFX Rich UI | PENDING |
+### Wave 1C: MCP Client ✅ PHASE 1
+**Commit:** `3ad0b7a` | McpClient, JSON-RPC protocol
+
+### Wave 2A: Syntax Highlighting ✅ COMPLETE
+**Commit:** `1a94be0` | 18+ languages supported
+
+### Wave 2B/2D: Advanced Vim ✅ COMPLETE
+**Commit:** `415ea73` | TextObject, VimRegisters, VimMarks
+
+### Wave 2C: Sub-agents ✅ COMPLETE
+**Commit:** `f50daf9` | SubAgent for parallel execution
+
+### Wave 2E: JavaFX UI ✅ PHASE 1
+**Commit:** `f50daf9` | JavaFXAdapter stub
+
+## All Waves Phase 1 Complete ✅
 
 ---
 
