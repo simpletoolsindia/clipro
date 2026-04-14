@@ -235,7 +235,7 @@ openclaude/src/
 | P2.5.1 | `StreamingMessage` in FullscreenLayout | ✅ StreamingTest | `src/components/` | ✅ **PC/MB DONE** |
 | P2.5.2 | `AgentEngine.runStreaming()` | ✅ StreamingTest | - | ✅ **PC/MB DONE** |
 | P2.5.3 | `UIController.sendMessageStreaming()` | ✅ StreamingTest | - | ✅ **PC/MB DONE** |
-| P2.5.4 | Real-time token updates | ⏳ StreamingE2E | - | PC |
+| P2.5.4 | Real-time token updates (E2E) | ✅ `StreamingE2ETest` (12 tests) | - | ✅ **DONE** |
 
 ---
 
@@ -483,7 +483,7 @@ class {Feature}Test {
 
 ---
 
-**Last Updated:** 2026-04-14 12:35
+**Last Updated:** 2026-04-14 13:00
 **Repository:** https://github.com/simpletoolsindia/clipro
 
 ## COMPLETED SUMMARY
