@@ -235,23 +235,23 @@ openclaude/src/
 ### P3.1: Vim State
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P3.1.1 | `VimState` enum | 🔄 PC Agent | PC |
-| P3.1.2 | `VimMode` transitions | 🔄 PC Agent | PC |
-| P3.1.3 | `VimStateManager` | 🔄 PC Agent | PC |
+| P3.1.1 | `VimState` enum | ✅ `VimStateTest` | ~~PC~~ DONE |
+| P3.1.2 | `VimMode` transitions | ✅ `VimModeTest` | ~~PC~~ DONE |
+| P3.1.3 | `VimStateManager` | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
 
 ### P3.2: Vim Keybindings
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P3.2.1 | Motion commands (hjkl) | 🔄 PC Agent | PC |
-| P3.2.2 | Word motion (w, b, e) | 🔄 PC Agent | PC |
-| P3.2.3 | Operators (d, y, p) | 🔄 PC Agent | PC |
-| P3.2.4 | `VimKeyHandler` | 🔄 PC Agent | PC |
+| P3.2.1 | Motion commands (hjkl) | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
+| P3.2.2 | Word motion (w, b, e) | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
+| P3.2.3 | Operators (d, y, p) | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
+| P3.2.4 | `VimKeyHandler` | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
 
 ### P3.3: Vim Commands
 | Ticket | Task | Test | Agent |
 |--------|------|------|-------|
-| P3.3.1 | `:w`, `:q`, `:wq` | 🔄 PC Agent | PC |
-| P3.3.2 | `:set` options | 🔄 PC Agent | PC |
+| P3.3.1 | `:w`, `:q`, `:wq` | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
+| P3.3.2 | `:set` options | ✅ `VimKeyHandlerTest` | ~~PC~~ DONE |
 
 ---
 
