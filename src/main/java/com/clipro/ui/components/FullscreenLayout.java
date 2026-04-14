@@ -3,7 +3,8 @@ package com.clipro.ui.components;
 import com.clipro.ui.Terminal;
 
 /**
- * Fullscreen layout combining header, messages, and status.
+ * Fullscreen layout combining header, messages, input, and status.
+ * Pixel-perfect OpenClaude style.
  * Reference: openclaude/src/components/FullscreenLayout.tsx
  */
 public class FullscreenLayout {
@@ -54,14 +55,22 @@ public class FullscreenLayout {
         header.setStatus(statusText);
     }
 
+    public void init() {
+        Terminal.clear();
+        Terminal.hideCursor();
+        Terminal.enterAltScreen();
+    }
+
+    public void shutdown() {
+        Terminal.showCursor();
+        Terminal.exitAltScreen();
+    }
+
     public String render() {
         StringBuilder sb = new StringBuilder();
+        int width = Terminal.getColumns();
 
-        // Clear screen and enter alt screen (these print directly)
-        Terminal.clear();
-        Terminal.enterAltScreen();
-
-        // Header
+        // Header with box border
         sb.append(header.render());
         sb.append("\n");
 
@@ -72,25 +81,45 @@ public class FullscreenLayout {
         // Messages
         if (!messages.isEmpty()) {
             sb.append(messages.render());
-            sb.append("\n");
         }
 
-        // Spacer
+        // Fill remaining space with dim lines
         int rows = Terminal.getRows();
-        int usedRows = 4; // header + divider + input + status
-        for (int i = 0; i < Math.max(0, rows - usedRows - messages.size()); i++) {
+        int contentRows = 4 + messages.size(); // header, divider, input, status, messages
+        int spacerRows = Math.max(0, rows - contentRows - 2);
+
+        for (int i = 0; i < spacerRows; i++) {
+            sb.append(Terminal.BORDER_V);
+            sb.append(Terminal.repeat(" ", width - 2));
+            sb.append(Terminal.BORDER_V);
             sb.append("\n");
         }
 
-        // Input
-        sb.append(input.renderWithCursor());
+        // Input with border
+        sb.append(Terminal.BORDER_V).append(" ");
+        sb.append(input.render());
+        sb.append(Terminal.padRight("", width - input.getLength() - 3));
+        sb.append(Terminal.BORDER_V).append("\n");
+
+        // Status bar
+        sb.append(status.render());
 
         return sb.toString();
     }
 
     public String renderMinimal() {
-        // Minimal render for updates (just input area)
-        return input.renderWithCursor();
+        // Minimal render for input updates only
+        StringBuilder sb = new StringBuilder();
+        int width = Terminal.getColumns();
+
+        // Move cursor to input line and update
+        sb.append("\r");
+        sb.append(Terminal.BORDER_V).append(" ");
+        sb.append(input.render());
+        sb.append(Terminal.padRight("", width - input.getLength() - 3));
+        sb.append(Terminal.BORDER_V);
+
+        return sb.toString();
     }
 
     public String renderWithInput(String inputText) {

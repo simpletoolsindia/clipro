@@ -93,4 +93,9 @@ public class Terminal {
     public static String boxRow(String content, int w) {
         return BORDER_V + content + repeat(" ", w - content.length() - 2) + BORDER_V;
     }
+
+    public static String padRight(String s, int n) {
+        if (n <= 0) return "";
+        return repeat(" ", n);
+    }
 }
