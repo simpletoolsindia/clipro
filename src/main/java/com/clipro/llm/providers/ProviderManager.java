@@ -18,6 +18,7 @@ public class ProviderManager {
     public enum ProviderType {
         OLLAMA("Ollama", "Local LLM (fast, private)"),
         OPENROUTER("OpenRouter", "Cloud LLM (300+ models)"),
+        DEEPSEEK("DeepSeek", "DeepSeek models (cost-effective)"),
         GITHUBMODELS("GitHub Models", "Azure AI via GitHub Copilot"),
         OPENAI("OpenAI", "Standard OpenAI models"),
         GEMINI("Google Gemini", "Gemini via Vertex AI"),
@@ -42,6 +43,7 @@ public class ProviderManager {
     private static final Map<ProviderType, String> DEFAULT_MODELS = Map.of(
         ProviderType.OLLAMA, "qwen3-coder:32b",
         ProviderType.OPENROUTER, "qwen/qwen3.6-plus",
+        ProviderType.DEEPSEEK, "deepseek-chat",
         ProviderType.GITHUBMODELS, "gpt-4o",
         ProviderType.OPENAI, "gpt-4o",
         ProviderType.GEMINI, "gemini-1.5-pro",
@@ -64,6 +66,9 @@ public class ProviderManager {
                     break;
                 case OPENROUTER:
                     providers.put(type, new OpenRouterProvider());
+                    break;
+                case DEEPSEEK:
+                    providers.put(type, new DeepSeekProvider());
                     break;
                 case GITHUBMODELS:
                     providers.put(type, new GitHubModelsProvider());
@@ -187,6 +192,8 @@ public class ProviderManager {
                 return OllamaProvider.getDefaultModels();
             case OPENROUTER:
                 return OpenRouterProvider.getDefaultModels();
+            case DEEPSEEK:
+                return DeepSeekProvider.getAvailableModels();
             case GITHUBMODELS:
                 return GitHubModelsProvider.getDefaultModels();
             case OPENAI:
