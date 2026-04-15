@@ -324,15 +324,88 @@ public class Theme {
         private String chromeYellow = "\u001B[38;2;251;188;4m";
         private String professionalBlue = "\u001B[38;2;106;155;204m";
 
+        // Brand color setters
         public Builder setClaude(String v) { this.claude = v; return this; }
+        public Builder setClaudeShimmer(String v) { this.claudeShimmer = v; return this; }
+        public Builder setClaudeBlue(String v) { this.claudeBlue = v; return this; }
+        public Builder setClaudeBlueShimmer(String v) { this.claudeBlueShimmer = v; return this; }
+
+        // Semantic color setters
         public Builder setText(String v) { this.text = v; return this; }
+        public Builder setInverseText(String v) { this.inverseText = v; return this; }
+        public Builder setSubtle(String v) { this.subtle = v; return this; }
+        public Builder setInactive(String v) { this.inactive = v; return this; }
+        public Builder setBackground(String v) { this.background = v; return this; }
+
+        // Status color setters
         public Builder setSuccess(String v) { this.success = v; return this; }
         public Builder setError(String v) { this.error = v; return this; }
         public Builder setWarning(String v) { this.warning = v; return this; }
-        public Builder setBackground(String v) { this.background = v; return this; }
-        public Builder setUserMessageBackground(String v) { this.userMessageBackground = v; return this; }
+        public Builder setMerged(String v) { this.merged = v; return this; }
         public Builder setSuggestion(String v) { this.suggestion = v; return this; }
+        public Builder setPermission(String v) { this.permission = v; return this; }
+
+        // Background setters
+        public Builder setUserMessageBackground(String v) { this.userMessageBackground = v; return this; }
+        public Builder setUserMessageBackgroundHover(String v) { this.userMessageBackgroundHover = v; return this; }
+        public Builder setMessageActionsBackground(String v) { this.messageActionsBackground = v; return this; }
+        public Builder setSelectionBg(String v) { this.selectionBg = v; return this; }
+        public Builder setBashMessageBackgroundColor(String v) { this.bashMessageBackgroundColor = v; return this; }
+        public Builder setMemoryBackgroundColor(String v) { this.memoryBackgroundColor = v; return this; }
         public Builder setToolResultBackground(String v) { this.toolResultBackground = v; return this; }
+
+        // Diff color setters
+        public Builder setDiffAdded(String v) { this.diffAdded = v; return this; }
+        public Builder setDiffRemoved(String v) { this.diffRemoved = v; return this; }
+        public Builder setDiffAddedDimmed(String v) { this.diffAddedDimmed = v; return this; }
+        public Builder setDiffRemovedDimmed(String v) { this.diffRemovedDimmed = v; return this; }
+        public Builder setDiffAddedWord(String v) { this.diffAddedWord = v; return this; }
+        public Builder setDiffRemovedWord(String v) { this.diffRemovedWord = v; return this; }
+
+        // Rainbow color setters (base)
+        public Builder setRainbowRed(String v) { this.rainbowRed = v; return this; }
+        public Builder setRainbowOrange(String v) { this.rainbowOrange = v; return this; }
+        public Builder setRainbowYellow(String v) { this.rainbowYellow = v; return this; }
+        public Builder setRainbowGreen(String v) { this.rainbowGreen = v; return this; }
+        public Builder setRainbowBlue(String v) { this.rainbowBlue = v; return this; }
+        public Builder setRainbowIndigo(String v) { this.rainbowIndigo = v; return this; }
+        public Builder setRainbowViolet(String v) { this.rainbowViolet = v; return this; }
+
+        // Rainbow shimmer setters
+        public Builder setRainbowRedShimmer(String v) { this.rainbowRedShimmer = v; return this; }
+        public Builder setRainbowOrangeShimmer(String v) { this.rainbowOrangeShimmer = v; return this; }
+        public Builder setRainbowYellowShimmer(String v) { this.rainbowYellowShimmer = v; return this; }
+        public Builder setRainbowGreenShimmer(String v) { this.rainbowGreenShimmer = v; return this; }
+        public Builder setRainbowBlueShimmer(String v) { this.rainbowBlueShimmer = v; return this; }
+        public Builder setRainbowIndigoShimmer(String v) { this.rainbowIndigoShimmer = v; return this; }
+        public Builder setRainbowVioletShimmer(String v) { this.rainbowVioletShimmer = v; return this; }
+
+        // Agent color setters
+        public Builder setAgentRed(String v) { this.agentRed = v; return this; }
+        public Builder setAgentBlue(String v) { this.agentBlue = v; return this; }
+        public Builder setAgentGreen(String v) { this.agentGreen = v; return this; }
+        public Builder setAgentYellow(String v) { this.agentYellow = v; return this; }
+        public Builder setAgentPurple(String v) { this.agentPurple = v; return this; }
+        public Builder setAgentOrange(String v) { this.agentOrange = v; return this; }
+        public Builder setAgentPink(String v) { this.agentPink = v; return this; }
+        public Builder setAgentCyan(String v) { this.agentCyan = v; return this; }
+
+        // UI color setters
+        public Builder setPlanMode(String v) { this.planMode = v; return this; }
+        public Builder setIde(String v) { this.ide = v; return this; }
+        public Builder setAutoAccept(String v) { this.autoAccept = v; return this; }
+        public Builder setBashBorder(String v) { this.bashBorder = v; return this; }
+        public Builder setPromptBorder(String v) { this.promptBorder = v; return this; }
+        public Builder setPromptBorderShimmer(String v) { this.promptBorderShimmer = v; return this; }
+        public Builder setFastMode(String v) { this.fastMode = v; return this; }
+        public Builder setFastModeShimmer(String v) { this.fastModeShimmer = v; return this; }
+        public Builder setRateLimitFill(String v) { this.rateLimitFill = v; return this; }
+        public Builder setRateLimitEmpty(String v) { this.rateLimitEmpty = v; return this; }
+        public Builder setBriefLabelYou(String v) { this.briefLabelYou = v; return this; }
+        public Builder setBriefLabelClaude(String v) { this.briefLabelClaude = v; return this; }
+        public Builder setChromeYellow(String v) { this.chromeYellow = v; return this; }
+        public Builder setProfessionalBlue(String v) { this.professionalBlue = v; return this; }
+
         public Theme build() { return new Theme(this); }
     }
 }
