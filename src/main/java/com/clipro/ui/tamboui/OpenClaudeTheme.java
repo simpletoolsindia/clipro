@@ -25,8 +25,8 @@ public class OpenClaudeTheme {
     public static final String TEXT_MUTED = "#505050";         // rgb(80,80,80)
 
     // Background colors - exact match darkTheme
-    public static final String BACKGROUND = "#00CCCC";         // rgb(0,204,204) - bright cyan
-    public static final String BACKGROUND_BRIGHT = "#00CCCC";   // rgb(0,204,204)
+    public static final String BACKGROUND = "#0f0f0f";         // Dark background for terminal
+    public static final String BACKGROUND_BRIGHT = "#1a1a1a";   // Slightly brighter for hover/select
     public static final String USER_MESSAGE_BG = "#373737";     // rgb(55,55,55)
     public static final String USER_MESSAGE_HOVER = "#464646";  // rgb(70,70,70)
     public static final String TOOL_RESULT_BG = "#191923";      // rgb(25,25,35)

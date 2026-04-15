@@ -64,7 +64,7 @@ public class WebSearchTool implements Tool {
 
     public String search(String query, int limit) throws Exception {
         String url = DEFAULT_URL + "?q=" + URLEncoder.encode(query, StandardCharsets.UTF_8) +
-                    "&format=json&engines=wikipedia,github,hackernews&safe_search=1&limit=" + limit;
+                    "&format=json&limit=" + limit + "&safe_search=1";
         var response = client.getAsync(url).get();
         return formatResults(response.body(), limit);
     }
