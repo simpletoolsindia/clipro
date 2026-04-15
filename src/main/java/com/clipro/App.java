@@ -174,6 +174,9 @@ public class App {
         tools.add(new com.clipro.tools.git.GitDiffTool());
         tools.add(new com.clipro.tools.git.GitLogTool());
         tools.add(new com.clipro.tools.git.GitCommitTool());
+        // Worktree (H-03: Git worktree tools)
+        tools.add(new com.clipro.tools.git.EnterWorktreeTool());
+        tools.add(new com.clipro.tools.git.ExitWorktreeTool());
         // Shell
         tools.add(new com.clipro.tools.shell.BashTool());
         // Web
