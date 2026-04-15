@@ -179,8 +179,13 @@ public class App {
         // Web
         tools.add(new com.clipro.tools.web.WebSearchTool());
         tools.add(new com.clipro.tools.web.WebFetchTool());
-        // Task
+        // Task (H-02: Individual task tools)
         tools.add(new com.clipro.tools.TaskTool());
+        tools.add(new com.clipro.tools.TaskCreateTool());
+        tools.add(new com.clipro.tools.TaskGetTool());
+        tools.add(new com.clipro.tools.TaskListTool());
+        tools.add(new com.clipro.tools.TaskUpdateTool());
+        tools.add(new com.clipro.tools.TaskStopTool());
         // Agent (H-01: Sub-agent spawning)
         tools.add(new com.clipro.tools.AgentTool());
         // Skill
