@@ -1,153 +1,105 @@
 package com.clipro.ui.components;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
- * Animated shimmer effect for rainbow colors.
- * Uses 120ms frame rate for smooth animation.
- *
- * Reference: openclaude/src/components/Spinner.tsx (shimmer logic)
+ * H-13: Animated shimmer effect for the prompt cursor.
+ * Creates a pulsing/shimmer animation at 120ms frame rate.
  */
 public class ShimmerAnimator {
 
-    /** Frame rate in milliseconds */
-    private static final int FRAME_RATE_MS = 120;
+    private static final long FRAME_RATE_MS = 120;
+    private static final int CYCLE_LENGTH = 8;
 
-    /** Number of frames in a shimmer cycle */
-    private static final int CYCLE_LENGTH = 2;
+    private final AtomicLong frameCount = new AtomicLong(0);
+    private volatile boolean enabled = false;
+    private volatile boolean paused = false;
+    private Thread animationThread;
+    private final Object lock = new Object();
 
-    private final RainbowRenderer renderer;
-    private long frameCount = 0;
-    private boolean enabled = false;
-    private boolean paused = false;
+    public ShimmerAnimator() {}
 
-    public ShimmerAnimator() {
-        this.renderer = new RainbowRenderer();
-    }
-
-    public ShimmerAnimator(RainbowRenderer renderer) {
-        this.renderer = renderer;
+    /**
+     * Start the shimmer animation.
+     */
+    public void start() {
+        if (enabled) return;
+        enabled = true;
+        paused = false;
+        animationThread = new Thread(() -> {
+            while (enabled) {
+                try {
+                    Thread.sleep(FRAME_RATE_MS);
+                    if (!paused) {
+                        frameCount.incrementAndGet();
+                    }
+                } catch (InterruptedException ignored) {
+                    break;
+                }
+            }
+        }, "shimmer-animator");
+        animationThread.setDaemon(true);
+        animationThread.start();
     }
 
     /**
-     * Advance one frame (call on each tick).
+     * Stop the shimmer animation.
      */
-    public void tick() {
-        if (paused) return;
-
-        frameCount++;
-        renderer.tickShimmer();
+    public void stop() {
+        enabled = false;
+        if (animationThread != null) {
+            animationThread.interrupt();
+            animationThread = null;
+        }
     }
 
     /**
-     * Get the frame rate in ms.
+     * Pause the animation (keeps thread alive).
      */
-    public int getFrameRateMs() {
-        return FRAME_RATE_MS;
+    public void pause() { paused = true; }
+
+    /**
+     * Resume the animation.
+     */
+    public void resume() { paused = false; }
+
+    /**
+     * Get the current frame for rendering.
+     */
+    public long getFrame() {
+        return frameCount.get();
     }
 
     /**
-     * Get current frame number.
+     * Get shimmer frame for ANSI cursor animation.
+     * Returns 0-7 for cycling through animation frames.
      */
-    public long getFrameCount() {
-        return frameCount;
+    public int getShimmerFrame() {
+        return (int) (frameCount.get() % CYCLE_LENGTH);
     }
 
     /**
-     * Check if in shimmer phase (odd frame).
+     * Get a shimmer block cursor character based on current frame.
      */
-    public boolean isShimmerPhase() {
-        return frameCount % CYCLE_LENGTH == 1;
+    public String getShimmerCursor() {
+        int frame = getShimmerFrame();
+        return switch (frame) {
+            case 0, 4 -> "\u2588";  // Full block
+            case 1, 5 -> "\u2589";  // 7/8
+            case 2, 6 -> "\u258A";  // 6/8
+            case 3, 7 -> "\u258B";  // 5/8
+            default -> "\u2588";
+        };
     }
 
     /**
-     * Enable/disable shimmer animation.
+     * Get shimmer animation phase for color cycling.
+     * Returns 0.0-1.0 cycling value.
      */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        renderer.setShimmerEnabled(enabled);
+    public double getPhase() {
+        return (frameCount.get() % (CYCLE_LENGTH * 4)) / (double) (CYCLE_LENGTH * 4);
     }
 
-    /**
-     * Check if shimmer is enabled.
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Pause/resume animation.
-     */
-    public void setPaused(boolean paused) {
-        this.paused = paused;
-    }
-
-    /**
-     * Check if animation is paused.
-     */
-    public boolean isPaused() {
-        return paused;
-    }
-
-    /**
-     * Render text with shimmer animation.
-     */
-    public String renderShimmer(String text) {
-        return renderer.renderRainbow(text, isShimmerPhase());
-    }
-
-    /**
-     * Render text with shimmer animation (bold).
-     */
-    public String renderShimmerBold(String text) {
-        return renderer.renderRainbowBold(text, isShimmerPhase());
-    }
-
-    /**
-     * Render ultrathink keyword with shimmer.
-     */
-    public String renderUltrathink(String text) {
-        return renderer.renderUltrathink(text, isShimmerPhase());
-    }
-
-    /**
-     * Get the underlying renderer.
-     */
-    public RainbowRenderer getRenderer() {
-        return renderer;
-    }
-
-    /**
-     * Reset frame counter.
-     */
-    public void reset() {
-        frameCount = 0;
-    }
-
-    /**
-     * Create a timer-compatible runnable for animation loop.
-     */
-    public Runnable createTickRunnable() {
-        return this::tick;
-    }
-
-    /**
-     * Get shimmer state for serialization (e.g., save to config).
-     */
-    public ShimmerState getState() {
-        return new ShimmerState(enabled, paused, frameCount);
-    }
-
-    /**
-     * Restore shimmer state from serialization.
-     */
-    public void restoreState(ShimmerState state) {
-        this.enabled = state.enabled();
-        this.paused = state.paused();
-        this.frameCount = state.frameCount();
-        renderer.setShimmerEnabled(enabled);
-    }
-
-    /**
-     * Serializable shimmer state record.
-     */
-    public record ShimmerState(boolean enabled, boolean paused, long frameCount) {}
+    public boolean isEnabled() { return enabled; }
+    public boolean isPaused() { return paused; }
 }

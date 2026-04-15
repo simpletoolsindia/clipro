@@ -453,4 +453,72 @@ public class MessageBox {
         if (text == null || text.length() <= maxLen) return text;
         return text.substring(0, Math.max(0, maxLen - 3)) + "...";
     }
+
+    // ========== H-14: Click-to-Expand Methods ==========
+
+    /**
+     * H-14: Handle click on a message - expand collapsed regions.
+     * Detects if click was on a collapsed thinking/search block.
+     * @param content the message content
+     * @return expanded content if click was on collapsed region, null otherwise
+     */
+    public static String handleClickOnCollapsed(String content) {
+        if (content == null) return null;
+        // Check if content has collapsed markers
+        if (content.contains("[click to expand]") || content.contains("[collapsed:")) {
+            // Expand all collapsed regions
+            return expandAllCollapsed(content);
+        }
+        return null; // Click was not on a collapsed region
+    }
+
+    /**
+     * H-14: Expand all collapsed regions in content.
+     */
+    public static String expandAllCollapsed(String content) {
+        if (content == null) return "";
+        StringBuilder sb = new StringBuilder();
+
+        // Parse thinking blocks
+        var blocks = thinkingParser.parseBlocks(content);
+        if (blocks.isEmpty()) return content;
+
+        int lastEnd = 0;
+        for (var block : blocks) {
+            // Text before block
+            if (block.getStartIndex() > lastEnd) {
+                sb.append(content, lastEnd, block.getStartIndex());
+            }
+            // Expanded block content
+            String blockContent = block.getContent();
+            sb.append("◇ [thinking expanded]:\n").append(blockContent).append("\n");
+            lastEnd = block.getEndIndex();
+        }
+
+        if (lastEnd < content.length()) {
+            sb.append(content.substring(lastEnd));
+        }
+
+        // Toggle thinking block expanded state
+        thinkingBlock.setExpanded(true);
+        return sb.toString();
+    }
+
+    /**
+     * H-14: Collapse expanded regions back.
+     */
+    public static String collapseAll(String content) {
+        thinkingBlock.setExpanded(false);
+        return content;
+    }
+
+    /**
+     * H-14: Check if content has any collapsible regions.
+     */
+    public static boolean hasCollapsibleRegions(String content) {
+        if (content == null) return false;
+        return content.contains("[click to expand]") ||
+               content.contains("[collapsed:") ||
+               thinkingParser.countThinkingBlocks(content) > 0;
+    }
 }

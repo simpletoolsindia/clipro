@@ -32,11 +32,12 @@ class ProviderManagerTest {
     @Test
     void shouldGetAvailableProviders() {
         var providers = manager.getAvailableProviders();
-        assertEquals(2, providers.size());
+        assertEquals(ProviderManager.ProviderType.values().length, providers.size());
 
-        // Should have both Ollama and OpenRouter
+        // Should have all configured providers
         assertTrue(providers.stream().anyMatch(p -> p.getType() == ProviderManager.ProviderType.OLLAMA));
         assertTrue(providers.stream().anyMatch(p -> p.getType() == ProviderManager.ProviderType.OPENROUTER));
+        assertTrue(providers.stream().anyMatch(p -> p.getType() == ProviderManager.ProviderType.GITHUBMODELS));
     }
 
     @Test

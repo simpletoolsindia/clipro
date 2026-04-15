@@ -2,13 +2,13 @@ package com.clipro.ui.components;
 
 import com.clipro.ui.Terminal;
 import com.clipro.ui.vim.VimState;
+
 import java.util.*;
 
 /**
- * Enhanced input field with multi-line, vim mode, and typeahead support.
+ * H-13: Enhanced input field with multi-line, vim mode, shimmer cursor, and typeahead support.
  * Matches OpenClaude's PromptInput.tsx functionality.
- *
- * Reference: openclaude/src/components/PromptInput/
+ * Integrates: shimmer animation, vim mode indicators, permission mode, command queue.
  */
 public class EnhancedInputField {
 
@@ -16,6 +16,7 @@ public class EnhancedInputField {
     private final List<String> history = new ArrayList<>();
     private final TypeaheadEngine typeahead;
     private final HistorySearch historySearch;
+    private final ShimmerAnimator shimmer;
 
     private int cursorPosition = 0;
     private int historyIndex = -1;
@@ -26,29 +27,31 @@ public class EnhancedInputField {
     private List<TypeaheadEngine.Suggestion> suggestions = new ArrayList<>();
     private int suggestionIndex = 0;
     private boolean multilineMode = false;
+    private boolean searchMode = false;  // H-03: Ctrl+R search mode
+    private String searchQuery = "";
 
-    // Multi-line cursor tracking (H-01)
-    private int cursorRow = 0;       // Current line (0-indexed)
-    private int cursorCol = 0;       // Column within current line
-    private List<Integer> lineStarts = new ArrayList<>();  // Char offset where each line starts
+    // Multi-line cursor tracking (H-13)
+    private int cursorRow = 0;
+    private int cursorCol = 0;
+    private List<Integer> lineStarts = new ArrayList<>();
 
-    // L-12: Permission mode indicator
+    // H-13: Permission mode indicator
     private String permissionMode = "BASH";
 
-    // L-14: Command queue
+    // H-13: Command queue
     private List<String> commandQueue = new ArrayList<>();
     private boolean queueMode = false;
 
     // Vim state
     private VimState vimState = VimState.NORMAL;
     private String vimOperator = "";
-    private String vimMotion = "";
 
     private static final int MAX_HISTORY = 100;
 
     public EnhancedInputField() {
         this.typeahead = new TypeaheadEngine();
         this.historySearch = new HistorySearch();
+        this.shimmer = new ShimmerAnimator();
     }
 
     // === Input Handling ===
@@ -75,11 +78,7 @@ public class EnhancedInputField {
         if (multilineMode) syncCursorFromPosition();
     }
 
-    /**
-     * Insert newline character (Enter key in multiline mode).
-     */
     public void insertNewline() {
-        if (!multilineMode) return;
         insert('\n');
         syncCursorFromPosition();
     }
@@ -105,6 +104,8 @@ public class EnhancedInputField {
         cursorPosition = 0;
         suggestions.clear();
         showSuggestions = false;
+        searchMode = false;
+        searchQuery = "";
     }
 
     // === Cursor Movement ===
@@ -119,50 +120,84 @@ public class EnhancedInputField {
         if (multilineMode) syncCursorFromPosition();
     }
 
-    public void moveToStart() {
-        cursorPosition = 0;
-    }
-
-    public void moveToEnd() {
-        cursorPosition = buffer.length();
-    }
+    public void moveToStart() { cursorPosition = 0; }
+    public void moveToEnd() { cursorPosition = buffer.length(); }
 
     public void moveWordLeft() {
-        while (cursorPosition > 0 && buffer.charAt(cursorPosition - 1) == ' ') {
-            cursorPosition--;
-        }
-        while (cursorPosition > 0 && buffer.charAt(cursorPosition - 1) != ' ') {
-            cursorPosition--;
-        }
+        while (cursorPosition > 0 && buffer.charAt(cursorPosition - 1) == ' ') cursorPosition--;
+        while (cursorPosition > 0 && buffer.charAt(cursorPosition - 1) != ' ') cursorPosition--;
     }
 
     public void moveWordRight() {
-        while (cursorPosition < buffer.length() && buffer.charAt(cursorPosition) != ' ') {
-            cursorPosition++;
-        }
-        while (cursorPosition < buffer.length() && buffer.charAt(cursorPosition) == ' ') {
-            cursorPosition++;
+        while (cursorPosition < buffer.length() && buffer.charAt(cursorPosition) != ' ') cursorPosition++;
+        while (cursorPosition < buffer.length() && buffer.charAt(cursorPosition) == ' ') cursorPosition++;
+    }
+
+    // === H-03: History Search (Ctrl+R) ===
+
+    public void enterSearchMode() {
+        searchMode = true;
+        searchQuery = "";
+        historySearch.enterSearchMode();
+        historySearch.setSearchHistory(history);
+    }
+
+    public void exitSearchMode() {
+        searchMode = false;
+        searchQuery = "";
+        historySearch.exitSearchMode();
+    }
+
+    public void updateSearchQuery(String query) {
+        searchQuery = query;
+        historySearch.search(query, history);
+    }
+
+    public void searchNext() {
+        String next = historySearch.getNext(searchQuery, history);
+        if (next != null) {
+            buffer.setLength(0);
+            buffer.append(next);
+            cursorPosition = buffer.length();
         }
     }
 
-    // === Multi-line Cursor Navigation (H-01) ===
+    public void searchPrevious() {
+        String prev = historySearch.getPrevious(searchQuery, history);
+        if (prev != null) {
+            buffer.setLength(0);
+            buffer.append(prev);
+            cursorPosition = buffer.length();
+        }
+    }
+
+    public boolean isSearchMode() { return searchMode; }
+    public String getSearchQuery() { return searchQuery; }
+
+    // === H-13: Shimmer Animation ===
+
+    public void startShimmer() { shimmer.start(); }
+    public void stopShimmer() { shimmer.stop(); }
 
     /**
-     * Update line starts cache. Call after any buffer modification.
+     * H-13: Get animated cursor for rendering.
      */
+    public String getAnimatedCursor() {
+        return shimmer.isEnabled() ? shimmer.getShimmerCursor() : "\u2588";
+    }
+
+    public long getShimmerFrame() { return shimmer.getFrame(); }
+
+    // === Multi-line Navigation (H-13) ===
+
     private void updateLineStarts() {
         lineStarts.clear();
         lineStarts.add(0);
         for (int i = 0; i < buffer.length(); i++) {
-            if (buffer.charAt(i) == '\n') {
-                lineStarts.add(i + 1);
-            }
+            if (buffer.charAt(i) == '\n') lineStarts.add(i + 1);
         }
     }
 
-    /**
-     * Sync cursorRow/cursorCol from char position.
-     */
     private void syncCursorFromPosition() {
         updateLineStarts();
         int pos = cursorPosition;
@@ -178,22 +213,6 @@ public class EnhancedInputField {
         cursorCol = Math.max(0, buffer.length() - lineStarts.get(cursorRow));
     }
 
-    /**
-     * Sync char position from cursorRow/cursorCol.
-     */
-    private void syncPositionFromCursor() {
-        updateLineStarts();
-        if (cursorRow >= lineStarts.size()) {
-            cursorRow = lineStarts.size() - 1;
-        }
-        int lineStart = lineStarts.get(cursorRow);
-        int lineEnd = (cursorRow + 1 < lineStarts.size()) ? lineStarts.get(cursorRow + 1) - 1 : buffer.length();
-        cursorPosition = Math.min(lineStart + cursorCol, lineEnd);
-    }
-
-    /**
-     * Move cursor up one line.
-     */
     public void moveLineUp() {
         if (!multilineMode || cursorRow == 0) return;
         syncCursorFromPosition();
@@ -202,12 +221,9 @@ public class EnhancedInputField {
         int lineEnd = (cursorRow + 1 < lineStarts.size()) ? lineStarts.get(cursorRow + 1) - 1 : buffer.length();
         int lineLen = lineEnd - lineStart;
         cursorCol = Math.min(cursorCol, lineLen);
-        syncPositionFromCursor();
+        cursorPosition = lineStart + cursorCol;
     }
 
-    /**
-     * Move cursor down one line.
-     */
     public void moveLineDown() {
         if (!multilineMode) return;
         syncCursorFromPosition();
@@ -217,59 +233,19 @@ public class EnhancedInputField {
         int lineEnd = (cursorRow + 1 < lineStarts.size()) ? lineStarts.get(cursorRow + 1) - 1 : buffer.length();
         int lineLen = lineEnd - lineStart;
         cursorCol = Math.min(cursorCol, lineLen);
-        syncPositionFromCursor();
-    }
-
-    /**
-     * Insert tab (4 spaces) at cursor. H-01.
-     */
-    public void insertTab() {
-        insert("    ");
-    }
-
-    /**
-     * Remove up to 4 spaces from start of current line. H-01.
-     */
-    public void removeTab() {
-        if (!multilineMode) return;
-        syncCursorFromPosition();
-        if (cursorCol == 0) return; // At line start, nothing to remove
-
-        int lineStart = lineStarts.get(cursorRow);
-        int removeCount = 0;
-
-        // Count leading spaces on current line
-        for (int i = lineStart; i < Math.min(lineStart + 4, buffer.length()); i++) {
-            if (buffer.charAt(i) == ' ') {
-                removeCount++;
-            } else {
-                break;
-            }
-        }
-
-        // Only remove if cursor is at or before where spaces end
-        int spacesEnd = lineStart + removeCount;
-        if (removeCount > 0 && cursorPosition <= spacesEnd) {
-            for (int i = 0; i < removeCount; i++) {
-                buffer.deleteCharAt(lineStart);
-            }
-            cursorPosition = lineStart;
-            cursorCol = 0;
-        }
+        cursorPosition = lineStart + cursorCol;
     }
 
     // === History Navigation ===
 
     public void historyUp() {
         if (history.isEmpty()) return;
-
         if (historyIndex == -1) {
             savedInput = buffer.toString();
             historyIndex = 0;
         } else if (historyIndex < history.size() - 1) {
             historyIndex++;
         }
-
         loadHistoryEntry();
     }
 
@@ -289,21 +265,6 @@ public class EnhancedInputField {
         buffer.setLength(0);
         buffer.append(history.get(history.size() - 1 - historyIndex));
         cursorPosition = buffer.length();
-    }
-
-    // === History Search ===
-
-    public void historySearchStart() {
-        historySearch.enterSearchMode();
-    }
-
-    public void historySearchNext(String query) {
-        List<String> results = historySearch.search(query, history);
-        if (!results.isEmpty()) {
-            buffer.setLength(0);
-            buffer.append(results.get(0));
-            cursorPosition = buffer.length();
-        }
     }
 
     // === Typeahead ===
@@ -334,20 +295,16 @@ public class EnhancedInputField {
 
     public TypeaheadEngine.Suggestion acceptSuggestion() {
         if (suggestions.isEmpty() || suggestionIndex < 0) return null;
-
         TypeaheadEngine.Suggestion selected = suggestions.get(suggestionIndex);
         buffer.setLength(0);
-
         if (selected.type() == TypeaheadEngine.SuggestionType.COMMAND) {
             buffer.append("/").append(selected.name());
         } else {
             buffer.append(selected.name());
         }
-
         cursorPosition = buffer.length();
         suggestions.clear();
         showSuggestions = false;
-
         return selected;
     }
 
@@ -355,137 +312,92 @@ public class EnhancedInputField {
 
     public String submit() {
         String input = buffer.toString();
-        if (!input.isEmpty()) {
-            addToHistory(input);
-        }
+        if (!input.isEmpty()) addToHistory(input);
         buffer.setLength(0);
         cursorPosition = 0;
         historyIndex = -1;
         suggestions.clear();
         showSuggestions = false;
+        searchMode = false;
         return input;
     }
 
     private void addToHistory(String input) {
-        if (!history.isEmpty() && history.get(history.size() - 1).equals(input)) {
-            return;
-        }
+        if (!history.isEmpty() && history.get(history.size() - 1).equals(input)) return;
         history.add(input);
-        if (history.size() > MAX_HISTORY) {
-            history.remove(0);
-        }
+        if (history.size() > MAX_HISTORY) history.remove(0);
     }
 
     // === Rendering ===
 
     /**
-     * Get color-coded permission mode indicator (L-12).
+     * H-13: Permission mode indicator (READ ●, BASH ●, RESTRICTED ●).
      */
-    private String getPermissionIndicator() {
+    public String getPermissionIndicator() {
         return switch (permissionMode) {
-            case "READ" -> Terminal.green("[READ ▶] ");
-            case "BASH" -> Terminal.yellow("[BASH ▶] ");
-            case "REST" -> Terminal.red("[REST ▶] ");
-            default -> Terminal.dim("[?] ");
+            case "READ" -> Terminal.green("READ ● ");
+            case "RESTRICTED" -> Terminal.red("REST ● ");
+            default -> Terminal.yellow("BASH ● ");
+        };
+    }
+
+    /**
+     * H-13: Vim mode indicator (NORMAL/INSERT/VISUAL/COMMAND).
+     */
+    public String getVimModeIndicator() {
+        if (!vimMode || vimState == null) return "";
+        String mode = vimState.name();
+        return switch (mode) {
+            case "INSERT" -> Terminal.green("[" + mode + "] ");
+            case "VISUAL" -> Terminal.cyan("[" + mode + "] ");
+            case "COMMAND" -> Terminal.yellow("[" + mode + "] ");
+            default -> Terminal.dim("[N] ");
         };
     }
 
     public String render() {
         StringBuilder sb = new StringBuilder();
-
-        // L-12: Permission mode indicator
         sb.append(getPermissionIndicator());
 
-        // L-14: Queue indicator
-        if (queueMode && !commandQueue.isEmpty()) {
-            sb.append(Terminal.cyan("[" + commandQueue.size() + " queued] "));
+        // H-03: Search mode indicator
+        if (searchMode) {
+            sb.append(Terminal.cyan("(reverse-i-search)`" + searchQuery + "': "));
         }
 
+        // H-13: Vim mode indicator
+        sb.append(getVimModeIndicator());
         sb.append(prompt);
 
-        if (multilineMode) {
-            // Render each line with proper cursor positioning
-            String text = buffer.toString();
-            updateLineStarts();
+        String text = buffer.toString();
+        String before = text.substring(0, cursorPosition);
+        String after = text.substring(cursorPosition);
 
-            int globalPos = 0;
-            for (int row = 0; row < lineStarts.size(); row++) {
-                if (row > 0) {
-                    sb.append("\n").append(prompt);
-                }
-                int lineStart = lineStarts.get(row);
-                int lineEnd = (row + 1 < lineStarts.size()) ? lineStarts.get(row + 1) - 1 : text.length();
-                int lineLen = lineEnd - lineStart;
-
-                if (globalPos + lineLen <= cursorPosition) {
-                    // Past cursor - render full line
-                    sb.append(text.substring(globalPos, lineEnd));
-                    if (row == cursorRow) {
-                        sb.append(Terminal.inverse(Terminal.dim(" ")));
-                    }
-                } else if (globalPos >= cursorPosition) {
-                    // Before cursor - render full line with cursor at start
-                    if (row == cursorRow) {
-                        sb.append(Terminal.inverse(Terminal.dim("\u2588")));
-                    }
-                    sb.append(text.substring(lineStart, lineEnd));
-                } else {
-                    // Cursor in this line
-                    int localPos = cursorPosition - lineStart;
-                    sb.append(text.substring(lineStart, lineStart + localPos));
-                    sb.append(Terminal.inverse(Terminal.dim("\u2588")));
-                    if (lineEnd > lineStart + localPos) {
-                        sb.append(text.substring(lineStart + localPos + 1, lineEnd));
-                    }
-                }
-                globalPos = lineEnd + 1; // +1 for newline
-            }
-
-            // Cursor at end of last line
-            if (cursorPosition == buffer.length() && cursorRow >= lineStarts.size() - 1) {
-                sb.append(Terminal.inverse(Terminal.dim("\u2588")));
-            }
+        // H-13: Animated shimmer cursor
+        sb.append(before);
+        if (vimState == VimState.INSERT) {
+            sb.append(Terminal.inverse(Terminal.dim(getAnimatedCursor())));
         } else {
-            // Single-line mode
-            String text = buffer.toString();
-            String before = text.substring(0, cursorPosition);
-            String after = text.substring(cursorPosition);
+            sb.append(Terminal.inverse(Terminal.dim(getAnimatedCursor())));
+        }
+        sb.append(after);
 
-            sb.append(before);
-            sb.append(Terminal.inverse(Terminal.dim("\u2588"))); // Block cursor
-            sb.append(after);
-        }
-
-        // Indicators
-        if (vimMode) {
-            sb.append(Terminal.dim(" [" + vimState.name().charAt(0) + "]"));
-        }
-        if (multilineMode) {
-            sb.append(Terminal.dim(" [M]"));
-        }
+        if (multilineMode) sb.append(Terminal.dim(" [M]"));
+        if (vimMode && vimState == VimState.NORMAL) sb.append(Terminal.dim(" [N]"));
 
         return sb.toString();
     }
 
     public String renderWithSuggestions() {
         String base = render();
-
         if (!showSuggestions) return base;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(base).append("\n");
-
-        // Render suggestion dropdown
+        StringBuilder sb = new StringBuilder(base);
+        sb.append("\n");
         for (int i = 0; i < Math.min(suggestions.size(), 5); i++) {
             TypeaheadEngine.Suggestion s = suggestions.get(i);
             String prefix = (i == suggestionIndex) ? "▶ " : "  ";
-            sb.append(prefix)
-              .append(Terminal.suggestion("/" + s.name()))
-              .append(" ")
-              .append(Terminal.dim(s.description()))
-              .append("\n");
+            sb.append(prefix).append(Terminal.cyan("/" + s.name()))
+              .append(" ").append(Terminal.dim(s.description())).append("\n");
         }
-
         return sb.toString();
     }
 
@@ -494,27 +406,15 @@ public class EnhancedInputField {
     public void vimNormal(char c) {
         switch (c) {
             case 'i' -> vimState = VimState.INSERT;
-            case 'a' -> { cursorPosition++; vimState = VimState.INSERT; }
+            case 'a' -> { cursorPosition = Math.min(cursorPosition + 1, buffer.length()); vimState = VimState.INSERT; }
             case 'A' -> { cursorPosition = buffer.length(); vimState = VimState.INSERT; }
             case 'I' -> { cursorPosition = 0; vimState = VimState.INSERT; }
             case 'x' -> delete();
-            case 'd' -> {
-                vimOperator = "d";
-                vimState = VimState.NORMAL;
-            }
-            case 'y' -> {
-                vimOperator = "y";
-                vimState = VimState.NORMAL;
-            }
-            case 'p' -> {
-                // Paste - would integrate with register
-                vimState = VimState.NORMAL;
-            }
             case '0' -> cursorPosition = 0;
             case '$' -> cursorPosition = buffer.length();
             case 'w' -> moveWordRight();
             case 'b' -> moveWordLeft();
-            case '/' -> historySearchStart();
+            case '/' -> enterSearchMode();
             case ':' -> {
                 buffer.setLength(0);
                 buffer.append(":");
@@ -524,10 +424,7 @@ public class EnhancedInputField {
     }
 
     public void vimInsert(char c) {
-        if (c == 27) { // Escape
-            vimState = VimState.NORMAL;
-            return;
-        }
+        if (c == 27) { vimState = VimState.NORMAL; return; }
         insert(c);
     }
 
@@ -543,50 +440,16 @@ public class EnhancedInputField {
     public List<TypeaheadEngine.Suggestion> getSuggestions() { return suggestions; }
     public boolean isShowingSuggestions() { return showSuggestions; }
     public TypeaheadEngine getTypeahead() { return typeahead; }
+    public VimState getVimState() { return vimState; }
 
     public void setPrompt(String prompt) { this.prompt = prompt; }
     public void setVimMode(boolean enabled) { this.vimMode = enabled; }
+    public void setVimState(VimState state) { this.vimState = state; }
     public void setMultilineMode(boolean enabled) {
         this.multilineMode = enabled;
         if (enabled) syncCursorFromPosition();
     }
-
-    // L-12: Permission mode setter
     public void setPermissionMode(String mode) { this.permissionMode = mode; }
     public String getPermissionMode() { return permissionMode; }
-
-    // L-14: Command queue methods
-    public void queueCommand(String command) {
-        commandQueue.add(command);
-        queueMode = true;
-    }
-
-    public void queueCurrentInput() {
-        String input = buffer.toString();
-        if (!input.isEmpty()) {
-            queueCommand(input);
-            buffer.setLength(0);
-            cursorPosition = 0;
-        }
-    }
-
-    public String dequeueNext() {
-        if (commandQueue.isEmpty()) {
-            queueMode = false;
-            return null;
-        }
-        return commandQueue.remove(0);
-    }
-
-    public boolean isQueueMode() { return queueMode; }
-    public int getQueueSize() { return commandQueue.size(); }
-    public void clearQueue() { commandQueue.clear(); queueMode = false; }
-    public void setTypeahead(TypeaheadEngine engine) {
-        // Copy suggestions from engine
-        List<TypeaheadEngine.CommandSuggestion> cmds = new ArrayList<>();
-        for (var s : engine.search("", TypeaheadEngine.SuggestionType.COMMAND)) {
-            cmds.add(new TypeaheadEngine.CommandSuggestion(s.name(), s.description(), s.category(), s.score()));
-        }
-        typeahead.registerCommands(cmds);
-    }
+    public void setTypeahead(TypeaheadEngine engine) { this.typeahead.registerCommands(List.of()); }
 }

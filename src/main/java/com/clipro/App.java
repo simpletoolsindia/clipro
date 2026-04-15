@@ -1,10 +1,17 @@
 package com.clipro;
 
+import com.clipro.agent.AgentEngine;
 import com.clipro.cli.CommandRegistry;
+import com.clipro.llm.providers.OllamaProvider;
+import com.clipro.llm.providers.ProviderManager;
 import com.clipro.logging.Logger;
+import com.clipro.mcp.McpClient;
+import com.clipro.tools.Tool;
 import com.clipro.ui.tamboui.TamboUIAdapter;
 import com.clipro.ui.tamboui.TuiAdapter;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -18,14 +25,20 @@ public class App {
     private TuiAdapter ui;
     private final CommandRegistry commands;
     private final CommandRegistry.CommandContext commandContext;
+    private final ProviderManager providerManager;
     private boolean running = true;
     private CompletableFuture<Void> pendingRequest;
+
+    // H-10: Agent engine and MCP clients
+    private AgentEngine agentEngine;
+    private List<McpClient> mcpClients;
 
     public App() {
         LOG.info("Initializing CLIPRO...");
         this.ui = new TamboUIAdapter();
         this.commands = new CommandRegistry();
         this.commandContext = new CommandRegistry.CommandContext();
+        this.providerManager = new ProviderManager();
         commandContext.setAgentContext(new AppAgentContext());
         LOG.info("CLIPRO initialized with TamboUI");
     }
@@ -67,21 +80,112 @@ public class App {
             return;
         }
 
-        // It's a user message - send to agent
+        // H-10: It's a user message - send to AgentEngine
         ui.addUserMessage(input);
-        ui.setStatus("Processing...");
+        ui.setStatus("Thinking...");
 
-        pendingRequest = CompletableFuture.runAsync(() -> {
-            try {
-                // This would normally call the agent
-                // For now, simulate a response
-                Thread.sleep(500); // Simulate processing
-                ui.addAssistantMessage("Processing: " + input + "\n\nNote: Agent integration pending.");
-                ui.setStatus("Ready");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+        // Get or create agent engine
+        if (agentEngine == null) {
+            agentEngine = createAgentEngine();
+        }
+
+        // Start streaming message
+        java.util.function.Consumer<String> onToken = ui.startStreamingMessage();
+
+        // Set up callbacks
+        agentEngine.onResponse(token -> {
+            // Stream token to UI immediately
+            onToken.accept(token);
         });
+        agentEngine.onThought(thought -> {
+            ui.addSystemMessage("💭 " + thought);
+        });
+        agentEngine.onToolCall(call -> {
+            ui.addSystemMessage("🔧 " + call);
+        });
+
+        pendingRequest = agentEngine.run(input).thenAccept(response -> {
+            ui.completeStreamingMessage(response);
+            ui.setStatus("Ready");
+
+            // Update token stats
+            if (agentEngine.getTokenBudget() != null) {
+                int inputTokens = agentEngine.getTokenBudget().getPromptTokens();
+                int outputTokens = agentEngine.getTokenBudget().getCompletionTokens();
+                ui.setTokens(inputTokens, outputTokens);
+            }
+        }).exceptionally(ex -> {
+            ui.completeStreamingMessage("Error: " + ex.getMessage());
+            ui.setStatus("Ready");
+            return null;
+        });
+    }
+
+    /**
+     * H-10: Create and configure the agent engine with all tools.
+     */
+    private AgentEngine createAgentEngine() {
+        AgentEngine engine = new AgentEngine(
+            providerManager.getCurrentProvider().getCurrentModel()
+        );
+
+        // Register all native tools
+        engine.registerTools(getNativeTools());
+
+        // Register MCP tools if servers are running
+        if (mcpClients != null) {
+            for (var client : mcpClients) {
+                for (var tool : client.getTools()) {
+                    // Wrap MCP tool
+                    engine.registerTool(new Tool() {
+                        @Override public String getName() { return "mcp_" + client.getServerName() + "_" + tool.name(); }
+                        @Override public String getDescription() { return tool.description(); }
+                        @Override public Object getParameters() { return tool.inputSchema() != null ? tool.inputSchema() : Map.of(); }
+                        @Override
+                        public String execute(Map<String, Object> args) {
+                            try {
+                                var result = client.callTool(tool.name(), args).get();
+                                return result.toString();
+                            } catch (Exception e) {
+                                return "Error: " + e.getMessage();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        return engine;
+    }
+
+    /**
+     * H-10: Get all native tools for the agent.
+     */
+    private List<Tool> getNativeTools() {
+        List<Tool> tools = new java.util.ArrayList<>();
+        // File tools
+        tools.add(new com.clipro.tools.file.FileReadTool());
+        tools.add(new com.clipro.tools.file.FileWriteTool());
+        tools.add(new com.clipro.tools.file.FileEditTool());
+        tools.add(new com.clipro.tools.file.GlobTool());
+        tools.add(new com.clipro.tools.file.GrepTool());
+        // Git tools
+        tools.add(new com.clipro.tools.git.GitStatusTool());
+        tools.add(new com.clipro.tools.git.GitDiffTool());
+        tools.add(new com.clipro.tools.git.GitLogTool());
+        tools.add(new com.clipro.tools.git.GitCommitTool());
+        // Shell
+        tools.add(new com.clipro.tools.shell.BashTool());
+        // Web
+        tools.add(new com.clipro.tools.web.WebSearchTool());
+        tools.add(new com.clipro.tools.web.WebFetchTool());
+        // Task
+        tools.add(new com.clipro.tools.TaskTool());
+        // Skill
+        try { tools.add(new com.clipro.tools.skill.SkillTool()); } catch (Exception ignored) {}
+        // LSP
+        try { tools.add(new com.clipro.tools.lsp.LSPTool()); } catch (Exception ignored) {}
+        return tools;
     }
 
     private void onInputChange(String input) {
@@ -93,12 +197,43 @@ public class App {
         }
     }
 
+    /**
+     * H-12: Check connection to LLM provider and update UI.
+     * Performs async health check against Ollama to determine actual network status.
+     */
     private void checkConnection() {
-        // Check if Ollama is connected
-        boolean connected = true; // TODO: actual health check
-        ui.setConnected(connected);
-        ui.setModel("qwen3-coder:32b");
-        ui.setStatus(connected ? "Ready" : "Disconnected");
+        ui.setStatus("Checking connection...");
+        ui.setConnected(false); // Assume disconnected until proven
+
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                // H-12: Use OllamaProvider healthCheck() to verify connectivity
+                OllamaProvider ollama = (OllamaProvider) providerManager.getCurrentProvider();
+                if (ollama != null) {
+                    return ollama.healthCheck().get();
+                }
+                return false;
+            } catch (Exception e) {
+                LOG.debug("Health check failed: " + e.getMessage());
+                return false;
+            }
+        }).thenAccept(connected -> {
+            String model = providerManager.getCurrentModel();
+            ui.setConnected(connected);
+            ui.setModel(model != null ? model : "qwen3-coder:32b");
+            ui.setStatus(connected ? "Ready" : "Disconnected");
+
+            if (connected) {
+                LOG.info("Connected to " + providerManager.getCurrentProviderType().getName()
+                    + " with model " + model);
+            } else {
+                LOG.warn("Could not connect to Ollama. Is it running?");
+                ui.addSystemMessage("⚠ Could not connect to Ollama at http://localhost:11434\n"
+                    + "  Make sure Ollama is installed and running:\n"
+                    + "  → curl -fsSL https://ollama.com/install.sh | sh\n"
+                    + "  → ollama pull qwen3-coder:32b");
+            }
+        });
     }
 
     public void stop() {

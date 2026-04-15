@@ -46,6 +46,8 @@ public class TamboUIAdapter implements TuiAdapter {
     private int scrollOffset = 0;
     private int historyIndex = -1;
     private String savedInput = "";
+    // H-05: Permission mode indicator (READ, BASH, RESTRICTED)
+    private String permissionMode = "BASH";
 
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
@@ -386,25 +388,30 @@ public class TamboUIAdapter implements TuiAdapter {
         sb.append("\r");
         sb.append(OpenClaudeTheme.BORDER_V).append(" ");
 
+        // H-05: Permission mode indicator with color coding
+        String permDisplay = getPermissionDisplay();
+        sb.append(permDisplay);
+        sb.append(OpenClaudeTheme.dimText(" │ "));
+
         sb.append(OpenClaudeTheme.dimText("Tokens: "));
         sb.append(OpenClaudeTheme.cyan(inputTokens + "/" + outputTokens));
         if (latencyMs > 0) {
-            sb.append(OpenClaudeTheme.dimText(" | "));
+            sb.append(OpenClaudeTheme.dimText(" │ "));
             sb.append(OpenClaudeTheme.successText(latencyMs + "ms"));
         }
         if (!vimMode.isEmpty()) {
-            sb.append(OpenClaudeTheme.dimText(" | "));
+            sb.append(OpenClaudeTheme.dimText(" │ "));
             sb.append(OpenClaudeTheme.warningText(vimMode));
         }
-        sb.append(OpenClaudeTheme.dimText(" | "));
+        sb.append(OpenClaudeTheme.dimText(" │ "));
         String statusDisplay = status.equals("Ready")
             ? OpenClaudeTheme.successText(status)
             : OpenClaudeTheme.warningText(status);
 
-        String statusStr = "Tokens: " + inputTokens + "/" + outputTokens +
-                          (latencyMs > 0 ? " | " + latencyMs + "ms" : "") +
-                          (!vimMode.isEmpty() ? " | " + vimMode : "") +
-                          " | " + status;
+        String statusStr = stripAnsi(permDisplay) + " │ Tokens: " + inputTokens + "/" + outputTokens +
+                          (latencyMs > 0 ? " │ " + latencyMs + "ms" : "") +
+                          (!vimMode.isEmpty() ? " │ " + vimMode : "") +
+                          " │ " + status;
 
         if (statusStr.length() < width - 3) {
             sb.append(" ".repeat(width - 3 - statusStr.length()));
@@ -413,6 +420,19 @@ public class TamboUIAdapter implements TuiAdapter {
         sb.append(" ").append(OpenClaudeTheme.BORDER_V);
 
         return sb.toString();
+    }
+
+    /**
+     * H-05: Get colored permission mode display string.
+     * READ ● in green, BASH ● in yellow, RESTRICTED ● in red.
+     */
+    private String getPermissionDisplay() {
+        String text = permissionMode + " ●";
+        return switch (permissionMode) {
+            case "READ" -> OpenClaudeTheme.successText(text);
+            case "RESTRICTED" -> OpenClaudeTheme.errorText(text);
+            default -> OpenClaudeTheme.warningText(text);
+        };
     }
 
     private String truncate(String text, int maxLen) {
@@ -519,6 +539,11 @@ public class TamboUIAdapter implements TuiAdapter {
     @Override
     public void setLatency(long ms) {
         this.latencyMs = ms;
+    }
+
+    @Override
+    public void setPermissionMode(String mode) {
+        this.permissionMode = mode != null ? mode : "BASH";
     }
 
     @Override

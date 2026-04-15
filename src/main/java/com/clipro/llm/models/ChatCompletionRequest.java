@@ -18,6 +18,10 @@ public class ChatCompletionRequest {
     private List<Message> messages;
     private boolean stream;
 
+    // max_tokens for OpenAI-compatible APIs (also used by GitHub Models)
+    @JsonProperty("max_tokens")
+    private Integer maxTokens;
+
     // Ollama-specific options
     @JsonProperty("options")
     private Map<String, Object> options;
@@ -52,6 +56,14 @@ public class ChatCompletionRequest {
 
     public void setMessages(List<Message> messages) {
         this.messages = messages;
+    }
+
+    public Integer getMaxTokens() {
+        return maxTokens;
+    }
+
+    public void setMaxTokens(Integer maxTokens) {
+        this.maxTokens = maxTokens;
     }
 
     public boolean isStream() {

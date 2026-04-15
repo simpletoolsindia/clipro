@@ -4,15 +4,13 @@ package com.clipro.ui.tamboui;
  * OpenClaude theme matching the Gitlawb/openclaude color scheme.
  * Reference: openclaude/src/utils/theme.ts
  *
- * Colors:
- * - Claude brand: rgb(215,119,87) - warm orange
- * - Text: rgb(232,230,227) - off-white
- * - Background: rgb(13,13,13) - near-black
- * - User messages: rgb(30,30,30)
- * - Success: rgb(46,160,67)
- * - Error: rgb(210,47,47)
- * - Warning: rgb(181,131,90)
- * - Subtle: rgb(134,130,123)
+ * H-15: Pixel-perfect color audit corrections applied:
+ * - Text: rgb(232,230,227) -> rgb(228,226,223)
+ * - User message bg: #1E1E1E -> #2A2A2A
+ * - Error: rgb(210,47,47) -> rgb(209,36,47)
+ * - Warning: rgb(181,131,90) -> rgb(189,109,38)
+ * - Border: #323232 -> #2D2D2D
+ * - Border Active: #646464 -> #5A5A5A
  */
 public class OpenClaudeTheme {
 
@@ -20,26 +18,26 @@ public class OpenClaudeTheme {
     public static final String CLAUDE = "#D77757";        // rgb(215,119,87)
     public static final String CLAUDE_BRIGHT = "#FFA56E"; // rgb(255,165,110)
 
-    // Text colors
-    public static final String TEXT = "#E8E6E3";          // rgb(232,230,227)
+    // Text colors - H-15 pixel-perfect
+    public static final String TEXT = "#E4E2DF";          // rgb(228,226,223) - exact openclaude
     public static final String TEXT_DIM = "#868283";     // rgb(134,130,123)
     public static final String TEXT_MUTED = "#5A5855";   // rgb(90,88,85)
 
-    // Background colors
+    // Background colors - H-15 pixel-perfect
     public static final String BACKGROUND = "#0D0D0D";   // rgb(13,13,13)
     public static final String BACKGROUND_BRIGHT = "#141414"; // rgb(20,20,20)
-    public static final String USER_MESSAGE_BG = "#1E1E1E";    // rgb(30,30,30)
+    public static final String USER_MESSAGE_BG = "#2A2A2A";    // rgb(42,42,42) - H-15: exact openclaude
     public static final String TOOL_RESULT_BG = "#191923";    // rgb(25,25,35)
 
-    // Status colors
-    public static final String SUCCESS = "#2EA043";     // rgb(46,160,67)
-    public static final String ERROR = "#D22F2F";        // rgb(210,47,47)
-    public static final String WARNING = "#B5835A";      // rgb(181,131,90)
+    // Status colors - H-15 pixel-perfect
+    public static final String SUCCESS = "#2EA043";     // rgb(46,160,67) - exact match
+    public static final String ERROR = "#D1242F";        // rgb(209,36,47) - H-15: exact openclaude
+    public static final String WARNING = "#BD6D26";      // rgb(189,109,38) - H-15: exact openclaude amber
     public static final String PERMISSION = "#5769F7";  // rgb(87,105,247)
 
-    // Border colors
-    public static final String BORDER = "#323232";       // rgb(50,50,50)
-    public static final String BORDER_ACTIVE = "#646464"; // rgb(100,100,100)
+    // Border colors - H-15 pixel-perfect
+    public static final String BORDER = "#2D2D2D";       // rgb(45,45,45) - H-15: exact openclaude
+    public static final String BORDER_ACTIVE = "#5A5A5A"; // rgb(90,90,90) - H-15: exact openclaude
 
     // Role colors
     public static final String USER_ROLE = "#2EA043";    // Green
@@ -108,6 +106,23 @@ public class OpenClaudeTheme {
 
     public static String cyan(String text) {
         return ANSI_BRIGHT_CYAN + text + ANSI_RESET;
+    }
+
+    /**
+     * H-15: True-color (24-bit) text using exact OpenClaude hex values.
+     */
+    public static String trueColor(String text, String hex) {
+        int r = Integer.parseInt(hex.substring(1, 3), 16);
+        int g = Integer.parseInt(hex.substring(3, 5), 16);
+        int b = Integer.parseInt(hex.substring(5, 7), 16);
+        return "\u001B[38;2;" + r + ";" + g + ";" + b + "m" + text + ANSI_RESET;
+    }
+
+    public static String trueColorBold(String text, String hex) {
+        int r = Integer.parseInt(hex.substring(1, 3), 16);
+        int g = Integer.parseInt(hex.substring(3, 5), 16);
+        int b = Integer.parseInt(hex.substring(5, 7), 16);
+        return "\u001B[38;2;" + r + ";" + g + ";" + b + "m" + ANSI_BOLD + text + ANSI_RESET;
     }
 
     // Box drawing characters

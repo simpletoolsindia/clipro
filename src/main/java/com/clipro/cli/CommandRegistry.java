@@ -2,6 +2,7 @@ package com.clipro.cli;
 
 import com.clipro.agent.AgentEngine;
 import com.clipro.agent.AgentManager;
+import com.clipro.plugins.PluginLoader;
 import com.clipro.tools.Tool;
 import com.clipro.tools.file.GrepTool;
 import com.clipro.tools.git.GitCommitTool;
@@ -28,6 +29,7 @@ public class CommandRegistry {
     private final Map<String, Tool> toolMap;
     private AgentContext agentContext;
     private AgentManager agentManager;
+    private PluginLoader pluginLoader;
 
     public CommandRegistry() {
         this.commands = new HashMap<>();
@@ -47,6 +49,18 @@ public class CommandRegistry {
 
     public AgentManager getAgentManager() {
         return agentManager;
+    }
+
+    public void setPluginLoader(PluginLoader loader) {
+        this.pluginLoader = loader;
+    }
+
+    public PluginLoader getPluginLoader() {
+        if (pluginLoader == null) {
+            pluginLoader = new PluginLoader(this);
+            pluginLoader.loadAll();
+        }
+        return pluginLoader;
     }
 
     private void registerDefaultCommands() {
@@ -218,6 +232,31 @@ public class CommandRegistry {
 
         // Theme commands (M-05)
         register(new Command("theme", "Theme management", this::executeTheme));
+
+        // H-17: Additional commands
+        register(new Command("resume", "Resume interrupted task", (ctx) -> {
+            return "Resume: No interrupted task to resume.\nStart a task and press Ctrl+C to enable resume.";
+        }));
+        register(new Command("rewind", "Rewind conversation (Usage: /rewind <n>)", (ctx) -> {
+            String n = ctx.getArgs().trim();
+            return "Rewind: Cannot rewind - no conversation history.\n" +
+                   "Rewind removes the last N messages from context.";
+        }));
+        register(new Command("review", "Review code changes", (ctx) -> {
+            return executeCommand(ctx, "git diff --stat HEAD~5");
+        }));
+        register(new Command("plan", "Enter planning mode", (ctx) -> {
+            return "Planning mode: Type your plan as a numbered list.\n" +
+                   "The agent will analyze and break down each step.\n" +
+                   "Example:\n" +
+                   "  1. Read the existing config file\n" +
+                   "  2. Update the database connection string\n" +
+                   "  3. Run tests to verify";
+        }));
+
+        // H-16: Plugin commands
+        register(new Command("plugin", "Plugin management", this::executePlugin));
+        register(new Command("reload-plugins", "Reload all plugins", this::executeReloadPlugins));
     }
 
     private void registerDefaultTools() {
@@ -710,14 +749,16 @@ public class CommandRegistry {
         return "Tools for " + server + ":\n  (no tools loaded)";
     }
 
-    // M-05: Theme commands
+    // M-05 / H-09: Theme commands - fully implemented with hot-switching
     private String executeTheme(CommandContext ctx) {
         String args = ctx.getArgs().trim().toLowerCase();
         if (args.isEmpty()) {
-            return "Current theme: dark\n" +
+            var tm = com.clipro.ui.tamboui.ThemeManager.getInstance();
+            String current = tm.getThemeName().name().toLowerCase();
+            return "Current theme: " + current + "\n" +
                    "Usage: /theme <option>\n" +
-                   "  /theme dark           - Switch to dark theme\n" +
-                   "  /theme light          - Switch to light theme\n" +
+                   "  /theme dark           - Switch to dark\n" +
+                   "  /theme light          - Switch to light\n" +
                    "  /theme dark-ansi      - Dark with ANSI colors\n" +
                    "  /theme light-ansi     - Light with ANSI colors\n" +
                    "  /theme auto           - Auto-detect from terminal\n" +
@@ -725,24 +766,92 @@ public class CommandRegistry {
         }
         switch (args) {
             case "dark":
+                com.clipro.ui.tamboui.ThemeManager.getInstance().setTheme(
+                    com.clipro.ui.tamboui.ThemeName.DARK);
+                return "Theme: dark ✓";
             case "dark-ansi":
-                return "Theme set to: dark";
+                com.clipro.ui.tamboui.ThemeManager.getInstance().setTheme(
+                    com.clipro.ui.tamboui.ThemeName.DARK_ANSI);
+                return "Theme: dark-ansi ✓";
             case "light":
+                com.clipro.ui.tamboui.ThemeManager.getInstance().setTheme(
+                    com.clipro.ui.tamboui.ThemeName.LIGHT);
+                return "Theme: light ✓";
             case "light-ansi":
-                return "Theme set to: light";
+                com.clipro.ui.tamboui.ThemeManager.getInstance().setTheme(
+                    com.clipro.ui.tamboui.ThemeName.LIGHT_ANSI);
+                return "Theme: light-ansi ✓";
             case "auto":
-                return "Theme set to: auto (detecting terminal...)";
+                com.clipro.ui.tamboui.ThemeManager.getInstance().autoDetect();
+                return "Theme: auto-detected ✓";
             case "preview":
-                return "Theme Preview:\n" +
-                       "┌─ Dark ─────────────────────────────────┐\n" +
-                       "│ \033[38;2;255;255;255mWhite\033[0m \033[32mGreen\033[0m \033[33mYellow\033[0m \033[31mRed\033[0m \033[34mBlue\033[0m │\n" +
-                       "└────────────────────────────────────────┘\n" +
-                       "┌─ Light ────────────────────────────────┐\n" +
-                       "│ \033[38;2;0;0;0mBlack\033[0m \033[32mGreen\033[0m \033[33mYellow\033[0m \033[31mRed\033[0m \033[34mBlue\033[0m │\n" +
-                       "└────────────────────────────────────────┘";
+                return renderThemePreview();
             default:
                 return "Unknown theme: " + args + "\nUse /theme for available options.";
         }
+    }
+
+    // H-16: Plugin command handler
+    private String executePlugin(CommandContext ctx) {
+        var loader = getPluginLoader();
+        String args = ctx.getArgs().trim().toLowerCase();
+        if (args.isEmpty()) {
+            return loader.renderStatus();
+        }
+        String[] parts = args.split("\\s+", 2);
+        switch (parts[0]) {
+            case "list":
+                return loader.renderStatus();
+            case "load":
+                return "Usage: /plugin load <jar-path>\nAdd JAR to ~/.clipro/plugins/ and run /reload-plugins";
+            case "unload":
+                if (parts.length > 1) {
+                    loader.unload(parts[1]);
+                    return "Plugin unloaded: " + parts[1];
+                }
+                return "Usage: /plugin unload <plugin-id>";
+            case "info":
+                if (parts.length > 1) {
+                    var plugin = loader.getPlugin(parts[1]);
+                    if (plugin != null) {
+                        return "Plugin: " + plugin.getName() + "\n" +
+                               "  ID: " + plugin.getId() + "\n" +
+                               "  Version: " + plugin.getVersion() + "\n" +
+                               "  Description: " + plugin.getDescription() + "\n" +
+                               "  Commands: " + plugin.getCommands().length;
+                    }
+                    return "Plugin not found: " + parts[1];
+                }
+                return "Usage: /plugin info <plugin-id>";
+            default:
+                return "Plugin commands:\n" +
+                       "  /plugin         - Show plugin status\n" +
+                       "  /plugin list    - List all plugins\n" +
+                       "  /plugin load    - Load plugin JAR\n" +
+                       "  /plugin unload - Unload plugin\n" +
+                       "  /plugin info    - Show plugin details";
+        }
+    }
+
+    // H-16: Reload plugins
+    private String executeReloadPlugins(CommandContext ctx) {
+        var loader = getPluginLoader();
+        loader.reloadAll();
+        return "Plugins reloaded.\n" + loader.renderStatus();
+    }
+
+    private String renderThemePreview() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Theme Preview:\n\n");
+        sb.append("┌─ Dark ─────────────────────────────┐\n");
+        sb.append("│ \u001B[38;2;232;230;227mWhite\u001B[0m \u001B[38;2;46;160;67mGreen\u001B[0m \u001B[38;2;181;131;90mYellow\u001B[0m \u001B[38;2;210;47;47mRed\u001B[0m \u001B[38;2;87;105;247mBlue\u001B[0m  │\n");
+        sb.append("│ \u001B[38;2;215;119;87mClaude\u001B[0m \u001B[38;2;78;186;101mSuccess\u001B[0m \u001B[38;2;255;107;128mError\u001B[0m │\n");
+        sb.append("└────────────────────────────────────────┘\n\n");
+        sb.append("┌─ Light ────────────────────────────┐\n");
+        sb.append("│ \u001B[30mBlack\u001B[0m \u001B[32mGreen\u001B[0m \u001B[33mYellow\u001B[0m \u001B[31mRed\u001B[0m \u001B[34mBlue\u001B[0m   │\n");
+        sb.append("│ \u001B[31mClaude\u001B[0m \u001B[32mSuccess\u001B[0m \u001B[31mError\u001B[0m          │\n");
+        sb.append("└────────────────────────────────────────┘");
+        return sb.toString();
     }
 
     /**

@@ -50,6 +50,14 @@ public class AgentEngine {
         this.maxIterations = DEFAULT_MAX_ITERATIONS;
     }
 
+    public AgentEngine(String model) {
+        this.provider = new OllamaProvider();
+        this.provider.setCurrentModel(model);
+        this.toolRegistry = new ToolRegistry();
+        this.tokenBudget = new TokenBudget();
+        this.maxIterations = DEFAULT_MAX_ITERATIONS;
+    }
+
     public void registerTool(Tool tool) {
         toolRegistry.register(tool);
     }

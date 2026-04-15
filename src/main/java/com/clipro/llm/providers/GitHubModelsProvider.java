@@ -5,6 +5,7 @@ import com.clipro.llm.SseParser;
 import com.clipro.llm.models.ChatCompletionRequest;
 import com.clipro.llm.models.ChatCompletionResponse;
 import com.clipro.llm.models.ChatCompletionChunk;
+import com.clipro.llm.models.Message;
 
 import java.net.URI;
 import java.util.List;
@@ -127,7 +128,7 @@ public class GitHubModelsProvider implements LlmProvider {
         
         ChatCompletionRequest req = new ChatCompletionRequest();
         req.setModel(currentModel);
-        req.getMessages().add(Map.of("role", "system", "content", "test"));
+        req.getMessages().add(Message.system("test"));
         req.setMaxTokens(1);
         
         return chat(req)

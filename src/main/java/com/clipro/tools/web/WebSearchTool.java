@@ -2,168 +2,36 @@ package com.clipro.tools.web;
 
 import com.clipro.llm.LlmHttpClient;
 import com.clipro.tools.Tool;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.URI;
-import java.net.http.HttpResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * Web search tool with multi-provider support.
- * M-21: SearchProvider interface with SearXNG, Tavily, Serper providers.
+ * Web search tool using SearXNG (self-hosted search.sridharhomelab.in).
+ * M-21: Only SearXNG - Tavily and Serper removed per user request.
  */
 public class WebSearchTool implements Tool {
 
-    // M-21: Search provider interface
-    public interface SearchProvider {
-        String search(String query, int limit) throws Exception;
-        String getName();
-        default boolean isAvailable() { return true; }
-    }
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final String DEFAULT_URL = "https://search.sridharhomelab.in/search";
+    private static final int DEFAULT_LIMIT = 10;
 
-    // M-21: SearXNG provider (self-hosted)
-    private static class SearXNGProvider implements SearchProvider {
-        private static final String DEFAULT_URL = "https://search.sridharhomelab.in/search";
-        private final LlmHttpClient client;
-
-        SearXNGProvider() {
-            this.client = new LlmHttpClient(URI.create(DEFAULT_URL));
-        }
-
-        @Override
-        public String search(String query, int limit) throws Exception {
-            String url = DEFAULT_URL + "?q=" + java.net.URLEncoder.encode(query, java.nio.charset.StandardCharsets.UTF_8) +
-                        "&format=json&engines=wikipedia,github,hackernews&safe_search=1&limit=" + limit;
-            HttpResponse<String> response = client.getAsync(url).get();
-            return formatSearXNGResults(response.body());
-        }
-
-        @Override
-        public String getName() { return "SearXNG"; }
-
-        private String formatSearXNGResults(String json) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Search Results (SearXNG):\n\n");
-            try {
-                // Simple JSON extraction
-                int count = 0;
-                String[] lines = json.split("\n");
-                for (String line : lines) {
-                    if (line.contains("\"title\"") && count < 10) {
-                        sb.append("- ").append(line.trim()).append("\n");
-                        count++;
-                    }
-                }
-            } catch (Exception e) {
-                return "Error parsing results: " + e.getMessage();
-            }
-            return sb.length() > 0 ? sb.toString() : "No results found";
-        }
-    }
-
-    // M-21: Tavily provider
-    private static class TavilyProvider implements SearchProvider {
-        private final String apiKey;
-        private final LlmHttpClient client;
-
-        TavilyProvider(String apiKey) {
-            this.apiKey = apiKey;
-            this.client = new LlmHttpClient(URI.create("https://api.tavily.com"));
-        }
-
-        @Override
-        public String search(String query, int limit) throws Exception {
-            if (apiKey == null || apiKey.isEmpty()) {
-                return "Tavily API key not configured";
-            }
-            // Simplified - would need proper API call
-            return "Search Results (Tavily): " + query + "\n[Tavily integration pending]";
-        }
-
-        @Override
-        public String getName() { return "Tavily"; }
-
-        @Override
-        public boolean isAvailable() { return apiKey != null && !apiKey.isEmpty(); }
-    }
-
-    // M-21: Serper provider
-    private static class SerperProvider implements SearchProvider {
-        private final String apiKey;
-        private final LlmHttpClient client;
-
-        SerperProvider(String apiKey) {
-            this.apiKey = apiKey;
-            this.client = new LlmHttpClient(URI.create("https://google.serper.dev/search"));
-        }
-
-        @Override
-        public String search(String query, int limit) throws Exception {
-            if (apiKey == null || apiKey.isEmpty()) {
-                return "Serper API key not configured";
-            }
-            return "Search Results (Serper): " + query + "\n[Serper integration pending]";
-        }
-
-        @Override
-        public String getName() { return "Serper"; }
-
-        @Override
-        public boolean isAvailable() { return apiKey != null && !apiKey.isEmpty(); }
-    }
-
-    // Provider management
-    private final Map<String, SearchProvider> providers = new HashMap<>();
-    private SearchProvider activeProvider;
+    private final LlmHttpClient client;
 
     public WebSearchTool() {
-        // Register default providers
-        providers.put("searxng", new SearXNGProvider());
-        // Try to load API keys from environment/config
-        String tavilyKey = System.getenv("TAVILY_API_KEY");
-        String serperKey = System.getenv("SERPER_API_KEY");
-
-        if (tavilyKey != null) {
-            providers.put("tavily", new TavilyProvider(tavilyKey));
-        }
-        if (serperKey != null) {
-            providers.put("serper", new SerperProvider(serperKey));
-        }
-
-        // Default to SearXNG
-        activeProvider = providers.get("searxng");
-    }
-
-    /**
-     * M-21: Select provider by name.
-     */
-    public void setProvider(String name) {
-        SearchProvider provider = providers.get(name.toLowerCase());
-        if (provider != null && provider.isAvailable()) {
-            activeProvider = provider;
-        }
-    }
-
-    /**
-     * M-21: List available providers.
-     */
-    public String listProviders() {
-        StringBuilder sb = new StringBuilder("Available Search Providers:\n");
-        for (Map.Entry<String, SearchProvider> entry : providers.entrySet()) {
-            String marker = entry.getValue() == activeProvider ? " (active)" : "";
-            String status = entry.getValue().isAvailable() ? "" : " [unavailable]";
-            sb.append("  - ").append(entry.getKey()).append(": ").append(entry.getValue().getName()).append(marker).append(status).append("\n");
-        }
-        return sb.toString();
+        this.client = new LlmHttpClient(URI.create(DEFAULT_URL));
     }
 
     @Override
-    public String getName() {
-        return "web_search";
-    }
+    public String getName() { return "web_search"; }
 
     @Override
     public String getDescription() {
-        return "Search the web. Providers: SearXNG (default), Tavily, Serper. Use /provider <name> to switch.";
+        return "Search the web using SearXNG (search.sridharhomelab.in). Returns title, URL, and snippet for each result.";
     }
 
     @Override
@@ -171,18 +39,8 @@ public class WebSearchTool implements Tool {
         return Map.of(
             "type", "object",
             "properties", Map.of(
-                "query", Map.of(
-                    "type", "string",
-                    "description", "Search query"
-                ),
-                "limit", Map.of(
-                    "type", "integer",
-                    "description", "Maximum results (default: 10)"
-                ),
-                "provider", Map.of(
-                    "type", "string",
-                    "description", "Search provider: searxng, tavily, serper"
-                )
+                "query", Map.of("type", "string", "description", "Search query"),
+                "limit", Map.of("type", "integer", "description", "Max results (default: 10)")
             ),
             "required", List.of("query")
         );
@@ -191,38 +49,85 @@ public class WebSearchTool implements Tool {
     @Override
     public String execute(Map<String, Object> args) {
         String query = (String) args.get("query");
-        if (query == null || query.isEmpty()) {
-            return "Error: query is required";
-        }
+        if (query == null || query.isEmpty()) return "Error: query is required";
 
-        int limit = 10;
+        int limit = DEFAULT_LIMIT;
         Object limitObj = args.get("limit");
-        if (limitObj instanceof Number) {
-            limit = ((Number) limitObj).intValue();
-        }
-
-        // M-21: Provider selection
-        Object providerObj = args.get("provider");
-        if (providerObj instanceof String providerName) {
-            setProvider(providerName);
-        }
-
-        if (activeProvider == null) {
-            return "Error: No search provider available";
-        }
+        if (limitObj instanceof Number) limit = ((Number) limitObj).intValue();
 
         try {
-            return activeProvider.search(query, limit);
+            return search(query, limit);
         } catch (Exception e) {
             return "Error: Search failed - " + e.getMessage();
         }
     }
 
-    private String encode(String s) {
-        return s.replace(" ", "+").replace("&", "%26").replace("?", "%3F");
+    public String search(String query, int limit) throws Exception {
+        String url = DEFAULT_URL + "?q=" + URLEncoder.encode(query, StandardCharsets.UTF_8) +
+                    "&format=json&engines=wikipedia,github,hackernews&safe_search=1&limit=" + limit;
+        var response = client.getAsync(url).get();
+        return formatResults(response.body(), limit);
     }
 
-    public LlmHttpClient getHttpClient() {
-        return null;
+    private String formatResults(String json, int limit) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Search Results:\n\n");
+        try {
+            JsonNode root = MAPPER.readTree(json);
+            JsonNode results = root.get("results");
+            if (results != null && results.isArray()) {
+                int count = 0;
+                for (JsonNode result : results) {
+                    if (count >= limit) break;
+                    String title = safeGet(result, "title");
+                    String url = safeGet(result, "url");
+                    String content = safeGet(result, "content");
+                    if (!title.isEmpty()) {
+                        sb.append("[").append(++count).append("] ").append(title).append("\n");
+                        if (!url.isEmpty()) sb.append("    ").append(url).append("\n");
+                        if (!content.isEmpty()) sb.append("    ").append(truncate(content, 200)).append("\n");
+                        sb.append("\n");
+                    }
+                }
+                if (count == 0) sb.append("No results found.\n");
+            } else {
+                sb.append(formatFallback(json, limit));
+            }
+        } catch (Exception e) {
+            sb.append(formatFallback(json, limit));
+        }
+        return sb.toString();
+    }
+
+    private String formatFallback(String json, int limit) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Search Results:\n\n");
+        try {
+            int count = 0;
+            int titleIdx = json.indexOf("\"title\"");
+            while (titleIdx >= 0 && count < limit) {
+                int start = json.indexOf("\"", titleIdx + 7) + 1;
+                int end = json.indexOf("\"", start);
+                if (start > 0 && end > start) {
+                    sb.append("[").append(++count).append("] ")
+          .append(json.substring(start, end)).append("\n\n");
+                }
+                titleIdx = json.indexOf("\"title\"", titleIdx + 1);
+            }
+            if (count == 0) sb.append("Raw: ").append(truncate(json, 300)).append("\n");
+        } catch (Exception e) {
+            sb.append("Parse error.\n");
+        }
+        return sb.toString();
+    }
+
+    private String safeGet(JsonNode node, String field) {
+        JsonNode n = node.get(field);
+        return (n != null && !n.isNull()) ? n.asText().trim() : "";
+    }
+
+    private String truncate(String s, int max) {
+        if (s == null || s.length() <= max) return s;
+        return s.substring(0, max) + "...";
     }
 }

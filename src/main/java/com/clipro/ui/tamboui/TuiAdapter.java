@@ -117,6 +117,12 @@ public interface TuiAdapter {
      */
     void setLatency(long ms);
 
+    /**
+     * Set the current permission mode (READ, BASH, RESTRICTED).
+     * H-05: Used to display security permission indicator in the status bar.
+     */
+    void setPermissionMode(String mode);
+
     // ===== Callbacks (set by App) =====
 
     /**

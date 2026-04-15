@@ -31,6 +31,13 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+// Exclude JavaFX adapter (requires javafx platform modules not available on all systems)
+sourceSets.main {
+    java {
+        exclude("**/javafx/**")
+    }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
@@ -57,17 +64,18 @@ tasks.register<Jar>("uberJar") {
 tasks.register<Exec>("fixJar") {
     dependsOn("uberJar")
     workingDir = projectDir
+    val projectPath = projectDir.absolutePath
     commandLine = listOf("/bin/bash", "-c", """
         cd build/libs && \
         rm -rf /tmp/clipro-fix && \
         mkdir -p /tmp/clipro-fix && \
         cd /tmp/clipro-fix && \
-        unzip -q /Users/sridhar/clipro/build/libs/clipro-0.1.0.jar && \
+        unzip -q "$projectPath/build/libs/clipro-0.1.0.jar" && \
         find . -name "*.SF" -delete && \
         find . -name "*.RSA" -delete && \
         find . -name "*.DSA" -delete && \
-        rm -f /Users/sridhar/clipro/build/libs/clipro-0.1.0.jar && \
-        jar cfm /Users/sridhar/clipro/build/libs/clipro-0.1.0.jar META-INF/MANIFEST.MF . && \
+        rm -f "$projectPath/build/libs/clipro-0.1.0.jar" && \
+        jar cfm "$projectPath/build/libs/clipro-0.1.0.jar" META-INF/MANIFEST.MF . && \
         rm -rf /tmp/clipro-fix && \
         echo "Fixed: signature files removed"
     """.trimIndent())
