@@ -181,6 +181,8 @@ public class App {
         tools.add(new com.clipro.tools.web.WebFetchTool());
         // Task
         tools.add(new com.clipro.tools.TaskTool());
+        // Agent (H-01: Sub-agent spawning)
+        tools.add(new com.clipro.tools.AgentTool());
         // Skill
         try { tools.add(new com.clipro.tools.skill.SkillTool()); } catch (Exception ignored) {}
         // LSP
